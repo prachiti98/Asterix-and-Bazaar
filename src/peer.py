@@ -8,7 +8,7 @@ from threading import Lock
 import random
 import time, datetime
 
-import logging
+import sys
 
 from constants import *
 import datetime
@@ -50,7 +50,7 @@ class Peer(thd.Thread):
             self.target = random.randint(FISH, BOAR) #since 11 to 13 choose between 11 to 13
 
             #remove
-            self._print("[INIT] Peer %d plans to buy %s", (self.peer_id, TO_ITEM_NAME[self.target]))
+            #self._print("[INIT] Peer %d plans to buy %s", (self.peer_id, TO_ITEM_NAME[self.target]))
 
             f = open("Peer"+str(self.peer_id)+"/output.txt","a")
             f.write(str(datetime.datetime.now()) +" Peer " + str(self.peer_id) +" plans to buy "+ str(TO_ITEM_NAME[self.target]) + "\n")
@@ -79,9 +79,9 @@ class Peer(thd.Thread):
                 proxy = self._get_proxy(seller_id)
                 if proxy != None and proxy.buy(self.target,self.peer_id):
                     #remove
-                    self._print("%s Peer %d buys %s from peer %d; avg. response time: %f (sec/req)",
-                        (datetime.datetime.now(), self.peer_id, TO_ITEM_NAME[self.target], seller_id,
-                        (self.response_time / len(self.candidate_sellers))))
+                    #self._print("%s Peer %d buys %s from peer %d; avg. response time: %f (sec/req)",
+                        #(datetime.datetime.now(), self.peer_id, TO_ITEM_NAME[self.target], seller_id,
+                        #(self.response_time / len(self.candidate_sellers))))
 
                     f = open("Peer"+str(self.peer_id)+"/output.txt","a")
                     f.write(str(datetime.datetime.now()) + " Bought " + str(TO_ITEM_NAME[self.target]) +" from peerID " + str(seller_id) + "\n")
@@ -94,9 +94,12 @@ class Peer(thd.Thread):
         self.commodity_quantity = random.randint(1, MAX_ITEM_NUMBER)
         self.commodity_lock = Lock()
 
+        f = open("Peer"+str(self.peer_id)+"/output.txt","a")
+        f.write(str(datetime.datetime.now()) + " Selling " +str(TO_ITEM_NAME[self.commodity])+': '+str(self.commodity_quantity)+"\n")
+        f.close()
         #should be printed on console for everyone to see
-        self._print("[INIT] Peer %d sells %d units of %s",
-            (self.peer_id, self.commodity_quantity, TO_ITEM_NAME[self.commodity]))
+        #self._print("[INIT] Peer %d sells %d units of %s",
+            #(self.peer_id, self.commodity_quantity, TO_ITEM_NAME[self.commodity]))
 
 
     def _initiate_rpc_server(self):
@@ -182,8 +185,8 @@ class Peer(thd.Thread):
 
             proxy = self._get_proxy(from_neighbor_id)
             if proxy != None:
-                self._print("Peer %d has %s!! Reply to peer %d",
-                    (self.peer_id, TO_ITEM_NAME[product_name], from_neighbor_id))
+                #self._print("Peer %d has %s!! Reply to peer %d",
+                    #(self.peer_id, TO_ITEM_NAME[product_name], from_neighbor_id))
 
                 #print the reply in receiver's output
                 f = open("Peer"+str(from_neighbor_id)+"/output.txt","a")
@@ -197,7 +200,7 @@ class Peer(thd.Thread):
 
         # discard
         if hopcount == 0:
-            self._print("[LOOKUP stop] Peer %d final path: %s", (self.peer_id, path))
+            #self._print("[LOOKUP stop] Peer %d final path: %s", (self.peer_id, path))
 
             #print the reply in last peer's directory
             f = open("Peer"+str(self.peer_id)+"/output.txt","a")
@@ -212,8 +215,8 @@ class Peer(thd.Thread):
                 new_path = "%d-%s" % (self.peer_id, path)
                 
 
-                self._print("[LOOKUP propagate] Peer %d: (next) %d <- %d (curr) - %s (path)",
-                    (self.peer_id, neighbor_id, self.peer_id, path))
+                #self._print("[LOOKUP propagate] Peer %d: (next) %d <- %d (curr) - %s (path)",
+                #    (self.peer_id, neighbor_id, self.peer_id, path))
 
                 #print the lookup propogated in the propogater's output 
                 f = open("Peer"+str(self.peer_id)+"/output.txt","a")
@@ -238,7 +241,7 @@ class Peer(thd.Thread):
             t_response = datetime.datetime.now()
             self.response_time += (t_response - self.t_buy).total_seconds()
             self.candidate_sellers.append(seller_id)
-            self._print("[RECEIVE] Peer %d receives a reply from peer %d", (self.peer_id, seller_id))
+            #self._print("[RECEIVE] Peer %d receives a reply from peer %d", (self.peer_id, seller_id))
             
             #print the reply in receiver's (buyer) directory
             f = open("Peer"+str(self.peer_id)+"/output.txt","a")
@@ -253,8 +256,8 @@ class Peer(thd.Thread):
         next_neighbor_id = int(footprints[0])
         new_path = '' if len(footprints) == 1 else "-".join(footprints[1:])
 
-        self._print("[REPLY propagate] Peer %d: (curr) %d -> %d (next) --> %s (path)",
-            (self.peer_id, self.peer_id, next_neighbor_id, new_path))
+        #self._print("[REPLY propagate] Peer %d: (curr) %d -> %d (next) --> %s (path)",
+        #    (self.peer_id, self.peer_id, next_neighbor_id, new_path))
 
         #propogate the reply (can be seller or buyer) print in sender's directory
         f = open("Peer"+str(self.peer_id)+"/output.txt","a")
@@ -270,8 +273,8 @@ class Peer(thd.Thread):
 
     def buy(self, product_name,buyer_id):
         if product_name != self.commodity:
-            self._print("[FAILURE] The %s of peer %d has been sold out.",
-                    (TO_ITEM_NAME[self.commodity], self.peer_id))
+            #self._print("[FAILURE] The %s of peer %d has been sold out.",
+             #       (TO_ITEM_NAME[self.commodity], self.peer_id))
 
             #print in buyer's directory
             f = open("Peer"+str(buyer_id)+"/output.txt","a")
@@ -283,8 +286,8 @@ class Peer(thd.Thread):
         # sync
         with self.commodity_lock:
             if self.commodity_quantity <= 0:
-                self._print("[FAILURE] The %s of peer %d has been sold out.",
-                    (TO_ITEM_NAME[self.commodity], self.peer_id))
+                #self._print("[FAILURE] The %s of peer %d has been sold out.",
+                #    (TO_ITEM_NAME[self.commodity], self.peer_id))
 
                 #print in buyer's directory
                 f = open("Peer"+str(buyer_id)+"/output.txt","a")
@@ -299,8 +302,8 @@ class Peer(thd.Thread):
                 self.commodity_quantity = random.randint(1, MAX_ITEM_NUMBER)
                 self.commodity = random.randint(FISH, BOAR)
                 
-        self._print("[UPDATE] Peer %d has %d units of %s to sell",
-            (self.peer_id, self.commodity_quantity, TO_ITEM_NAME[self.commodity]))
+        #self._print("[UPDATE] Peer %d has %d units of %s to sell",
+         #   (self.peer_id, self.commodity_quantity, TO_ITEM_NAME[self.commodity]))
 
         #print in buyer's directory
         f = open("Peer"+str(buyer_id)+"/output.txt","a")
@@ -354,75 +357,79 @@ class Peer(thd.Thread):
     
 
 if __name__ == "__main__":
-    if DEBUG:
-        # only support self-defined neighbor map
-        neighbor_map = TEST_MAP
-        role = TEST_ROLE
-        PEER_NUM = len(role)
-    # else:
-    #     neighbor_map = generate_neighbor_map()
-    #     role = generate_peer_roles()
+    no_nodes = int(sys.argv[1])
+    if no_nodes<2:
+        print('Enter more than 1 node!')
+    else:
+        if DEBUG:
+            # only support self-defined neighbor map
+            role = node_mapping[no_nodes][0]
+            neighbor_map = node_mapping[no_nodes][1]
+            PEER_NUM = no_nodes
+        # else:
+        #     neighbor_map = generate_neighbor_map()
+        #     role = generate_peer_roles()
 
 
-    with PRINT_LOCK:
-        print('Node is running on: %s\n' % CURR_IP)
-        print('\\\\\\\\\\  *NEIGHBOR MAP*  /////')
-        for row in neighbor_map:
-            print(row)
-        print('\n')
+        with PRINT_LOCK:
+            print('Node is running on: %s\n' % CURR_IP)
+            print('\\\\\\\\\\  *NEIGHBOR MAP*  /////')
+            for row in neighbor_map:
+                print(row)
+            print('\n')
 
 
-    peers = []
-    # run at localhost
-    if LOCAL_DEPLOY:
-        for peer_id in range(PEER_NUM):
-            #check if directory exists for printing
-            path = 'Peer'+str(peer_id)
-            
-            #else create
-            
-            if(not os.path.isdir(path)):
-                os.mkdir(path)
-            else:
-                if(os.path.isfile(path+"/output.txt")): #if output.txt exists delete it for a new run
-                    os.remove(path+"/output.txt")
-            
-            neighbors = []
-            for j in range(PEER_NUM):
-                if neighbor_map[peer_id][j]:
-                    neighbors.append(j)
+        peers = []
+        # run at localhost
+        if LOCAL_DEPLOY:
+            for peer_id in range(PEER_NUM):
+                #check if directory exists for printing
+                path = 'Peer'+str(peer_id)
+                
+                #else create
+                
+                if(not os.path.isdir(path)):
+                    os.mkdir(path)
+                else:
+                    if(os.path.isfile(path+"/output.txt")): #if output.txt exists delete it for a new run
+                        os.remove(path+"/output.txt")
+                
+                neighbors = []
+                for j in range(PEER_NUM):
+                    if neighbor_map[peer_id][j]:
+                        neighbors.append(j)
 
-            PROXY_ADDR_LIST.append('http://localhost:%d')
-            peer = Peer(peer_id, role[peer_id], neighbors) #calls init
-            peers.append(peer)
-            peer.start()
-    
-    # else:
-    #     # find the order of current machine & create PROXY_ADDR_LIST
-    #     # a machine with order 0 is the master machine
-    #     curr_machine_order = 0
-    #     num_of_peers_on_each_machine = int(PEER_NUM / len(MACHINES))
-    #     for i in range(len(MACHINES)):
-    #         if CURR_IP == MACHINES[i]['ip']:
-    #             curr_machine_order = i
-            
-    #         peer_id_start = num_of_peers_on_each_machine * i
-    #         peer_id_end   = peer_id_start + num_of_peers_on_each_machine
-    #         for peer_id in range(peer_id_start, peer_id_end):
-    #             PROXY_ADDR_LIST.append('http://' + MACHINES[i]['ip'] + ':%d')
+                PROXY_ADDR_LIST.append('http://localhost:%d')
+                peer = Peer(peer_id, role[peer_id], neighbors) #calls init
+                peers.append(peer)
+                peer.start()
         
-    #     peer_id_start = num_of_peers_on_each_machine * curr_machine_order
-    #     peer_id_end   = peer_id_start + num_of_peers_on_each_machine
-    #     for peer_id in range(peer_id_start, peer_id_end):
-    #         neighbors = []
-    #         for j in range(PEER_NUM):
-    #             if neighbor_map[peer_id][j]:
-    #                 neighbors.append(j)
+        # else:
+        #     # find the order of current machine & create PROXY_ADDR_LIST
+        #     # a machine with order 0 is the master machine
+        #     curr_machine_order = 0
+        #     num_of_peers_on_each_machine = int(PEER_NUM / len(MACHINES))
+        #     for i in range(len(MACHINES)):
+        #         if CURR_IP == MACHINES[i]['ip']:
+        #             curr_machine_order = i
+                
+        #         peer_id_start = num_of_peers_on_each_machine * i
+        #         peer_id_end   = peer_id_start + num_of_peers_on_each_machine
+        #         for peer_id in range(peer_id_start, peer_id_end):
+        #             PROXY_ADDR_LIST.append('http://' + MACHINES[i]['ip'] + ':%d')
+            
+        #     peer_id_start = num_of_peers_on_each_machine * curr_machine_order
+        #     peer_id_end   = peer_id_start + num_of_peers_on_each_machine
+        #     for peer_id in range(peer_id_start, peer_id_end):
+        #         neighbors = []
+        #         for j in range(PEER_NUM):
+        #             if neighbor_map[peer_id][j]:
+        #                 neighbors.append(j)
 
-    #         peer = Peer(peer_id, role[peer_id], neighbors)
-    #         peers.append(peer)
-    #         peer.start()
+        #         peer = Peer(peer_id, role[peer_id], neighbors)
+        #         peers.append(peer)
+        #         peer.start()
 
-    # avoid closing main thread (why)
-    for peer in peers:
-        peer.join()
+        # avoid closing main thread (why)
+        for peer in peers:
+            peer.join()

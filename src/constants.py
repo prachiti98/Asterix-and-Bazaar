@@ -48,6 +48,13 @@ HOPCOUNT = 2
 # please set DEBUG to True
 DEBUG = True
 
+node_mapping = {
+    2: [[BUYER, SELLER],[[False, True],[True, False]]],
+    3: [[BUYER, SELLER, BUYER],[[False, True, True],[True, False,False],[True, False, False]]],
+    4: [[BUYER, SELLER, SELLER, BUYER],[[False, True, False, True],[True, False, True, True],[False, True, False, True],[True, True, True, False]]],
+    5: [[BUYER, SELLER, SELLER, BUYER, BUYER],[[False, True, False, False, False],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]]],
+    6: [[BUYER, SELLER, SELLER, SELLER, BUYER, BUYER],[[False, True, False, False, False, False],[True, False, True, False, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]]
+}
 # case 1
 # TEST_ROLE = [BUYER, SELLER, BUYER]
 # TEST_MAP  = [

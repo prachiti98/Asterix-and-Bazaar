@@ -1,0 +1,116 @@
+2022-10-15 14:30:00.941522 Peer 5 plans to buy Fish
+2022-10-15 14:30:01.137810 Received a reply from peerID 3
+2022-10-15 14:30:04.950935 Hurry! PeerID 3 has Fish to sell
+2022-10-15 14:30:04.955210 Bought Fish from peerID 3
+2022-10-15 14:30:07.958784 Peer 5 plans to buy Boar
+2022-10-15 14:30:11.963496 Stopped buying Boar because no sellers
+2022-10-15 14:30:14.966664 Peer 5 plans to buy Fish
+2022-10-15 14:30:15.058566 Received a reply from peerID 3
+2022-10-15 14:30:18.982698 Hurry! PeerID 3 has Fish to sell
+2022-10-15 14:30:18.991313 Bought Fish from peerID 3
+2022-10-15 14:30:21.995221 Peer 5 plans to buy Boar
+2022-10-15 14:30:26.007866 Stopped buying Boar because no sellers
+2022-10-15 14:30:29.013812 Peer 5 plans to buy Salt
+2022-10-15 14:30:33.023912 Stopped buying Salt because no sellers
+2022-10-15 14:30:36.026645 Peer 5 plans to buy Boar
+2022-10-15 14:30:36.109983 Received a reply from peerID 2
+2022-10-15 14:30:40.031559 Hurry! PeerID 2 has Boar to sell
+2022-10-15 14:30:40.033999 Bought Boar from peerID 2
+2022-10-15 14:30:43.038855 Peer 5 plans to buy Salt
+2022-10-15 14:30:47.049131 Stopped buying Salt because no sellers
+2022-10-15 14:30:50.056127 Peer 5 plans to buy Salt
+2022-10-15 14:30:50.097439 Received a reply from peerID 2
+2022-10-15 14:30:54.087584 Hurry! PeerID 2 has Salt to sell
+2022-10-15 14:30:54.095783 Bought Salt from peerID 2
+2022-10-15 14:30:57.100337 Peer 5 plans to buy Fish
+2022-10-15 14:30:57.181104 Received a reply from peerID 3
+2022-10-15 14:31:01.148987 Hurry! PeerID 3 has Fish to sell
+2022-10-15 14:31:01.159034 Bought Fish from peerID 3
+2022-10-15 14:31:04.163068 Peer 5 plans to buy Boar
+2022-10-15 14:31:08.172583 Stopped buying Boar because no sellers
+2022-10-15 14:31:11.181885 Peer 5 plans to buy Fish
+2022-10-15 14:31:15.189978 Stopped buying Fish because no sellers
+2022-10-15 14:31:18.192409 Peer 5 plans to buy Fish
+2022-10-15 14:31:22.195657 Stopped buying Fish because no sellers
+2022-10-15 14:31:25.200630 Peer 5 plans to buy Boar
+2022-10-15 14:31:25.278868 Received a reply from peerID 3
+2022-10-15 14:31:29.218964 Hurry! PeerID 3 has Fish to sell
+2022-10-15 14:31:29.225117 Bought Boar from peerID 3
+2022-10-15 14:31:32.229766 Peer 5 plans to buy Fish
+2022-10-15 14:31:32.376197 Received a reply from peerID 3
+2022-10-15 14:31:36.249636 Hurry! PeerID 3 has Fish to sell
+2022-10-15 14:31:36.264428 Bought Fish from peerID 3
+2022-10-15 14:31:39.271794 Peer 5 plans to buy Salt
+2022-10-15 14:31:39.347613 Received a reply from peerID 2
+2022-10-15 14:31:43.282369 Hurry! PeerID 2 has Salt to sell
+2022-10-15 14:31:43.292125 Bought Salt from peerID 2
+2022-10-15 14:31:46.298428 Peer 5 plans to buy Boar
+2022-10-15 14:31:50.305155 Stopped buying Boar because no sellers
+2022-10-15 14:31:53.317563 Peer 5 plans to buy Salt
+2022-10-15 14:31:53.492559 Received a reply from peerID 2
+2022-10-15 14:31:57.353140 Hurry! PeerID 2 has Salt to sell
+2022-10-15 14:31:57.365363 Bought Salt from peerID 2
+2022-10-15 14:32:00.375867 Peer 5 plans to buy Salt
+2022-10-15 14:32:04.379627 Stopped buying Salt because no sellers
+2022-10-15 14:32:07.388298 Peer 5 plans to buy Boar
+2022-10-15 14:32:11.400188 Stopped buying Boar because no sellers
+2022-10-15 14:32:14.403826 Peer 5 plans to buy Boar
+2022-10-15 14:32:18.408629 Stopped buying Boar because no sellers
+2022-10-15 14:32:21.411793 Peer 5 plans to buy Salt
+2022-10-15 14:32:25.415502 Stopped buying Salt because no sellers
+2022-10-15 14:32:28.419925 Peer 5 plans to buy Salt
+2022-10-15 14:32:32.424157 Stopped buying Salt because no sellers
+2022-10-15 14:32:35.427538 Peer 5 plans to buy Boar
+2022-10-15 14:32:39.430653 Stopped buying Boar because no sellers
+2022-10-15 14:32:42.433930 Peer 5 plans to buy Boar
+2022-10-15 14:32:46.437149 Stopped buying Boar because no sellers
+2022-10-15 14:32:49.440420 Peer 5 plans to buy Fish
+2022-10-15 14:32:49.463287 Received a reply from peerID 3
+2022-10-15 14:32:53.445512 Hurry! PeerID 3 has Fish to sell
+2022-10-15 14:32:53.448576 Bought Fish from peerID 3
+2022-10-15 14:32:56.451708 Peer 5 plans to buy Salt
+2022-10-15 14:33:00.455063 Stopped buying Salt because no sellers
+2022-10-15 14:33:03.458116 Peer 5 plans to buy Fish
+2022-10-15 14:33:03.515727 Received a reply from peerID 3
+2022-10-15 14:33:07.465488 Hurry! PeerID 3 has Fish to sell
+2022-10-15 14:33:07.470033 Bought Fish from peerID 3
+2022-10-15 14:33:10.474689 Peer 5 plans to buy Fish
+2022-10-15 14:33:10.499791 Received a reply from peerID 3
+2022-10-15 14:33:14.481573 Hurry! PeerID 3 has Fish to sell
+2022-10-15 14:33:14.486229 Bought Fish from peerID 3
+2022-10-15 14:33:17.491381 Peer 5 plans to buy Boar
+2022-10-15 14:33:21.498209 Stopped buying Boar because no sellers
+2022-10-15 14:33:24.515950 Peer 5 plans to buy Salt
+2022-10-15 14:33:24.544247 Received a reply from peerID 3
+2022-10-15 14:33:28.530341 Hurry! PeerID 3 has Salt to sell
+2022-10-15 14:33:28.544308 Bought Salt from peerID 3
+2022-10-15 14:33:31.556188 Peer 5 plans to buy Fish
+2022-10-15 14:33:31.670165 Received a reply from peerID 2
+2022-10-15 14:33:35.593791 Hurry! PeerID 2 has Fish to sell
+2022-10-15 14:33:35.613267 Bought Fish from peerID 2
+2022-10-15 14:33:38.625624 Peer 5 plans to buy Salt
+2022-10-15 14:33:38.654936 Received a reply from peerID 3
+2022-10-15 14:33:42.643644 Hurry! PeerID 3 has Salt to sell
+2022-10-15 14:33:42.660577 Bought Salt from peerID 3
+2022-10-15 14:33:45.666847 Peer 5 plans to buy Boar
+2022-10-15 14:33:49.677874 Stopped buying Boar because no sellers
+2022-10-15 14:33:52.689866 Peer 5 plans to buy Boar
+2022-10-15 14:33:56.701280 Stopped buying Boar because no sellers
+2022-10-15 14:33:59.711479 Peer 5 plans to buy Boar
+2022-10-15 14:34:03.717582 Stopped buying Boar because no sellers
+2022-10-15 14:34:06.729465 Peer 5 plans to buy Boar
+2022-10-15 14:34:10.740191 Stopped buying Boar because no sellers
+2022-10-15 14:34:13.744630 Peer 5 plans to buy Boar
+2022-10-15 14:34:17.749652 Stopped buying Boar because no sellers
+2022-10-15 14:34:20.754534 Peer 5 plans to buy Salt
+2022-10-15 14:34:20.832956 Received a reply from peerID 3
+2022-10-15 14:34:24.768178 Hurry! PeerID 3 has Salt to sell
+2022-10-15 14:34:24.777196 Bought Salt from peerID 3
+2022-10-15 14:34:27.783051 Peer 5 plans to buy Boar
+2022-10-15 14:34:31.792585 Stopped buying Boar because no sellers
+2022-10-15 14:34:34.798165 Peer 5 plans to buy Boar
+2022-10-15 14:34:38.808939 Stopped buying Boar because no sellers
+2022-10-15 14:34:41.819928 Peer 5 plans to buy Salt
+2022-10-15 14:34:41.849642 Received a reply from peerID 3
+2022-10-15 14:34:45.838300 Hurry! PeerID 3 has Salt to sell
+2022-10-15 14:34:45.847464 Bought Salt from peerID 3
