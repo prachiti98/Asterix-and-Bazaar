@@ -11,7 +11,7 @@ import sys
 from constants import *
 import datetime
 
-
+addLock = Lock()
 peerServerList = []
 currentServer = 'localhost' if deployOnLocalhost else socket.gethostbyname(socket.gethostname())
 
@@ -110,7 +110,11 @@ class Peer(t.Thread):
                     f.write("The average response time: %f \n"%(self.responseTime/len(self.potentialSellers)))
                     f.close()
                     break
-                
+
+    def printOnConsole(self, msg, arg):
+        with addLock:
+            print(msg % arg)
+
     # find the server and call the main lookup
     def lookupUtil(self, peerId, productName, hopCount, path):
         proxyServer = self.getPeerIdServer(peerId)
