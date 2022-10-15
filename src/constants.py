@@ -1,3 +1,4 @@
+import random
 BUYER  = 1
 SELLER = 2
 
@@ -41,7 +42,7 @@ maxUnits = 10
 # waiting time for a buyer to receive responses from sellers
 clientWaitTime = 4
 
-hopCount = 2
+hopCount = random.randint(1, totalPeers-1) #randomised (has to be >0 and less than maximum distance between peers)
 
 ######## SELF-DEFINED MAP & ROLE ########
 # if you would like to initialize peers by using TEST_ROLE and TEST_MAP,
