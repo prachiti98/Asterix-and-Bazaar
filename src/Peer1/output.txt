@@ -1,0 +1,101 @@
+2022-10-15 12:18:53.766409 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:18:53.769483 Lookup for product Salt propogated from peerID 1 to peerID 3
+2022-10-15 12:18:53.774834 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:18:53.776399 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:18:53.785915 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:18:53.788855 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:18:53.789843 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:18:53.792104 Max Hop count reached, Lookup stopped Path: 2-3-0
+2022-10-15 12:19:00.766802 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:19:00.769626 Lookup for product Boar propogated from peerID 1 to peerID 3
+2022-10-15 12:19:00.778463 Lookup for product Boar propogated from peerID 1 to peerID 0
+2022-10-15 12:19:00.780722 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:19:00.786619 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:19:00.790489 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:19:00.793705 Peer 2 has Boar
+2022-10-15 12:19:00.797914 Propogate the reply to peerID 0 Path: 0
+2022-10-15 12:19:00.801659 Peer 2 has Boar
+2022-10-15 12:19:00.804535 Peer 2 has Boar
+2022-10-15 12:19:00.804645 Propogate the reply to peerID 0 Path: 0
+2022-10-15 12:19:00.806055 Propogate the reply to peerID 3 Path: 3
+2022-10-15 12:19:00.808607 Propogate the reply to peerID 3 Path: 3-0
+2022-10-15 12:19:00.808695 Peer 2 has Boar
+2022-10-15 12:19:00.810691 Propogate the reply to peerID 0 Path: 0-3
+2022-10-15 12:19:07.786636 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:07.789272 Lookup for product Salt propogated from peerID 1 to peerID 3
+2022-10-15 12:19:07.793806 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:19:07.795227 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:07.806420 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:07.809242 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:07.811171 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:19:07.812421 Max Hop count reached, Lookup stopped Path: 2-3-0
+2022-10-15 12:19:14.804967 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:19:14.806338 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:14.815836 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:14.820082 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:19:28.830704 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:19:28.833021 Lookup for product Boar propogated from peerID 1 to peerID 3
+2022-10-15 12:19:28.835681 Lookup for product Boar propogated from peerID 1 to peerID 0
+2022-10-15 12:19:28.836466 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:19:28.843558 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:19:28.847946 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:19:28.850252 Peer 2 has Boar
+2022-10-15 12:19:28.854202 Propogate the reply to peerID 0 Path: 0
+2022-10-15 12:19:28.857472 Peer 2 has Boar
+2022-10-15 12:19:28.861879 Propogate the reply to peerID 3 Path: 3
+2022-10-15 12:19:28.862268 Peer 2 has Boar
+2022-10-15 12:19:28.865783 Propogate the reply to peerID 0 Path: 0-3
+2022-10-15 12:19:28.868211 Peer 2 has Boar
+2022-10-15 12:19:28.871804 Propogate the reply to peerID 0 Path: 0
+2022-10-15 12:19:28.872685 Propogate the reply to peerID 3 Path: 3-0
+2022-10-15 12:19:35.850204 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:35.852642 Lookup for product Salt propogated from peerID 1 to peerID 3
+2022-10-15 12:19:35.872464 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:35.877843 Max Hop count reached, Lookup stopped Path: 2-3-0
+2022-10-15 12:19:42.863686 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:42.866354 Lookup for product Salt propogated from peerID 1 to peerID 3
+2022-10-15 12:19:42.869753 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:19:42.871745 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:42.882157 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:42.886871 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:42.888415 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:19:42.889959 Max Hop count reached, Lookup stopped Path: 2-3-0
+2022-10-15 12:19:49.866669 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:49.871676 Lookup for product Salt propogated from peerID 1 to peerID 3
+2022-10-15 12:19:49.881293 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:19:49.882023 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:49.888310 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:49.891139 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:19:49.895613 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:19:49.897804 Max Hop count reached, Lookup stopped Path: 2-3-0
+2022-10-15 12:20:03.896923 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:20:03.900579 Lookup for product Salt propogated from peerID 1 to peerID 3
+2022-10-15 12:20:03.919134 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:20:03.928845 Max Hop count reached, Lookup stopped Path: 2-3-0
+2022-10-15 12:20:10.905205 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:20:10.906374 Lookup for product Boar propogated from peerID 1 to peerID 3
+2022-10-15 12:20:10.917911 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:20:10.923842 Peer 2 has Boar
+2022-10-15 12:20:10.923956 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:20:10.925235 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:20:10.928119 Lookup for product Salt propogated from peerID 1 to peerID 2
+2022-10-15 12:20:10.934799 Propogate the reply to peerID 0 Path: 0
+2022-10-15 12:20:10.939819 Lookup for product Salt propogated from peerID 1 to peerID 0
+2022-10-15 12:20:10.942686 Peer 2 has Boar
+2022-10-15 12:20:10.945917 Propogate the reply to peerID 3 Path: 3-0
+2022-10-15 12:20:10.947419 Propogate the reply to peerID 0 Path: 0
+2022-10-15 12:20:17.914617 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:20:17.916047 Lookup for product Boar propogated from peerID 1 to peerID 3
+2022-10-15 12:20:17.924394 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:20:17.927579 Peer 2 has Boar
+2022-10-15 12:20:17.934921 Propogate the reply to peerID 0 Path: 0
+2022-10-15 12:20:17.938836 Lookup for product Boar propogated from peerID 1 to peerID 0
+2022-10-15 12:20:17.941237 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:20:17.945854 Peer 2 has Boar
+2022-10-15 12:20:17.946398 Lookup for product Boar propogated from peerID 1 to peerID 2
+2022-10-15 12:20:17.950611 Propogate the reply to peerID 3 Path: 3-0
+2022-10-15 12:20:17.958783 Peer 2 has Boar
+2022-10-15 12:20:17.961449 Peer 2 has Boar
+2022-10-15 12:20:17.961557 Propogate the reply to peerID 3 Path: 3
+2022-10-15 12:20:17.962505 Propogate the reply to peerID 0 Path: 0
+2022-10-15 12:20:17.965175 Propogate the reply to peerID 0 Path: 0-3

@@ -1,0 +1,428 @@
+import xmlrpc
+from xmlrpc.server import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
+
+import socket
+import threading as thd
+from threading import Lock
+
+import random
+import time, datetime
+
+import logging
+
+from constants import *
+import datetime
+import os
+
+PRINT_LOCK = Lock()
+PROXY_ADDR_LIST = []
+CURR_IP = 'localhost' if LOCAL_DEPLOY else socket.gethostbyname(socket.gethostname())
+
+class Peer(thd.Thread):
+    def __init__(self, peer_id, role, neighbors):
+        thd.Thread.__init__(self)
+        
+        self.peer_id = peer_id
+        self.role = role
+        self.neighbors = neighbors
+        self.latency = 0
+        self.request_count = 0
+
+        self._print("[Neighbor] Neighbors of peer %d: %s",
+            (self.peer_id, ','.join(str(x) for x in self.neighbors)))
+            
+    # entry point
+    def run(self):
+        server = thd.Thread(target=self._initiate_rpc_server)
+        server.start()
+        
+        if self.role == SELLER:
+            self._initiate_seller()
+        
+        if self.role == BUYER:
+            self._initiate_buyer()
+
+
+    def _initiate_buyer(self):
+        while True:
+            time.sleep(3)
+            # generate a buy request
+            self.target = random.randint(FISH, BOAR) #since 11 to 13 choose between 11 to 13
+
+            #remove
+            self._print("[INIT] Peer %d plans to buy %s", (self.peer_id, TO_ITEM_NAME[self.target]))
+
+            f = open("Peer"+str(self.peer_id)+"/output.txt","a")
+            f.write(str(datetime.datetime.now()) +" Peer " + str(self.peer_id) +" plans to buy "+ str(TO_ITEM_NAME[self.target]) + "\n")
+            f.close()
+
+            self.t_buy = datetime.datetime.now()
+            self.response_time = 0
+
+            # ask neighbors
+            self.candidate_sellers = []
+            for neighbor_id in self.neighbors:
+                thread = thd.Thread(target=self._lookup_t,
+                    args=(neighbor_id, self.target, HOPCOUNT, '%d' % self.peer_id))
+                thread.start()
+
+            time.sleep(CLIENT_TIMEOUT) #waits a specific amount of time to receive replies
+            
+            #stopped buying commodity because no sellers 
+            if self.candidate_sellers == []:
+                f = open("Peer"+str(self.peer_id)+"/output.txt","a")
+                f.write(str(datetime.datetime.now()) +" Stopped buying "+TO_ITEM_NAME[self.target]+ " because no sellers" + "\n")
+                f.close()
+
+            # check candidate sellers and trade, choose the first seller
+            for seller_id in self.candidate_sellers:
+                proxy = self._get_proxy(seller_id)
+                if proxy != None and proxy.buy(self.target,self.peer_id):
+                    #remove
+                    self._print("%s Peer %d buys %s from peer %d; avg. response time: %f (sec/req)",
+                        (datetime.datetime.now(), self.peer_id, TO_ITEM_NAME[self.target], seller_id,
+                        (self.response_time / len(self.candidate_sellers))))
+
+                    f = open("Peer"+str(self.peer_id)+"/output.txt","a")
+                    f.write(str(datetime.datetime.now()) + " Bought " + str(TO_ITEM_NAME[self.target]) +" from peerID " + str(seller_id) + "\n")
+                    f.close()
+                    break
+                
+
+    def _initiate_seller(self):
+        self.commodity = random.randint(FISH, BOAR)
+        self.commodity_quantity = random.randint(1, MAX_ITEM_NUMBER)
+        self.commodity_lock = Lock()
+
+        #should be printed on console for everyone to see
+        self._print("[INIT] Peer %d sells %d units of %s",
+            (self.peer_id, self.commodity_quantity, TO_ITEM_NAME[self.commodity]))
+
+
+    def _initiate_rpc_server(self):
+        server = SimpleXMLRPCServer((CURR_IP, PORT_START_NUM + self.peer_id),
+                    allow_none=True, logRequests=False)
+
+        server.register_function(self.hello)
+        server.register_function(self.lookup)
+        
+        server.register_function(self.reply) 
+
+        # Clients (BUYERS) don't have to listen to buy requests 
+        if self.role != BUYER:
+            server.register_function(self.buy)
+        
+        server.serve_forever()
+
+
+    def _print(self, msg, arg):
+        with PRINT_LOCK:
+            print(msg % arg)
+
+
+    def _report_latency(self, t_start, t_stop):
+        self.latency += (t_stop - t_start).total_seconds()
+        self.request_count += 1
+        if self.request_count % 50 == 0:
+            self._print('**** [PERFORMANCE] Average latency of peer %d: %f (sec/req) ****',
+                (self.peer_id, (self.latency / self.request_count)))
+
+
+    def _get_proxy(self, peer_id):
+        addr = PROXY_ADDR_LIST[peer_id] % (PORT_START_NUM + peer_id)
+        
+        proxy = xmlrpc.client.ServerProxy(addr)
+        
+        try:
+            proxy.hello()       # ack
+        except xmlrpc.client.Fault as err:
+            self._print('[Proxy Error] code: %d, msg: %s', (err.faultCode, err.faultString))
+            pass
+        except xmlrpc.client.ProtocolError as err:
+            self._print('[Proxy Error] code: %d, msg: %s', (err.errcode, err.errmsg))
+            return None
+        except socket.error:
+            self._print('[Protocol Error] Failed to connect to peer %d', peer_id)
+            return None
+            
+        return proxy
+
+
+    # for thread to execute
+    def _lookup_t(self, peer_id, product_name, hopcount, path):
+        proxy = self._get_proxy(peer_id)
+        if proxy != None:
+            t_start = datetime.datetime.now()
+            proxy.lookup(product_name, hopcount, path)
+            t_stop = datetime.datetime.now()
+            self._report_latency(t_start, t_stop)
+
+
+    # for thread to execute
+    def _reply_t(self, peer_id, seller_id, product_name, new_path):
+        proxy = self._get_proxy(peer_id)
+        if proxy != None:
+            t_start = datetime.datetime.now()
+            proxy.reply(seller_id, product_name, new_path)
+            t_stop = datetime.datetime.now()
+            self._report_latency(t_start, t_stop)
+  
+
+    def hello(self):
+        return True
+
+
+    def lookup(self, product_name, hopcount, path):
+        footprints = path.split('-')
+        
+        # have the product
+        if self.role != BUYER and product_name == self.commodity:
+            from_neighbor_id = int(footprints[0])
+            new_path = '' if len(footprints) == 1 else "-".join(footprints[1:])
+
+            proxy = self._get_proxy(from_neighbor_id)
+            if proxy != None:
+                self._print("Peer %d has %s!! Reply to peer %d",
+                    (self.peer_id, TO_ITEM_NAME[product_name], from_neighbor_id))
+
+                #print the reply in receiver's output
+                f = open("Peer"+str(from_neighbor_id)+"/output.txt","a")
+                f.write(str(datetime.datetime.now()) + " Peer " + str(self.peer_id) + " has " + TO_ITEM_NAME[product_name] + "\n")
+                f.close()
+
+                thread = thd.Thread(target=self._reply_t,
+                    args=(from_neighbor_id, self.peer_id, product_name, new_path))
+                thread.start()
+            return True
+
+        # discard
+        if hopcount == 0:
+            self._print("[LOOKUP stop] Peer %d final path: %s", (self.peer_id, path))
+
+            #print the reply in last peer's directory
+            f = open("Peer"+str(self.peer_id)+"/output.txt","a")
+            f.write(str(datetime.datetime.now()) + " Max Hop count reached, Lookup stopped Path: "+ str(path) + "\n")
+
+            f.close()
+            return False
+
+        # propagate the request
+        for neighbor_id in self.neighbors:
+            if str(neighbor_id) not in footprints: #to avoid a cycle
+                new_path = "%d-%s" % (self.peer_id, path)
+                
+
+                self._print("[LOOKUP propagate] Peer %d: (next) %d <- %d (curr) - %s (path)",
+                    (self.peer_id, neighbor_id, self.peer_id, path))
+
+                #print the lookup propogated in the propogater's output 
+                f = open("Peer"+str(self.peer_id)+"/output.txt","a")
+                f.write(str(datetime.datetime.now()) + " Lookup for product "+TO_ITEM_NAME[product_name]+" propogated from peerID " +str(self.peer_id) + " to peerID " + str(neighbor_id) +"\n")
+                
+                f.close()
+
+                thread = thd.Thread(target=self._lookup_t,
+                    args=(neighbor_id, product_name, hopcount-1, new_path))
+                thread.start()
+
+        return True
+
+
+    def reply(self, seller_id, product_name, path):
+        # 1. The reply request arrives to the buyer
+        if len(path) == 0:
+            # target product has been updated (timeout)
+            if product_name != self.target:
+                return False
+
+            t_response = datetime.datetime.now()
+            self.response_time += (t_response - self.t_buy).total_seconds()
+            self.candidate_sellers.append(seller_id)
+            self._print("[RECEIVE] Peer %d receives a reply from peer %d", (self.peer_id, seller_id))
+            
+            #print the reply in receiver's (buyer) directory
+            f = open("Peer"+str(self.peer_id)+"/output.txt","a")
+            f.write(str(datetime.datetime.now()) + " Received a reply from peerID " +str(seller_id) +"\n")
+            
+            f.close()
+
+            return True
+        
+        # 2. Otherwise, a peer propagates the reply request
+        footprints = path.split('-')
+        next_neighbor_id = int(footprints[0])
+        new_path = '' if len(footprints) == 1 else "-".join(footprints[1:])
+
+        self._print("[REPLY propagate] Peer %d: (curr) %d -> %d (next) --> %s (path)",
+            (self.peer_id, self.peer_id, next_neighbor_id, new_path))
+
+        #propogate the reply (can be seller or buyer) print in sender's directory
+        f = open("Peer"+str(self.peer_id)+"/output.txt","a")
+        f.write(str(datetime.datetime.now()) + " Propogate the reply to peerID " +str(next_neighbor_id) + " Path: " +str(path) +"\n")
+        
+        f.close()
+        
+        thread = thd.Thread(target=self._reply_t, args=(next_neighbor_id, seller_id, product_name, new_path))
+        thread.start()
+
+        return True
+
+
+    def buy(self, product_name,buyer_id):
+        if product_name != self.commodity:
+            self._print("[FAILURE] The %s of peer %d has been sold out.",
+                    (TO_ITEM_NAME[self.commodity], self.peer_id))
+
+            #print in buyer's directory
+            f = open("Peer"+str(buyer_id)+"/output.txt","a")
+            f.write(str(datetime.datetime.now()) + " Too late! PeerID " +str(self.peer_id)+ "'s "+TO_ITEM_NAME[self.commodity]+" got sold out" +"\n")
+            
+            f.close()
+            return False
+
+        # sync
+        with self.commodity_lock:
+            if self.commodity_quantity <= 0:
+                self._print("[FAILURE] The %s of peer %d has been sold out.",
+                    (TO_ITEM_NAME[self.commodity], self.peer_id))
+
+                #print in buyer's directory
+                f = open("Peer"+str(buyer_id)+"/output.txt","a")
+                f.write(str(datetime.datetime.now()) + " Too late! PeerID " +str(self.peer_id)+ "'s "+TO_ITEM_NAME[self.commodity]+" got sold out" +"\n")
+                
+                f.close()
+                return False
+
+            self.commodity_quantity -= 1
+        
+            if self.commodity_quantity == 0:
+                self.commodity_quantity = random.randint(1, MAX_ITEM_NUMBER)
+                self.commodity = random.randint(FISH, BOAR)
+                
+        self._print("[UPDATE] Peer %d has %d units of %s to sell",
+            (self.peer_id, self.commodity_quantity, TO_ITEM_NAME[self.commodity]))
+
+        #print in buyer's directory
+        f = open("Peer"+str(buyer_id)+"/output.txt","a")
+        f.write(str(datetime.datetime.now()) + " Hurry! PeerID " +str(self.peer_id)+ " has "+TO_ITEM_NAME[self.commodity]+" to sell"+"\n")
+        
+        f.close()
+        return True
+
+
+# def generate_neighbor_map():
+#     neighbor_map = []
+#     for j in range(PEER_NUM):
+#         row = [False for i in range(PEER_NUM)]
+#         neighbor_map.append(row)
+
+#     # generate neighbor map
+#     for j in range(PEER_NUM):
+#         # make sure that a peer always has a neighbor
+#         assured = random.randint(0, j-1) if j == PEER_NUM-1 else random.randint(j+1, PEER_NUM-1)
+#         neighbor_map[j][assured] = True
+#         neighbor_map[assured][j] = True
+
+#         for i in range(j+1, PEER_NUM-1):
+#             if random.randint(0, 1) == 1:
+#                 neighbor_map[j][i] = True
+#                 neighbor_map[i][j] = True
+
+#     return neighbor_map
+
+
+# def generate_peer_roles():
+#     buyer_num  = 0
+#     seller_num = 0
+#     roles = []
+
+#     for i in range(PEER_NUM):
+#         tmp = BUYER
+#         while True:
+#             tmp = random.randint(BUYER)
+#             if tmp == BUYER and buyer_num <= MAX_BUYER_NUM:
+#                 buyer_num += 1
+#                 break
+#             elif tmp == SELLER and seller_num <= MAX_SELLER_NUM:
+#                 seller_num += 1
+#                 break
+
+        
+#         roles.append(tmp)
+    
+#     return roles
+    
+
+if __name__ == "__main__":
+    if DEBUG:
+        # only support self-defined neighbor map
+        neighbor_map = TEST_MAP
+        role = TEST_ROLE
+        PEER_NUM = len(role)
+    # else:
+    #     neighbor_map = generate_neighbor_map()
+    #     role = generate_peer_roles()
+
+
+    with PRINT_LOCK:
+        print('Node is running on: %s\n' % CURR_IP)
+        print('\\\\\\\\\\  *NEIGHBOR MAP*  /////')
+        for row in neighbor_map:
+            print(row)
+        print('\n')
+
+
+    peers = []
+    # run at localhost
+    if LOCAL_DEPLOY:
+        for peer_id in range(PEER_NUM):
+            #check if directory exists for printing
+            path = 'Peer'+str(peer_id)
+            
+            #else create
+            
+            if(not os.path.isdir(path)):
+                os.mkdir(path)
+            else:
+                if(os.path.isfile(path+"/output.txt")): #if output.txt exists delete it for a new run
+                    os.remove(path+"/output.txt")
+            
+            neighbors = []
+            for j in range(PEER_NUM):
+                if neighbor_map[peer_id][j]:
+                    neighbors.append(j)
+
+            PROXY_ADDR_LIST.append('http://localhost:%d')
+            peer = Peer(peer_id, role[peer_id], neighbors) #calls init
+            peers.append(peer)
+            peer.start()
+    
+    # else:
+    #     # find the order of current machine & create PROXY_ADDR_LIST
+    #     # a machine with order 0 is the master machine
+    #     curr_machine_order = 0
+    #     num_of_peers_on_each_machine = int(PEER_NUM / len(MACHINES))
+    #     for i in range(len(MACHINES)):
+    #         if CURR_IP == MACHINES[i]['ip']:
+    #             curr_machine_order = i
+            
+    #         peer_id_start = num_of_peers_on_each_machine * i
+    #         peer_id_end   = peer_id_start + num_of_peers_on_each_machine
+    #         for peer_id in range(peer_id_start, peer_id_end):
+    #             PROXY_ADDR_LIST.append('http://' + MACHINES[i]['ip'] + ':%d')
+        
+    #     peer_id_start = num_of_peers_on_each_machine * curr_machine_order
+    #     peer_id_end   = peer_id_start + num_of_peers_on_each_machine
+    #     for peer_id in range(peer_id_start, peer_id_end):
+    #         neighbors = []
+    #         for j in range(PEER_NUM):
+    #             if neighbor_map[peer_id][j]:
+    #                 neighbors.append(j)
+
+    #         peer = Peer(peer_id, role[peer_id], neighbors)
+    #         peers.append(peer)
+    #         peer.start()
+
+    # avoid closing main thread (why)
+    for peer in peers:
+        peer.join()

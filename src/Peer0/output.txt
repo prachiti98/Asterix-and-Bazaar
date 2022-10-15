@@ -1,0 +1,91 @@
+2022-10-15 12:18:53.745859 Peer 0 plans to buy Salt
+2022-10-15 12:18:53.766586 Lookup for product Salt propogated from peerID 0 to peerID 1
+2022-10-15 12:18:53.792251 Max Hop count reached, Lookup stopped Path: 1-2-3
+2022-10-15 12:18:57.754090 Stopped buying Salt because no sellers
+2022-10-15 12:19:00.755667 Peer 0 plans to buy Boar
+2022-10-15 12:19:00.772033 Lookup for product Boar propogated from peerID 0 to peerID 1
+2022-10-15 12:19:00.792049 Received a reply from peerID 2
+2022-10-15 12:19:00.801616 Received a reply from peerID 2
+2022-10-15 12:19:00.807998 Received a reply from peerID 2
+2022-10-15 12:19:00.812632 Propogate the reply to peerID 3 Path: 3
+2022-10-15 12:19:00.813175 Received a reply from peerID 2
+2022-10-15 12:19:04.766300 Hurry! PeerID 2 has Boar to sell
+2022-10-15 12:19:04.767308 Bought Boar from peerID 2
+2022-10-15 12:19:07.772392 Peer 0 plans to buy Salt
+2022-10-15 12:19:07.786551 Lookup for product Salt propogated from peerID 0 to peerID 1
+2022-10-15 12:19:07.814350 Max Hop count reached, Lookup stopped Path: 1-2-3
+2022-10-15 12:19:11.779221 Stopped buying Salt because no sellers
+2022-10-15 12:19:14.785301 Peer 0 plans to buy Fish
+2022-10-15 12:19:14.797190 Lookup for product Salt propogated from peerID 0 to peerID 1
+2022-10-15 12:19:14.802128 Peer 1 has Fish
+2022-10-15 12:19:14.806944 Received a reply from peerID 1
+2022-10-15 12:19:14.824242 Max Hop count reached, Lookup stopped Path: 1-2-3
+2022-10-15 12:19:14.826194 Received a reply from peerID 1
+2022-10-15 12:19:14.829898 Received a reply from peerID 1
+2022-10-15 12:19:18.797351 Hurry! PeerID 1 has Fish to sell
+2022-10-15 12:19:18.797982 Bought Fish from peerID 1
+2022-10-15 12:19:21.801298 Peer 0 plans to buy Fish
+2022-10-15 12:19:21.810853 Lookup for product Fish propogated from peerID 0 to peerID 1
+2022-10-15 12:19:21.815920 Peer 1 has Fish
+2022-10-15 12:19:21.822083 Received a reply from peerID 1
+2022-10-15 12:19:21.830897 Peer 1 has Fish
+2022-10-15 12:19:21.833924 Propogate the reply to peerID 3 Path: 3
+2022-10-15 12:19:21.844641 Received a reply from peerID 1
+2022-10-15 12:19:21.847335 Received a reply from peerID 1
+2022-10-15 12:19:25.813033 Hurry! PeerID 1 has Fish to sell
+2022-10-15 12:19:25.814684 Bought Fish from peerID 1
+2022-10-15 12:19:28.819475 Peer 0 plans to buy Boar
+2022-10-15 12:19:28.832462 Lookup for product Boar propogated from peerID 0 to peerID 1
+2022-10-15 12:19:28.857755 Received a reply from peerID 2
+2022-10-15 12:19:28.862447 Received a reply from peerID 2
+2022-10-15 12:19:28.869129 Propogate the reply to peerID 3 Path: 3
+2022-10-15 12:19:28.874380 Received a reply from peerID 2
+2022-10-15 12:19:28.875811 Received a reply from peerID 2
+2022-10-15 12:19:32.835808 Hurry! PeerID 2 has Boar to sell
+2022-10-15 12:19:32.836476 Bought Boar from peerID 2
+2022-10-15 12:19:35.837537 Peer 0 plans to buy Salt
+2022-10-15 12:19:35.850142 Lookup for product Fish propogated from peerID 0 to peerID 1
+2022-10-15 12:19:35.870455 Peer 1 has Fish
+2022-10-15 12:19:35.874666 Propogate the reply to peerID 3 Path: 3
+2022-10-15 12:19:39.843617 Stopped buying Salt because no sellers
+2022-10-15 12:19:42.849518 Peer 0 plans to buy Salt
+2022-10-15 12:19:42.863594 Lookup for product Salt propogated from peerID 0 to peerID 1
+2022-10-15 12:19:42.891524 Max Hop count reached, Lookup stopped Path: 1-2-3
+2022-10-15 12:19:46.855973 Stopped buying Salt because no sellers
+2022-10-15 12:19:49.858033 Peer 0 plans to buy Salt
+2022-10-15 12:19:49.874582 Lookup for product Salt propogated from peerID 0 to peerID 1
+2022-10-15 12:19:49.898691 Max Hop count reached, Lookup stopped Path: 1-2-3
+2022-10-15 12:19:53.865096 Stopped buying Salt because no sellers
+2022-10-15 12:19:56.868199 Peer 0 plans to buy Fish
+2022-10-15 12:19:56.884868 Peer 1 has Fish
+2022-10-15 12:19:56.884995 Lookup for product Fish propogated from peerID 0 to peerID 1
+2022-10-15 12:19:56.890760 Received a reply from peerID 1
+2022-10-15 12:19:56.906526 Peer 1 has Fish
+2022-10-15 12:19:56.910301 Received a reply from peerID 1
+2022-10-15 12:19:56.911144 Propogate the reply to peerID 3 Path: 3
+2022-10-15 12:19:56.917103 Received a reply from peerID 1
+2022-10-15 12:20:00.881433 Hurry! PeerID 1 has Fish to sell
+2022-10-15 12:20:00.883206 Bought Fish from peerID 1
+2022-10-15 12:20:03.886544 Peer 0 plans to buy Salt
+2022-10-15 12:20:03.899937 Lookup for product Fish propogated from peerID 0 to peerID 1
+2022-10-15 12:20:03.923483 Peer 1 has Fish
+2022-10-15 12:20:03.926279 Propogate the reply to peerID 3 Path: 3
+2022-10-15 12:20:07.891427 Stopped buying Salt because no sellers
+2022-10-15 12:20:10.897308 Peer 0 plans to buy Boar
+2022-10-15 12:20:10.919728 Lookup for product Salt propogated from peerID 0 to peerID 1
+2022-10-15 12:20:10.938751 Received a reply from peerID 2
+2022-10-15 12:20:10.940395 Received a reply from peerID 2
+2022-10-15 12:20:10.943320 Max Hop count reached, Lookup stopped Path: 1-2-3
+2022-10-15 12:20:10.949518 Received a reply from peerID 2
+2022-10-15 12:20:10.949911 Received a reply from peerID 2
+2022-10-15 12:20:14.902378 Hurry! PeerID 2 has Boar to sell
+2022-10-15 12:20:14.903131 Bought Boar from peerID 2
+2022-10-15 12:20:17.906442 Peer 0 plans to buy Boar
+2022-10-15 12:20:17.934982 Lookup for product Boar propogated from peerID 0 to peerID 1
+2022-10-15 12:20:17.945789 Received a reply from peerID 2
+2022-10-15 12:20:17.950429 Received a reply from peerID 2
+2022-10-15 12:20:17.958029 Received a reply from peerID 2
+2022-10-15 12:20:17.964937 Received a reply from peerID 2
+2022-10-15 12:20:17.966562 Propogate the reply to peerID 3 Path: 3
+2022-10-15 12:20:21.919423 Hurry! PeerID 2 has Boar to sell
+2022-10-15 12:20:21.920389 Bought Boar from peerID 2
