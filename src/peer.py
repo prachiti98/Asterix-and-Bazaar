@@ -12,7 +12,6 @@ from constants import *
 import datetime
 
 
-addLock = Lock()
 peerServerList = []
 currentServer = 'localhost' if deployOnLocalhost else socket.gethostbyname(socket.gethostname())
 
@@ -168,13 +167,6 @@ class Peer(t.Thread):
         f = open("Peer"+str(self.peerId)+"/output.txt","a")
         f.write(str(datetime.datetime.now()) + " Selling " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+"\n")
         f.close()
-
-
-
-    def printOnConsole(self, msg, arg):
-        with addLock:
-            print(msg % arg)
-
 
     def _report_latency(self, timeStart, timeStop):
         self.latency += (timeStop - timeStart).total_seconds()
@@ -359,9 +351,9 @@ if __name__ == "__main__":
         #     role = generate_peer_roles()
 
 
-        with addLock:
             print('Running on: '+currentServer)
-            print('Peer Graph:')
+            print('Number of nodes: '+str(noNodes))
+            print('Graph:')
             for row in peerNeighborMap:
                 print(row)
 
