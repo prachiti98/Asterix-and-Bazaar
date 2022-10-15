@@ -13,7 +13,7 @@ import datetime
 
 
 addLock = Lock()
-peerServerList= []
+peerServerList = []
 currentServer = 'localhost' if deployOnLocalhost else socket.gethostbyname(socket.gethostname())
 
 class Peer(t.Thread):
@@ -24,10 +24,6 @@ class Peer(t.Thread):
         self.role = role
         self.neighbors = neighbors
         
-
-        self.printOnConsole("Neighbors of peer %d: %s",
-            (self.peerId, ','.join(str(x) for x in self.neighbors)))
-
         self.latency = 0
         self.requestCount = 0
             
@@ -58,9 +54,7 @@ class Peer(t.Thread):
 
     def getPeerIdServer(self, peerId):
         addr = peerServerList[peerId] % (portNumber + peerId)
-        
         proxyServer = xmlrpc.client.ServerProxy(addr)
-        
         try:
             proxyServer.hello()       # check if the server proxyServer exists
         except xmlrpc.client.Fault as err:
@@ -81,9 +75,6 @@ class Peer(t.Thread):
             # generate a buy request
             self.target = random.randint(FISH, BOAR) #since 100 to 102 
 
-            #remove
-            #self.printOnConsole("[INIT] Peer %d plans to buy %s", (self.peerId, toGoodsStringName[self.target]))
-
             f = open("Peer"+str(self.peerId)+"/output.txt","a")
             f.write(str(datetime.datetime.now()) +" Peer " + str(self.peerId) +" plans to buy "+ str(toGoodsStringName[self.target]) + "\n")
             f.close()
@@ -94,8 +85,7 @@ class Peer(t.Thread):
             # ask neighbors
             self.potentialSellers = []
             for neighborId in self.neighbors:
-                thread = t.Thread(target=self.lookupUtil,
-                    args=(neighborId, self.target, hopCount, '%d' % self.peerId))
+                thread = t.Thread(target=self.lookupUtil, args=(neighborId, self.target, hopCount, '%d' % self.peerId))
                 thread.start()
 
             time.sleep(clientWaitTime) #waits a specific amount of time to receive replies
@@ -123,65 +113,49 @@ class Peer(t.Thread):
                     break
                 
     # find the server and call the main lookup
-    def lookupUtil(self, peerId, product_name, hopCount, path):
+    def lookupUtil(self, peerId, productName, hopCount, path):
         proxyServer = self.getPeerIdServer(peerId)
         if proxyServer != None:
             timeStart = datetime.datetime.now()
-            proxyServer.lookup(product_name, hopCount, path)
+            proxyServer.lookup(productName, hopCount, path)
             timeEnd = datetime.datetime.now()
             self._report_latency(timeStart, timeEnd)
 
-    def lookup(self, product_name, hopCount, path):
+    def lookup(self, productName, hopCount, path):
         footprints = path.split('-')
         
         # have the product
-        if self.role != BUYER and product_name == self.good:
+        if self.role != BUYER and productName == self.good:
             fromNeighborId = int(footprints[0])
-            new_path = '' if len(footprints) == 1 else "-".join(footprints[1:])
+            newPath = '' if len(footprints) == 1 else "-".join(footprints[1:])
 
             proxyServer = self.getPeerIdServer(fromNeighborId)
             if proxyServer != None:
-                #self.printOnConsole("Peer %d has %s!! Reply to peer %d",
-                    #(self.peerId, toGoodsStringName[product_name], fromNeighborId))
-
                 #print the reply in receiver's output
                 f = open("Peer"+str(fromNeighborId)+"/output.txt","a")
-                f.write(str(datetime.datetime.now()) + " Peer " + str(self.peerId) + " has " + toGoodsStringName[product_name] + "\n")
+                f.write(str(datetime.datetime.now()) + " Peer " + str(self.peerId) + " has " + toGoodsStringName[productName] + "\n")
                 f.close()
-
-                thread = t.Thread(target=self.replyUtil,
-                    args=(fromNeighborId, self.peerId, product_name, new_path))
+                thread = t.Thread(target=self.replyUtil, args=(fromNeighborId, self.peerId, productName, newPath))
                 thread.start()
             return True
 
         # discard
         if hopCount == 0:
-            #self.printOnConsole("[LOOKUP stop] Peer %d final path: %s", (self.peerId, path))
-
             #print the reply in last peer's directory
             f = open("Peer"+str(self.peerId)+"/output.txt","a")
             f.write(str(datetime.datetime.now()) + " Max Hop count reached, Lookup stopped Path: "+ str(path) + "\n")
-
             f.close()
             return False
 
         # propagate the request
         for neighborId in self.neighbors:
             if str(neighborId) not in footprints: #to avoid a cycle
-                new_path = "%d-%s" % (self.peerId, path)
-                
-
-                #self.printOnConsole("[LOOKUP propagate] Peer %d: (next) %d <- %d (curr) - %s (path)",
-                #    (self.peerId, neighborId, self.peerId, path))
-
+                newPath = str(self.peerId)+'-'+str(path)
                 #print the lookup propogated in the propogater's output 
                 f = open("Peer"+str(self.peerId)+"/output.txt","a")
-                f.write(str(datetime.datetime.now()) + " Lookup for product "+toGoodsStringName[product_name]+" propogated from peerID " +str(self.peerId) + " to peerID " + str(neighborId) +"\n")
-                
+                f.write(str(datetime.datetime.now()) + " Lookup for product "+toGoodsStringName[productName]+" propogated from peerID " +str(self.peerId) + " to peerID " + str(neighborId) +"\n")
                 f.close()
-
-                thread = t.Thread(target=self.lookupUtil,
-                    args=(neighborId, product_name, hopCount-1, new_path))
+                thread = t.Thread(target=self.lookupUtil,args=(neighborId, productName, hopCount-1, newPath))
                 thread.start()
 
         return True
@@ -194,9 +168,7 @@ class Peer(t.Thread):
         f = open("Peer"+str(self.peerId)+"/output.txt","a")
         f.write(str(datetime.datetime.now()) + " Selling " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+"\n")
         f.close()
-        #should be printed on console for everyone to see
-        #self.printOnConsole("[INIT] Peer %d sells %d units of %s",
-            #(self.peerId, self.goodQuantity, toGoodsStringName[self.good]))
+
 
 
     def printOnConsole(self, msg, arg):
@@ -212,11 +184,11 @@ class Peer(t.Thread):
                 (self.peerId, (self.latency / self.requestCount)))
 
     # for thread to execute
-    def replyUtil(self, peerId, sellerId, product_name, newPath):
+    def replyUtil(self, peerId, sellerId, productName, newPath):
         proxyServer = self.getPeerIdServer(peerId)
         if proxyServer != None:
             timeStart = datetime.datetime.now()
-            proxyServer.reply(sellerId, product_name, newPath)
+            proxyServer.reply(sellerId, productName, newPath)
             timeStop = datetime.datetime.now()
             self._report_latency(timeStart, timeStop)
   
@@ -225,124 +197,94 @@ class Peer(t.Thread):
         return True
 
 
-    def lookup(self, product_name, hopCount, path):
+    def lookup(self, productName, hopCount, path):
         footprints = path.split('-')
         
         # have the product
-        if self.role != BUYER and product_name == self.good:
+        if self.role != BUYER and productName == self.good:
             fromNeighborId = int(footprints[0])
             newPath = '' if len(footprints) == 1 else "-".join(footprints[1:])
 
             proxyServer = self.getPeerIdServer(fromNeighborId)
             if proxyServer != None:
-                #self.printOnConsole("Peer %d has %s!! Reply to peer %d",
-                    #(self.peerId, toGoodsStringName[product_name], fromNeighborId))
 
                 #print the reply in receiver's output
                 f = open("Peer"+str(fromNeighborId)+"/output.txt","a")
-                f.write(str(datetime.datetime.now()) + " Peer " + str(self.peerId) + " has " + toGoodsStringName[product_name] + "\n")
+                f.write(str(datetime.datetime.now()) + " Peer " + str(self.peerId) + " has " + toGoodsStringName[productName] + "\n")
                 f.close()
 
-                thread = t.Thread(target=self.replyUtil,
-                    args=(fromNeighborId, self.peerId, product_name, newPath))
+                thread = t.Thread(target=self.replyUtil, args=(fromNeighborId, self.peerId, productName, newPath))
                 thread.start()
             return True
 
         # discard
         if hopCount == 0:
-            #self.printOnConsole("[LOOKUP stop] Peer %d final path: %s", (self.peerId, path))
-
-            #print the reply in last peer's directory
             f = open("Peer"+str(self.peerId)+"/output.txt","a")
             f.write(str(datetime.datetime.now()) + " Max Hop count reached, Lookup stopped Path: "+ str(path) + "\n")
-
             f.close()
             return False
 
         # propagate the request
         for neighborId in self.neighbors:
             if str(neighborId) not in footprints: #to avoid a cycle
-                new_path = "%d-%s" % (self.peerId, path)
-                
-
-                #self.printOnConsole("[LOOKUP propagate] Peer %d: (next) %d <- %d (curr) - %s (path)",
-                #    (self.peerId, neighborId, self.peerId, path))
-
+                newPath = str(self.peerId) + '-' + str(path)
                 #print the lookup propogated in the propogater's output 
                 f = open("Peer"+str(self.peerId)+"/output.txt","a")
-                f.write(str(datetime.datetime.now()) + " Lookup for product "+toGoodsStringName[product_name]+" propogated from peerID " +str(self.peerId) + " to peerID " + str(neighborId) +"\n")
-                
+                f.write(str(datetime.datetime.now()) + " Lookup for product "+toGoodsStringName[productName]+" propogated from peerID " +str(self.peerId) + " to peerID " + str(neighborId) +"\n")
                 f.close()
-
-                thread = t.Thread(target=self.lookupUtil,
-                    args=(neighborId, product_name, hopCount-1, new_path))
+                thread = t.Thread(target=self.lookupUtil, args=(neighborId, productName, hopCount-1, newPath))
                 thread.start()
-
         return True
 
 
-    def reply(self, sellerId, product_name, path):
+    def reply(self, sellerId, productName, path):
         # 1. The reply request arrives to the buyer
         if len(path) == 0:
             # target product has been updated (timeout)
-            if product_name != self.target:
+            if productName != self.target:
                 return False
 
-            t_response = datetime.datetime.now()
-            self.responseTime += (t_response - self.startBuyTime).total_seconds()
+            response = datetime.datetime.now()
+            self.responseTime += (response - self.startBuyTime).total_seconds()
             self.potentialSellers.append(sellerId)
-            #self.printOnConsole("[RECEIVE] Peer %d receives a reply from peer %d", (self.peerId, sellerId))
             
             #print the reply in receiver's (buyer) directory
             f = open("Peer"+str(self.peerId)+"/output.txt","a")
             f.write(str(datetime.datetime.now()) + " Received a reply from peerID " +str(sellerId) +"\n")
-            
             f.close()
 
             return True
         
         # 2. Otherwise, a peer propagates the reply request
         footprints = path.split('-')
-        next_neighborId = int(footprints[0])
-        new_path = '' if len(footprints) == 1 else "-".join(footprints[1:])
-
-        #self.printOnConsole("[REPLY propagate] Peer %d: (curr) %d -> %d (next) --> %s (path)",
-        #    (self.peerId, self.peerId, next_neighborId, new_path))
+        neighborId = int(footprints[0])
+        newPath = '' if len(footprints) == 1 else "-".join(footprints[1:])
 
         #propogate the reply (can be seller or buyer) print in sender's directory
         f = open("Peer"+str(self.peerId)+"/output.txt","a")
-        f.write(str(datetime.datetime.now()) + " Propogate the reply to peerID " +str(next_neighborId) + " Path: " +str(path) +"\n")
-        
+        f.write(str(datetime.datetime.now()) + " Propogate the reply to peerID " +str(neighborId) + " Path: " +str(path) +"\n")
         f.close()
         
-        thread = t.Thread(target=self.replyUtil, args=(next_neighborId, sellerId, product_name, new_path))
+        thread = t.Thread(target=self.replyUtil, args=(neighborId, sellerId, productName, newPath))
         thread.start()
-
         return True
 
 
-    def buy(self, product_name,buyer_id):
-        if product_name != self.good:
-            #self.printOnConsole("[FAILURE] The %s of peer %d has been sold out.",
-             #       (toGoodsStringName[self.good], self.peerId))
+    def buy(self, productName,buyerId):
+        if productName != self.good:
 
             #print in buyer's directory
-            f = open("Peer"+str(buyer_id)+"/output.txt","a")
+            f = open("Peer"+str(buyerId)+"/output.txt","a")
             f.write(str(datetime.datetime.now()) + " Too late! PeerID " +str(self.peerId)+ "'s "+toGoodsStringName[self.good]+" got sold out" +"\n")
-            
             f.close()
             return False
 
         # sync
         with self.goodLock:
             if self.goodQuantity <= 0:
-                #self.printOnConsole("[FAILURE] The %s of peer %d has been sold out.",
-                #    (toGoodsStringName[self.good], self.peerId))
-
                 #print in buyer's directory
-                f = open("Peer"+str(buyer_id)+"/output.txt","a")
+                f = open("Peer"+str(buyerId)+"/output.txt","a")
                 f.write(str(datetime.datetime.now()) + " Too late! PeerID " +str(self.peerId)+ "'s "+toGoodsStringName[self.good]+" got sold out" +"\n")
-                
                 f.close()
                 return False
 
@@ -352,13 +294,9 @@ class Peer(t.Thread):
                 self.goodQuantity = random.randint(1, maxUnits)
                 self.good = random.randint(FISH, BOAR)
                 
-        #self.printOnConsole("[UPDATE] Peer %d has %d units of %s to sell",
-         #   (self.peerId, self.goodQuantity, toGoodsStringName[self.good]))
-
         #print in buyer's directory
-        f = open("Peer"+str(buyer_id)+"/output.txt","a")
+        f = open("Peer"+str(buyerId)+"/output.txt","a")
         f.write(str(datetime.datetime.now()) + " Hurry! PeerID " +str(self.peerId)+ " has "+toGoodsStringName[self.good]+" to sell"+"\n")
-        
         f.close()
         return True
 
@@ -407,29 +345,27 @@ class Peer(t.Thread):
     
 
 if __name__ == "__main__":
-    no_nodes = int(sys.argv[1])
-    if no_nodes<2:
+    noNodes = int(sys.argv[1])
+    if noNodes<2:
         print('Enter more than 1 node!')
     else:
         if DEBUG:
             # only support self-defined neighbor map
-            role = nodeMapping[no_nodes][0]
-            peerNeighborMap = nodeMapping[no_nodes][1]
-            totalPeers = no_nodes
+            role = nodeMapping[noNodes][0]
+            peerNeighborMap = nodeMapping[noNodes][1]
+            totalPeers = noNodes
         # else:
         #     peerNeighborMap = generate_peerNeighborMap()
         #     role = generate_peer_roles()
 
 
         with addLock:
-            print('Node is running on: %s\n' % currentServer)
-            print('-----Peer Neighbor Adjacency List-----')
+            print('Running on: '+currentServer)
+            print('Peer Graph:')
             for row in peerNeighborMap:
                 print(row)
-            print('\n')
 
-        print("Check output.txt in PeerID directory to check the logging \n")
-
+        print("Marketplace is live! Check output.txt in PeerID directory to check the logging \n")
 
         peers = []
         # run at localhost
@@ -439,7 +375,6 @@ if __name__ == "__main__":
                 path = 'Peer'+str(peerId)
                 
                 #else create
-                
                 if(not os.path.isdir(path)):
                     os.mkdir(path)
                 else:
@@ -482,6 +417,6 @@ if __name__ == "__main__":
         #         peers.append(peer)
         #         peer.start()
 
-        # avoid closing main thread (why)
+        # avoid closing main thread 
         for peer in peers:
             peer.join()
