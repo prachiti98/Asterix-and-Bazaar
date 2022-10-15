@@ -1,11 +1,11 @@
 BUYER  = 1
 SELLER = 2
-BUYER   = 3
 
-FISH = 11
-SALT = 12
-BOAR = 13
-TO_ITEM_NAME = {
+FISH = 100
+SALT = 101
+BOAR = 102
+
+toGoodsStringName = {
     FISH: 'Fish',
     SALT: 'Salt',
     BOAR: 'Boar'
@@ -14,41 +14,42 @@ TO_ITEM_NAME = {
 ############ CONGIGURABLE ############
 # set True if you want to deploy locally
 # setting True omits NUM_OF_PEER_ON_EACH_MACHINE and MACHINES
-LOCAL_DEPLOY = True
+deployOnLocalhost = True
 
 # number of peers to be initialized on a machine
-# Note that the number of peers on each machine = PEER_NUM / '# of MACHINES'
+# Note that the number of peers on each machine = totalPeers / '# of MACHINES'
 MACHINES = [{
-    # default: elnux2
+    
     'ip': '128.119.243.164'
 }, {
-    # defualt: elnux7
+    
     'ip': '128.119.243.175'
 }]
 
 # number of total peers
-# PEER_NUM would be updated to len(TEST_ROLE) if DEBUG is True
-PEER_NUM = 6
-MAX_BUYER_NUM  = int(PEER_NUM/2) + 1
-MAX_SELLER_NUM = int(PEER_NUM/2) + 1
+totalPeers = 6
+
+MAX_BUYER_NUM  = int(totalPeers/2) + 1
+MAX_SELLER_NUM = int(totalPeers/2) + 1
 
 # optional
 # default port to start a RPC server
 # the port number of each RPC peer server is (PORT_START_NUM + peer_id)
-PORT_START_NUM = 10070
+portNumber = 10070
 # the maximum quantity a seller can sell
-MAX_ITEM_NUMBER = 10
+maxUnits = 10
 # waiting time for a buyer to receive responses from sellers
-CLIENT_TIMEOUT = 4
-# hopcount
-HOPCOUNT = 2
+clientWaitTime = 4
+
+hopCount = 2
 
 ######## SELF-DEFINED MAP & ROLE ########
 # if you would like to initialize peers by using TEST_ROLE and TEST_MAP,
 # please set DEBUG to True
 DEBUG = True
 
-node_mapping = {
+#adjacency matrix for role and neighbors
+nodeMapping = {
     2: [[BUYER, SELLER],[[False, True],[True, False]]],
     3: [[BUYER, SELLER, BUYER],[[False, True, True],[True, False,False],[True, False, False]]],
     4: [[BUYER, SELLER, SELLER, BUYER],[[False, True, False, True],[True, False, True, True],[False, True, False, True],[True, True, True, False]]],
