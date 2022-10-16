@@ -1,5 +1,5 @@
 
-from xmlrpc.server import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
+from xmlrpc.server import SimpleXMLRPCServer
 import xmlrpc
 import threading as t
 import socket
@@ -8,12 +8,49 @@ from threading import Lock
 import os
 import time, datetime
 import sys
-from constants import *
 import datetime
+import random
+
+#Initializing variables
+buyer,seller,fish,salt,boar  = 1,2,3,4,5
+toGoodsStringName = {fish:'Fish', salt:'Salt', boar:'Boar'}
+# the port number of each RPC peer server is (PORT_START_NUM + peer_id)
+portNumber = 5000
+# the maximum quantity a seller can sell
+maxUnits = 10
+# waiting time for a buyer to receive responses from sellers
+clientWaitTime = 4
+#Initializing Graph for various nodes
+nodeMapping = {
+    2: [[buyer, seller],[[False, True],[True, False]]],
+    3: [[buyer, seller, buyer],[[False, True, True],[True, False,False],[True, False, False]]],
+    4: [[buyer, seller, seller, buyer],[[False, True, False, True],[True, False, True, True],[False, True, False, True],[True, True, True, False]]],
+    5: [[buyer, seller, seller, buyer, buyer],[[False, True, False, False, False],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]]],
+    6: [[buyer, seller, seller, seller, buyer, buyer],[[False, True, False, False, False, False],[True, False, True, False, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]]
+}
+#Maybe Chnge?
+deployOnLocalhost = True
+DEBUG = True
+test = False
+############ CONGIGURABLE ############
+# set True if you want to deploy locally
+# setting True omits NUM_OF_PEER_ON_EACH_MACHINE and MACHINES
+
+
+# number of peers to be initialized on a machine
+# Note that the number of peers on each machine = totalPeers / '# of MACHINES'
+#MACHINES = [{
+#    
+#    'ip': '128.119.243.164'
+#}, {
+#    
+#    'ip': '128.119.243.175'
+#}]
+
 
 addLock = Lock()
 peerServerList = []
-currentServer = 'localhost' if deployOnLocalhost else socket.gethostbyname(socket.gethostname())
+currentServer = 'localhost' 
 
 class Peer(t.Thread):
     def __init__(self, peerId, role, neighbors):
@@ -30,9 +67,8 @@ class Peer(t.Thread):
     def run(self):
         server = t.Thread(target=self.initialiseRPCServer)
         server.start()
-        if self.role == BUYER:
+        if self.role == buyer:
             self.initialiseBuyer()
-
         else:
             self.initialiseSeller()
         
@@ -46,33 +82,35 @@ class Peer(t.Thread):
         server.register_function(self.reply) 
 
         # Clients (BUYERS) don't have to listen to buy requests 
-        if self.role != BUYER:
+        if self.role != buyer:
             server.register_function(self.buy)
         
         server.serve_forever()
 
     def getPeerIdServer(self, peerId):
-        addr = peerServerList[peerId] % (portNumber + peerId)
+        addr = peerServerList[peerId] + str(portNumber + peerId)
         proxyServer = xmlrpc.client.ServerProxy(addr)
         try:
             proxyServer.hello()       # check if the server proxyServer exists
         except xmlrpc.client.Fault as err:
-            self.printOnConsole('proxyServer Error - code: %d, msg: %s', (err.faultCode, err.faultString))
+            self.printOnConsole('proxyServer Error - code: '+str(err.faultCode)+', msg: '+str(err.faultString))
             pass
         except xmlrpc.client.ProtocolError as err:
-            self.printOnConsole('proxyServer Error - code: %d, msg: %s', (err.errcode, err.errmsg))
+            self.printOnConsole('proxyServer Error - code: '+str(err.errcode)+', msg: '+str(err.errmsg))
             return None
         except socket.error:
-            self.printOnConsole('Protocol Error - Failed to connect to peer %d', peerId)
+            self.printOnConsole('Protocol Error - Failed to connect to peer '+str(peerId))
             return None
             
         return proxyServer
 
     def initialiseBuyer(self):
         while True:
-            time.sleep(3)
+            #Sleep for Random time
+            time.sleep(random.randint(3,5))
+
             # generate a buy request
-            self.target = random.randint(FISH, BOAR) #since 100 to 102 
+            self.target = random.randint(fish, boar) #since 100 to 102 
 
             f = open("Peer"+str(self.peerId)+"/output.txt","a")
             f.write(str(datetime.datetime.now()) +" Peer " + str(self.peerId) +" plans to buy "+ str(toGoodsStringName[self.target]) + "\n")
@@ -84,7 +122,7 @@ class Peer(t.Thread):
             # ask neighbors
             self.potentialSellers = []
             for neighborId in self.neighbors:
-                thread = t.Thread(target=self.lookupUtil, args=(neighborId, self.target, hopCount, '%d' % self.peerId))
+                thread = t.Thread(target=self.lookupUtil, args=(neighborId, self.target, hopCount, str(self.peerId)))
                 thread.start()
 
             time.sleep(clientWaitTime) #waits a specific amount of time to receive replies
@@ -99,21 +137,17 @@ class Peer(t.Thread):
             for sellerId in self.potentialSellers:
                 proxyServer = self.getPeerIdServer(sellerId)
                 if proxyServer != None and proxyServer.buy(self.target,self.peerId):
-
                     #to do the calculation
-                    self.printOnConsole("%s Peer %d buys %s from peer %d; avg. response time: %f (sec/req)",
-                        (datetime.datetime.now(), self.peerId, toGoodsStringName[self.target], sellerId,
-                        (self.responseTime / len(self.potentialSellers))))
-
+                    self.printOnConsole(str(datetime.datetime.now())+" Peer "+str(self.peerId)+" buys "+str(toGoodsStringName[self.target])+" from peer "+str(sellerId)+"; avg. response time: "+str(self.responseTime / len(self.potentialSellers))+" (sec/req)")
                     f = open("Peer"+str(self.peerId)+"/output.txt","a")
                     f.write(str(datetime.datetime.now()) + " Bought " + str(toGoodsStringName[self.target]) +" from peerID " + str(sellerId) + "\n")
-                    f.write("The average response time: %f \n"%(self.responseTime/len(self.potentialSellers)))
+                    f.write("The average response time: "+str(self.responseTime/len(self.potentialSellers))+" \n")
                     f.close()
                     break
 
-    def printOnConsole(self, msg, arg):
+    def printOnConsole(self, msg):
         with addLock:
-            print(msg % arg)
+            print(msg)
 
     # find the server and call the main lookup
     def lookupUtil(self, peerId, productName, hopCount, path):
@@ -128,7 +162,7 @@ class Peer(t.Thread):
         footprints = path.split('-')
         
         # have the product
-        if self.role != BUYER and productName == self.good:
+        if self.role != buyer and productName == self.good:
             fromNeighborId = int(footprints[0])
             newPath = '' if len(footprints) == 1 else "-".join(footprints[1:])
 
@@ -164,20 +198,19 @@ class Peer(t.Thread):
         return True
 
     def initialiseSeller(self):
-        self.good = random.randint(FISH, BOAR)
+        self.good = random.randint(fish, boar)
         self.goodQuantity = random.randint(1, maxUnits)
         self.goodLock = Lock()
 
         f = open("Peer"+str(self.peerId)+"/output.txt","a")
-        f.write(str(datetime.datetime.now()) + " Selling " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+"\n")
+        f.write(str(datetime.datetime.now()) + " Selling " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+" Unit(s) \n")
         f.close()
 
     def _report_latency(self, timeStart, timeStop):
         self.latency += (timeStop - timeStart).total_seconds()
         self.requestCount += 1
-        if self.requestCount % 50 == 0:
-            self.printOnConsole('**** [PERFORMANCE] Average latency of peer %d: %f (sec/req) ****',
-                (self.peerId, (self.latency / self.requestCount)))
+        if self.requestCount % 1000 == 0:
+            self.printOnConsole('**** [PERFORMANCE] Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req) ****')
 
     # for thread to execute
     def replyUtil(self, peerId, sellerId, productName, newPath):
@@ -197,7 +230,7 @@ class Peer(t.Thread):
         footprints = path.split('-')
         
         # have the product
-        if self.role != BUYER and productName == self.good:
+        if self.role != buyer and productName == self.good:
             fromNeighborId = int(footprints[0])
             newPath = '' if len(footprints) == 1 else "-".join(footprints[1:])
 
@@ -285,10 +318,16 @@ class Peer(t.Thread):
                 return False
 
             self.goodQuantity -= 1
+            f = open("Peer"+str(self.peerId)+"/output.txt","a")
+            f.write(str(datetime.datetime.now()) + " Remaining " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+" Unit(s) \n")
+            f.close()
         
             if self.goodQuantity == 0:
                 self.goodQuantity = random.randint(1, maxUnits)
-                self.good = random.randint(FISH, BOAR)
+                self.good = random.randint(fish, boar)
+                f = open("Peer"+str(self.peerId)+"/output.txt","a")
+                f.write(str(datetime.datetime.now()) + " Selling new good " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+" Unit(s) \n")
+                f.close()
                 
         #print in buyer's directory
         f = open("Peer"+str(buyerId)+"/output.txt","a")
@@ -324,13 +363,13 @@ class Peer(t.Thread):
 #     roles = []
 
 #     for i in range(totalPeers):
-#         tmp = BUYER
+#         tmp = buyer
 #         while True:
-#             tmp = random.randint(BUYER)
-#             if tmp == BUYER and buyer_num <= MAX_BUYER_NUM:
+#             tmp = random.randint(buyer)
+#             if tmp == buyer and buyer_num <= MAX_BUYER_NUM:
 #                 buyer_num += 1
 #                 break
-#             elif tmp == SELLER and seller_num <= MAX_SELLER_NUM:
+#             elif tmp == seller and seller_num <= MAX_SELLER_NUM:
 #                 seller_num += 1
 #                 break
 
@@ -350,6 +389,7 @@ if __name__ == "__main__":
             role = nodeMapping[noNodes][0]
             peerNeighborMap = nodeMapping[noNodes][1]
             totalPeers = noNodes
+            hopCount = random.randint(1, noNodes-1)
         # else:
         #     peerNeighborMap = generate_peerNeighborMap()
         #     role = generate_peer_roles()
@@ -382,7 +422,7 @@ if __name__ == "__main__":
                     if peerNeighborMap[peerId][j]:
                         neighbors.append(j)
 
-                peerServerList.append('http://localhost:%d')
+                peerServerList.append('http://localhost:')
                 peer = Peer(peerId, role[peerId], neighbors) #calls init
                 peers.append(peer)
                 peer.start()
