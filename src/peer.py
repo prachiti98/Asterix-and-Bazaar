@@ -226,46 +226,6 @@ class Peer(t.Thread):
         return True
 
 
-    def lookup(self, productName, hopCount, path):
-        footprints = path.split('-')
-        
-        # have the product
-        if self.role != buyer and productName == self.good:
-            fromNeighborId = int(footprints[0])
-            newPath = '' if len(footprints) == 1 else "-".join(footprints[1:])
-
-            proxyServer = self.getPeerIdServer(fromNeighborId)
-            if proxyServer != None:
-
-                #print the reply in receiver's output
-                f = open("Peer"+str(fromNeighborId)+"/output.txt","a")
-                f.write(str(datetime.datetime.now()) + " Peer " + str(self.peerId) + " has " + toGoodsStringName[productName] + "\n")
-                f.close()
-
-                thread = t.Thread(target=self.replyUtil, args=(fromNeighborId, self.peerId, productName, newPath))
-                thread.start()
-            return True
-
-        # discard
-        if hopCount == 0:
-            f = open("Peer"+str(self.peerId)+"/output.txt","a")
-            f.write(str(datetime.datetime.now()) + " Max Hop count reached, Lookup stopped Path: "+ str(path) + "\n")
-            f.close()
-            return False
-
-        # propagate the request
-        for neighborId in self.neighbors:
-            if str(neighborId) not in footprints: #to avoid a cycle
-                newPath = str(self.peerId) + '-' + str(path)
-                #print the lookup propogated in the propogater's output 
-                f = open("Peer"+str(self.peerId)+"/output.txt","a")
-                f.write(str(datetime.datetime.now()) + " Lookup for product "+toGoodsStringName[productName]+" propogated from peerID " +str(self.peerId) + " to peerID " + str(neighborId) +"\n")
-                f.close()
-                thread = t.Thread(target=self.lookupUtil, args=(neighborId, productName, hopCount-1, newPath))
-                thread.start()
-        return True
-
-
     def reply(self, sellerId, productName, path):
         # 1. The reply request arrives to the buyer
         if len(path) == 0:
