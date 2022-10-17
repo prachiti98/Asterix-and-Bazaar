@@ -15,7 +15,7 @@ import random
 buyer,seller,fish,salt,boar  = 1,2,3,4,5
 toGoodsStringName = {fish:'Fish', salt:'Salt', boar:'Boar'}
 # the port number of each RPC peer server is (PORT_START_NUM + peer_id)
-portNumber = 5000
+portNumber = 16304
 # the maximum quantity a seller can sell
 maxUnits = 10
 # waiting time for a buyer to receive responses from sellers
@@ -29,7 +29,7 @@ nodeMapping = {
     6: [[buyer, seller, seller, seller, buyer, buyer],[[False, True, False, False, False, False],[True, False, True, False, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]]
 }
 #Maybe Chnge?
-deployOnLocalhost = True
+deployOnLocalhost = False
 DEBUG = True
 test = False
 ############ CONGIGURABLE ############
@@ -92,6 +92,7 @@ class Peer(t.Thread):
             return datetime.datetime.now()
 
     def getPeerIdServer(self, peerId):
+        
         addr = peerServerList[peerId] + str(portNumber + peerId)
         proxyServer = xmlrpc.client.ServerProxy(addr)
         try:
@@ -400,16 +401,20 @@ if __name__ == "__main__":
             # find the order of current machine & create peerServerList
             # a machine with order 0 is the master machine
             curr_machine_order = 0
-            num_of_peers_on_each_machine = int(totalPeers / len(MACHINES))
+            if totalPeers%2 == 0:
+                num_of_peers_on_each_machine = int(totalPeers / len(MACHINES))
+            else:
+                num_of_peers_on_each_machine = int((totalPeers+1) / len(MACHINES))
+            
             for i in range(len(MACHINES)):
                 if currentServer == MACHINES[i]['ip']:
                     curr_machine_order = i
                 
                 peerId_start = num_of_peers_on_each_machine * i
-                peerId_end   = peerId_start + num_of_peers_on_each_machine
+                peerId_end   = min(peerId_start + num_of_peers_on_each_machine,noNodes)
                 for peerId in range(peerId_start, peerId_end):
                     peerServerList.append('http://' + MACHINES[i]['ip'] + ':')
-            
+                
             # peerId_start = num_of_peers_on_each_machine * curr_machine_order
             # peerId_end   = peerId_start + num_of_peers_on_each_machine
             # for peerId in range(peerId_start, peerId_end):
@@ -421,6 +426,7 @@ if __name__ == "__main__":
                     peer = Peer(peerId, role[peerId], neighbors)
                     peers.append(peer)
                     peer.start()
+                
 
         # avoid closing main thread 
         for peer in peers:
