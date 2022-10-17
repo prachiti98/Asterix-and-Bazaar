@@ -96,15 +96,16 @@ class Peer(t.Thread):
         proxyServer = xmlrpc.client.ServerProxy(addr)
         try:
             proxyServer.getCurrentTime() #check if server is up and running and ready to accept requests
-        except xmlrpc.client.Fault as err:
-            self.printOnConsole('proxyServer Error - code: '+str(err.faultCode)+', msg: '+str(err.faultString))
-            pass
-        except xmlrpc.client.ProtocolError as err:
-            self.printOnConsole('proxyServer Error - code: '+str(err.errcode)+', msg: '+str(err.errmsg))
-            return None
         except socket.error:
             self.printOnConsole('Failed to connect to host. Please check all hosts')
             return None
+        except xmlrpc.client.Fault as err:
+            self.printOnConsole('Proxy Server Error - code: '+str(err.faultCode)+', msg: '+str(err.faultString))
+            pass
+        except xmlrpc.client.ProtocolError as err:
+            self.printOnConsole('Proxy Server Error - code: '+str(err.errcode)+', msg: '+str(err.errmsg))
+            return None
+        
         
         # try:
         #     proxyServer.getAcknowledged()       # check if the server proxyServer exists and is started #no need
