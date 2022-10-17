@@ -76,7 +76,7 @@ class Peer(t.Thread):
         server = SimpleXMLRPCServer((currentServer, portNumber + self.peerId),
                     allow_none=True, logRequests=False)
 
-        server.register_function(self.hello)
+        server.register_function(self.getCurrentTime)
         server.register_function(self.lookup)
         
         server.register_function(self.reply) 
@@ -87,11 +87,15 @@ class Peer(t.Thread):
         
         server.serve_forever()
 
+    
+    def getCurrentTime(self):
+            return datetime.datetime.now()
+
     def getPeerIdServer(self, peerId):
         addr = peerServerList[peerId] + str(portNumber + peerId)
         proxyServer = xmlrpc.client.ServerProxy(addr)
         try:
-            proxyServer.hello()       # check if the server proxyServer exists
+            proxyServer.getCurrentTime() #check if server is up and running and ready to accept requests
         except xmlrpc.client.Fault as err:
             self.printOnConsole('proxyServer Error - code: '+str(err.faultCode)+', msg: '+str(err.faultString))
             pass
@@ -99,8 +103,12 @@ class Peer(t.Thread):
             self.printOnConsole('proxyServer Error - code: '+str(err.errcode)+', msg: '+str(err.errmsg))
             return None
         except socket.error:
-            self.printOnConsole('Protocol Error - Failed to connect to peer '+str(peerId))
+            self.printOnConsole('Failed to connect to host. Please check all hosts')
             return None
+        
+        # try:
+        #     proxyServer.getAcknowledged()       # check if the server proxyServer exists and is started #no need
+        
             
         return proxyServer
 
@@ -222,8 +230,8 @@ class Peer(t.Thread):
             self._report_latency(timeStart, timeStop)
   
 
-    def hello(self):
-        return True
+    # def getAcknowledged(self): #can be removed
+    #     return True
 
 
     def reply(self, sellerId, productName, path):
@@ -415,4 +423,8 @@ if __name__ == "__main__":
 
         # avoid closing main thread 
         for peer in peers:
-            peer.join()
+            try:
+                peer.join()
+            except KeyboardInterrupt:
+                print("Keyboard Interrupted. Stopped the thread. Press Ctrl + C again to end all threads")
+                
