@@ -39,13 +39,13 @@ test = False
 
 # number of peers to be initialized on a machine
 # Note that the number of peers on each machine = totalPeers / '# of MACHINES'
-#MACHINES = [{
-#    
-#    'ip': '128.119.243.164'
-#}, {
-#    
-#    'ip': '128.119.243.175'
-#}]
+MACHINES = [{
+   
+   'ip': 'localhost'
+}, {
+   
+   'ip': 'localhost'
+}]
 
 
 addLock = Lock()
@@ -396,31 +396,31 @@ if __name__ == "__main__":
                 peers.append(peer)
                 peer.start()
         
-        # else:
-        #     # find the order of current machine & create peerServerList
-        #     # a machine with order 0 is the master machine
-        #     curr_machine_order = 0
-        #     num_of_peers_on_each_machine = int(totalPeers / len(MACHINES))
-        #     for i in range(len(MACHINES)):
-        #         if currentServer == MACHINES[i]['ip']:
-        #             curr_machine_order = i
+        else:
+            # find the order of current machine & create peerServerList
+            # a machine with order 0 is the master machine
+            curr_machine_order = 0
+            num_of_peers_on_each_machine = int(totalPeers / len(MACHINES))
+            for i in range(len(MACHINES)):
+                if currentServer == MACHINES[i]['ip']:
+                    curr_machine_order = i
                 
-        #         peerId_start = num_of_peers_on_each_machine * i
-        #         peerId_end   = peerId_start + num_of_peers_on_each_machine
-        #         for peerId in range(peerId_start, peerId_end):
-        #             peerServerList.append('http://' + MACHINES[i]['ip'] + ':%d')
+                peerId_start = num_of_peers_on_each_machine * i
+                peerId_end   = peerId_start + num_of_peers_on_each_machine
+                for peerId in range(peerId_start, peerId_end):
+                    peerServerList.append('http://' + MACHINES[i]['ip'] + ':')
             
-        #     peerId_start = num_of_peers_on_each_machine * curr_machine_order
-        #     peerId_end   = peerId_start + num_of_peers_on_each_machine
-        #     for peerId in range(peerId_start, peerId_end):
-        #         neighbors = []
-        #         for j in range(totalPeers):
-        #             if peerNeighborMap[peerId][j]:
-        #                 neighbors.append(j)
+            # peerId_start = num_of_peers_on_each_machine * curr_machine_order
+            # peerId_end   = peerId_start + num_of_peers_on_each_machine
+            # for peerId in range(peerId_start, peerId_end):
+                    neighbors = []
+                    for j in range(totalPeers):
+                        if peerNeighborMap[peerId][j]:
+                            neighbors.append(j)
 
-        #         peer = Peer(peerId, role[peerId], neighbors)
-        #         peers.append(peer)
-        #         peer.start()
+                    peer = Peer(peerId, role[peerId], neighbors)
+                    peers.append(peer)
+                    peer.start()
 
         # avoid closing main thread 
         for peer in peers:
