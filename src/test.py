@@ -22,7 +22,8 @@ portNumber = 5000
 maxUnits = 10
 # waiting time for a buyer to receive responses from sellers
 clientWaitTime = 4
-#1 Testcases
+#Testcases
+#1 Less than 2 peers
 #2 All sellers 
 #3 All buyers 
 #4 More than 3 neighbors 
@@ -37,6 +38,8 @@ testMapping = {
     4: [[buyer, seller, seller, buyer, buyer],[[False, True, True, True, True],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]]],
     5: [[buyer, buyer, buyer, buyer, seller],[[False, True, False, False, False],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]]],
     6: [[buyer, seller],[[False, True],[True, False]]],
+    7: [[buyer, seller],[[False, True],[True, False]]],
+    8: [[buyer, seller],[[False, True],[True, False]]]
 }
 
 class Peer(t.Thread):
@@ -151,7 +154,14 @@ class Peer(t.Thread):
 
     def lookup(self, productName, hopCount, path):
         footprints = path.split('-')
-        
+                # discard
+        if hopCount == 0:
+            #print the reply in last peer's directory
+            f = open("Peer"+str(self.peerId)+"/output.txt","a")
+            f.write(str(datetime.datetime.now()) + " Max Hop count reached, Lookup stopped Path: "+ str(path) + "\n")
+            f.close()
+            return False
+
         # have the product
         if self.role != buyer and productName == self.good:
             fromNeighborId = int(footprints[0])
@@ -166,14 +176,6 @@ class Peer(t.Thread):
                 thread = t.Thread(target=self.replyUtil, args=(fromNeighborId, self.peerId, productName, newPath))
                 thread.start()
             return True
-
-        # discard
-        if hopCount == 0:
-            #print the reply in last peer's directory
-            f = open("Peer"+str(self.peerId)+"/output.txt","a")
-            f.write(str(datetime.datetime.now()) + " Max Hop count reached, Lookup stopped Path: "+ str(path) + "\n")
-            f.close()
-            return False
 
         # propagate the request
         for neighborId in self.neighbors:
