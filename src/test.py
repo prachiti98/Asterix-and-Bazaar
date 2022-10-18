@@ -296,9 +296,9 @@ if __name__ == "__main__":
     if len(testMapping[testNode][0])<2:
         print('Enter more than 1 peer!')
     elif(testMapping[testNode][0].count(buyer)<1):
-        print('Enter atleast one buyer')
+        print('Atleast one buyer must be present')
     elif(testMapping[testNode][0].count(seller)<1):
-        print('Enter atleast one seller')
+        print('Atleast one seller must be present')
     elif(any(sum(i)>3 for i in testMapping[testNode][1])):
         print('Peer has more than 3 neighbors!')
     else:

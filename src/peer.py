@@ -311,8 +311,8 @@ class Peer(t.Thread):
         return True
 
 def getRandomRoles(totalPeers):
-    roles = []
-    for _ in range(totalPeers):
+    roles = [1,2]
+    for _ in range(totalPeers-2):
         roles.append(random.randint(buyer,seller))
     return roles
     
@@ -323,9 +323,9 @@ if __name__ == "__main__":
     if totalPeers<2:
         print('Enter more than 1 peer!')
     elif(role.count(buyer)<1):
-        print('Enter atleast one buyer')
+        print('Atleast one buyer must be present')
     elif(role.count(seller)<1):
-        print('Enter atleast one seller')
+        print('Atleast one seller must be present')
     elif(any(sum(i)>3 for i in  nodeMapping[totalPeers][1])):
         print('Peer has more than 3 neighbors!')
     else:
