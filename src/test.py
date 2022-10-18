@@ -155,12 +155,12 @@ class Peer(t.Thread):
     def lookup(self, productName, hopCount, path):
         footprints = path.split('-')
                 # discard
-        if hopCount == 0:
-            #print the reply in last peer's directory
-            f = open("Peer"+str(self.peerId)+"/output.txt","a")
-            f.write(str(datetime.datetime.now()) + " Max Hop count reached, Lookup stopped Path: "+ str(path) + "\n")
-            f.close()
-            return False
+        # if hopCount == 0:
+        #     #print the reply in last peer's directory
+        #     f = open("Peer"+str(self.peerId)+"/output.txt","a")
+        #     f.write(str(datetime.datetime.now()) + " Max Hop count reached, Lookup stopped Path: "+ str(path) + "\n")
+        #     f.close()
+        #     return False
 
         # have the product
         if self.role != buyer and productName == self.good:
@@ -180,8 +180,13 @@ class Peer(t.Thread):
         # propagate the request
         for neighborId in self.neighbors:
             if str(neighborId) not in footprints: #to avoid a cycle
-                newPath = str(self.peerId)+'-'+str(path)
+                newPath = str(self.peerId)+'-'+str(path) 
                 #print the lookup propogated in the propogater's output 
+                if(hopCount-1 == 0):
+                    f = open("Peer"+str(self.peerId)+"/output.txt","a")
+                    f.write(str(datetime.datetime.now()) + " Max Hopcount Reached, Can't lookup futher. Lookup stopped Path: "+ str(newPath) + "\n")
+                    f.close()
+                    return False
                 f = open("Peer"+str(self.peerId)+"/output.txt","a")
                 f.write(str(datetime.datetime.now()) + " Lookup for product "+toGoodsStringName[productName]+" propogated from peerID " +str(self.peerId) + " to peerID " + str(neighborId) +"\n")
                 f.close()
@@ -308,6 +313,7 @@ if __name__ == "__main__":
         print('Graph:')
         for row in peerNeighborMap:
             print(row)
+        print('Hopcount:' + str(hopCount))
 
         print("Marketplace is live! Check output.txt in PeerID directory to check the logging \n")
 
