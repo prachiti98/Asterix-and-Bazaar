@@ -10,6 +10,17 @@ import sys
 import datetime
 import random
 
+#Testcases
+#1 Less than 2 peers
+#2 All sellers 
+#3 All buyers 
+#4 More than 3 neighbors 
+#5 Hopcount check (Set to 2 and testing 5 peers -> To check hopcount functionality)
+#6 If item runs out then replace with new item 
+#7 If item not present 
+#8 Buyers want the same thing but one gets rejected because of the lock
+
+
 #Initializing variables
 buyer,seller,fish,salt,boar  = 1,2,3,4,5
 toGoodsStringName = {fish:'Fish', salt:'Salt', boar:'Boar'}
@@ -22,15 +33,7 @@ portNumber = 5000
 maxUnits = 10
 # waiting time for a buyer to receive responses from sellers
 clientWaitTime = 4
-#Testcases
-#1 Less than 2 peers
-#2 All sellers 
-#3 All buyers 
-#4 More than 3 neighbors 
-#5 Hopcount check (Set to 2 and testing 5 peers)
-#6 If item runs out then replace with new item 
-#7 If item not present 
-#8 Buyers want the same thing but one gets rejected because of the lock
+
 testMapping = {
     1: [[buyer],[False]],
     2: [[buyer, buyer],[[False, True],[True, False]]],
@@ -150,7 +153,7 @@ class Peer(t.Thread):
             timeStart = datetime.datetime.now()
             proxyServer.lookup(productName, hopCount, path)
             timeEnd = datetime.datetime.now()
-            self._report_latency(timeStart, timeEnd)
+            self.calculateLatency(timeStart, timeEnd)
 
     def lookup(self, productName, hopCount, path):
         footprints = path.split('-')
@@ -204,7 +207,7 @@ class Peer(t.Thread):
         f.write(str(datetime.datetime.now()) + " Selling " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+" Unit(s) \n")
         f.close()
 
-    def _report_latency(self, timeStart, timeStop):
+    def calculateLatency(self, timeStart, timeStop):
         self.latency += (timeStop - timeStart).total_seconds()
         self.requestCount += 1
         if self.requestCount % 1000 == 0:
@@ -217,7 +220,7 @@ class Peer(t.Thread):
             timeStart = datetime.datetime.now()
             proxyServer.reply(sellerId, productName, newPath)
             timeStop = datetime.datetime.now()
-            self._report_latency(timeStart, timeStop)
+            self.calculateLatency(timeStart, timeStop)
   
 
     def reply(self, sellerId, productName, path):
