@@ -39,7 +39,7 @@ testMapping = {
     5: [[buyer, buyer, buyer, buyer, seller],[[False, True, False, False, False],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]]],
     6: [[buyer, seller],[[False, True],[True, False]]],
     7: [[buyer, seller],[[False, True],[True, False]]],
-    8: [[buyer, seller],[[False, True],[True, False]]]
+    8: [[buyer, buyer, seller],[[False, True, True],[True, False, True],[True, True, False]]]
 }
 
 class Peer(t.Thread):
