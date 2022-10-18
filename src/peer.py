@@ -21,20 +21,17 @@ portNumber = 16304
 maxUnits = 10
 # waiting time for a buyer to receive responses from sellers
 clientWaitTime = 4
+#------------Change neighbor mapping here:----------------
 #Initializing Graph for various nodes
 nodeMapping = {
-    2: [[buyer, seller],[[False, True],[True, False]]],
-    3: [[buyer, seller, buyer],[[False, True, True],[True, False,False],[True, False, False]]],
-    4: [[buyer, seller, seller, buyer],[[False, True, False, True],[True, False, True, True],[False, True, False, True],[True, True, True, False]]],
-    5: [[buyer, seller, seller, buyer, buyer],[[False, True, False, False, False],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]]],
-    6: [[buyer, seller, seller, seller, buyer, buyer],[[False, True, False, False, False, False],[True, False, True, False, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]]
+    2: [[False, True],[True, False]],
+    3: [[False, True, True],[True, False,False],[True, False, False]],
+    4: [[False, True, False, True],[True, False, True, True],[False, True, False, True],[True, True, True, False]],
+    5: [[False, True, False, False, False],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]],
+    6: [[False, True, False, False, False, False],[True, False, True, False, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]
 }
-#Maybe Chnge?
+#---------------------------------------------------------
 deployOnLocalhost = False
-############ CONGIGURABLE ############
-# set True if you want to deploy locally
-# setting True omits NUM_OF_PEER_ON_EACH_MACHINE and MACHINES
-
 
 # number of peers to be initialized on a machine
 # Note that the number of peers on each machine = totalPeers / '# of MACHINES'
@@ -322,14 +319,8 @@ if __name__ == "__main__":
     role = getRandomRoles(totalPeers)
     if totalPeers<2:
         print('Enter more than 1 peer!')
-    elif(role.count(buyer)<1):
-        print('Atleast one buyer must be present')
-    elif(role.count(seller)<1):
-        print('Atleast one seller must be present')
-    elif(any(sum(i)>3 for i in  nodeMapping[totalPeers][1])):
-        print('Peer has more than 3 neighbors!')
     else:
-        peerNeighborMap = nodeMapping[totalPeers][1]
+        peerNeighborMap = nodeMapping[totalPeers]
         hopCount = random.randint(1, totalPeers-1)
         
         print('Running on: '+currentServer)
