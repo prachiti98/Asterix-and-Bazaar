@@ -14,6 +14,7 @@ import random
 #Initializing variables
 buyer,seller,fish,salt,boar  = 1,2,3,4,5
 toGoodsStringName = {fish:'Fish', salt:'Salt', boar:'Boar'}
+toRoleStringName = {buyer:'Buyer', seller:'Seller'}
 # the port number of each RPC peer server is (PORT_START_NUM + peer_id)
 portNumber = 16304
 # the maximum quantity a seller can sell
@@ -30,8 +31,6 @@ nodeMapping = {
 }
 #Maybe Chnge?
 deployOnLocalhost = False
-DEBUG = True
-test = False
 ############ CONGIGURABLE ############
 # set True if you want to deploy locally
 # setting True omits NUM_OF_PEER_ON_EACH_MACHINE and MACHINES
@@ -166,7 +165,7 @@ class Peer(t.Thread):
             timeStart = datetime.datetime.now()
             proxyServer.lookup(productName, hopCount, path)
             timeEnd = datetime.datetime.now()
-            self._report_latency(timeStart, timeEnd)
+            self.reportLatency(timeStart, timeEnd)
 
     def lookup(self, productName, hopCount, path):
         footprints = path.split('-')
@@ -222,7 +221,7 @@ class Peer(t.Thread):
         f.write(str(datetime.datetime.now()) + " Selling " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+" Unit(s) \n")
         f.close()
 
-    def _report_latency(self, timeStart, timeStop):
+    def reportLatency(self, timeStart, timeStop):
         self.latency += (timeStop - timeStart).total_seconds()
         self.requestCount += 1
         if self.requestCount % 1000 == 0:
@@ -235,7 +234,7 @@ class Peer(t.Thread):
             timeStart = datetime.datetime.now()
             proxyServer.reply(sellerId, productName, newPath)
             timeStop = datetime.datetime.now()
-            self._report_latency(timeStart, timeStop)
+            self.reportLatency(timeStart, timeStop)
   
 
     # def getAcknowledged(self): #can be removed
@@ -311,71 +310,34 @@ class Peer(t.Thread):
         f.close()
         return True
 
-
-# def generate_peerNeighborMap():
-#     peerNeighborMap = []
-#     for j in range(totalPeers):
-#         row = [False for i in range(totalPeers)]
-#         peerNeighborMap.append(row)
-
-#     # generate neighbor map
-#     for j in range(totalPeers):
-#         # make sure that a peer always has a neighbor
-#         assured = random.randint(0, j-1) if j == totalPeers-1 else random.randint(j+1, totalPeers-1)
-#         peerNeighborMap[j][assured] = True
-#         peerNeighborMap[assured][j] = True
-
-#         for i in range(j+1, totalPeers-1):
-#             if random.randint(0, 1) == 1:
-#                 peerNeighborMap[j][i] = True
-#                 peerNeighborMap[i][j] = True
-
-#     return peerNeighborMap
-
-
-# def generate_peer_roles():
-#     buyer_num  = 0
-#     seller_num = 0
-#     roles = []
-
-#     for i in range(totalPeers):
-#         tmp = buyer
-#         while True:
-#             tmp = random.randint(buyer)
-#             if tmp == buyer and buyer_num <= MAX_BUYER_NUM:
-#                 buyer_num += 1
-#                 break
-#             elif tmp == seller and seller_num <= MAX_SELLER_NUM:
-#                 seller_num += 1
-#                 break
-
-        
-#         roles.append(tmp)
-    
-#     return roles
+def getRandomRoles(totalPeers):
+    roles = []
+    for _ in range(totalPeers):
+        roles.append(random.randint(buyer,seller))
+    return roles
     
 
 if __name__ == "__main__":
-    noNodes = int(sys.argv[1])
-    if noNodes<2:
-        print('Enter more than 1 node!')
+    totalPeers = int(sys.argv[1])
+    role = getRandomRoles(totalPeers)
+    if totalPeers<2:
+        print('Enter more than 1 peer!')
+    elif(role.count(buyer)<1):
+        print('Enter atleast one buyer')
+    elif(role.count(seller)<1):
+        print('Enter atleast one seller')
+    elif(any(sum(i)>3 for i in  nodeMapping[totalPeers][1])):
+        print('Peer has more than 3 neighbors!')
     else:
-        if DEBUG:
-            # only support self-defined neighbor map
-            role = nodeMapping[noNodes][0]
-            peerNeighborMap = nodeMapping[noNodes][1]
-            totalPeers = noNodes
-            hopCount = random.randint(1, noNodes-1)
-        # else:
-        #     peerNeighborMap = generate_peerNeighborMap()
-        #     role = generate_peer_roles()
-
-
-            print('Running on: '+currentServer)
-            print('Number of nodes: '+str(noNodes))
-            print('Graph:')
-            for row in peerNeighborMap:
-                print(row)
+        peerNeighborMap = nodeMapping[totalPeers][1]
+        hopCount = random.randint(1, totalPeers-1)
+        
+        print('Running on: '+currentServer)
+        print('Number of nodes: '+str(totalPeers))
+        print('Roles:'," ".join([toRoleStringName[i] for i in role]))
+        print('Graph:')
+        for row in peerNeighborMap:
+            print(row)
 
         print('Hopcount:' + str(hopCount))
         print("Marketplace is live! Check output.txt in PeerID directory to check the logging \n")
@@ -418,7 +380,7 @@ if __name__ == "__main__":
                     curr_machine_order = i
                 
                 peerId_start = num_of_peers_on_each_machine * i
-                peerId_end   = min(peerId_start + num_of_peers_on_each_machine,noNodes)
+                peerId_end   = min(peerId_start + num_of_peers_on_each_machine,totalPeers)
                 for peerId in range(peerId_start, peerId_end):
                     peerServerList.append('http://' + MACHINES[i]['ip'] + ':')
                 
