@@ -165,7 +165,7 @@ class Peer(t.Thread):
             timeStart = datetime.datetime.now()
             proxyServer.lookup(productName, hopCount, path)
             timeEnd = datetime.datetime.now()
-            self.reportLatency(timeStart, timeEnd)
+            self.calculateLatency(timeStart, timeEnd)
 
     def lookup(self, productName, hopCount, path):
         footprints = path.split('-')
@@ -221,7 +221,7 @@ class Peer(t.Thread):
         f.write(str(datetime.datetime.now()) + " Selling " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+" Unit(s) \n")
         f.close()
 
-    def reportLatency(self, timeStart, timeStop):
+    def calculateLatency(self, timeStart, timeStop):
         self.latency += (timeStop - timeStart).total_seconds()
         self.requestCount += 1
         if self.requestCount % 1000 == 0:
@@ -234,7 +234,7 @@ class Peer(t.Thread):
             timeStart = datetime.datetime.now()
             proxyServer.reply(sellerId, productName, newPath)
             timeStop = datetime.datetime.now()
-            self.reportLatency(timeStart, timeStop)
+            self.calculateLatency(timeStart, timeStop)
   
 
     # def getAcknowledged(self): #can be removed
