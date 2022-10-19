@@ -24,11 +24,26 @@ clientWaitTime = 4
 #------------Change neighbor mapping here:----------------
 #Initializing Graph for various nodes
 nodeMapping = {
-    2: [[False, True],[True, False]],
-    3: [[False, True, True],[True, False,False],[True, False, False]],
-    4: [[False, True, False, True],[True, False, True, True],[False, True, False, True],[True, True, True, False]],
-    5: [[False, True, False, False, False],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]],
-    6: [[False, True, False, False, False, False],[True, False, True, False, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]
+    2: [[False, True],
+        [True, False]],
+    3: [[False, True, True],
+        [True, False,False],
+        [True, False, False]],
+    4: [[False, True, False, True],
+        [True, False, True, True],
+        [False, True, False, True],
+        [True, True, True, False]],
+    5: [[False, True, False, False, False],
+        [True, False, True, False, False],
+        [False, True, False, True, False],
+        [False, False, True, False, True],
+        [False, False, False, True, False]],
+    6: [[False, True, False, False, False, False],
+        [True, False, True, False, False, False],
+        [False, True, False, True, False, False],
+        [False, False, True, False, True, False],
+        [False, False, False, True, False, True],
+        [False, False, False, False, True, False]]
 }
 #---------------------------------------------------------
 deployOnLocalhost = True
