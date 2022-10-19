@@ -24,8 +24,6 @@ clientWaitTime = 4
 #------------Change neighbor mapping here:----------------
 #Initializing Graph for various nodes
 nodeMapping = {
-    2: [[False, True],
-        [True, False]],
     3: [[False, True, True],
         [True, False,False],
         [True, False, False]],
@@ -344,13 +342,17 @@ if __name__ == "__main__":
     #pass the number of peers via command line argument
     totalPeers = int(sys.argv[1])
     role = getRandomRoles(totalPeers)
-    if totalPeers<2:
-        print('Enter more than 1 peer!')
+    if totalPeers<=2:
+        print('Enter more than 2 peers!')
     elif(not check_connected(totalPeers)):
         print('Graph is not fully connected!')
     else:
         peerNeighborMap = nodeMapping[totalPeers]
-        hopCount = random.randint(1, totalPeers-1)
+        
+        if(totalPeers == 3):
+            hopCount = 1
+        else:
+            hopCount = 2
         
         print('Running on: '+currentServer)
         print('Number of nodes: '+str(totalPeers))

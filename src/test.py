@@ -321,8 +321,8 @@ if __name__ == "__main__":
     #Pass the testcase number via cmd line arg
     testNode = int(sys.argv[1])
     #Intiial checks
-    if len(testMapping[testNode][0])<2:
-        print('Enter more than 1 peer!')
+    if len(testMapping[testNode][0])<=2:
+        print('Enter more than 2 peers!')
     elif(testMapping[testNode][0].count(buyer)<1):
         print('Atleast one buyer must be present')
     elif(testMapping[testNode][0].count(seller)<1):
@@ -335,8 +335,9 @@ if __name__ == "__main__":
         role = testMapping[testNode][0]
         peerNeighborMap = testMapping[testNode][1]
         totalPeers = len(role)
-        #Set to 2 for testing
-        hopCount = 2
+
+        #Set to 1 for testing
+        hopCount = 1
 
         print('Running on: '+currentServer)
         print('Testcase: '+str(testNode))
