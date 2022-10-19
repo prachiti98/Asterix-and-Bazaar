@@ -316,6 +316,29 @@ def getRandomRoles(totalPeers):
         roles.append(random.randint(buyer,seller))
     return roles
     
+#To check if the graph is a fully connected graph
+def check_connected(totalPeers):
+    def create_graph(totalPeers):
+        graph = {}
+        for index,i in enumerate(nodeMapping[totalPeers]):
+            graph[index] = []
+            for index2,j in enumerate(i):
+                if j == True:
+                    graph[index].append(index2)
+        return graph
+    graph =  create_graph(totalPeers) 
+    def dfs(temp, v, visited):
+        visited.add(v)
+        temp.append(v)
+        for i in graph[v]:
+            if i not in visited:
+                temp = dfs(temp, i, visited)
+        return temp
+    visited, c = set(), [] 
+    for v in graph:
+        if v not in visited:
+            c.append(dfs([], v, visited))
+    return False if len(c)>1 else True
 
 if __name__ == "__main__":
     #pass the number of peers via command line argument
@@ -323,6 +346,8 @@ if __name__ == "__main__":
     role = getRandomRoles(totalPeers)
     if totalPeers<2:
         print('Enter more than 1 peer!')
+    elif(not check_connected(totalPeers)):
+        print('Graph is not fully connected!')
     else:
         peerNeighborMap = nodeMapping[totalPeers]
         hopCount = random.randint(1, totalPeers-1)
