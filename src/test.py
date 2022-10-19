@@ -336,8 +336,8 @@ if __name__ == "__main__":
         peerNeighborMap = testMapping[testNode][1]
         totalPeers = len(role)
 
-        #Set to 1 for testing
-        hopCount = 1
+        #Set to 2 for testing
+        hopCount = 2
 
         print('Running on: '+currentServer)
         print('Testcase: '+str(testNode))
