@@ -16,7 +16,7 @@ buyer,seller,fish,salt,boar  = 1,2,3,4,5
 toGoodsStringName = {fish:'Fish', salt:'Salt', boar:'Boar'}
 toRoleStringName = {buyer:'Buyer', seller:'Seller'}
 # the port number of each RPC peer server is (PORT_START_NUM + peer_id)
-portNumber = 16304
+portNumber = 49151
 # the maximum quantity a seller can sell
 maxUnits = 10
 # waiting time for a buyer to receive responses from sellers

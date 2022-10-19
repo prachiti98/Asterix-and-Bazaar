@@ -28,7 +28,7 @@ addLock = Lock()
 peerServerList = []
 currentServer = 'localhost' 
 # the port number of each RPC peer server is (PORT_START_NUM + peer_id)
-portNumber = 16304
+portNumber = 49151
 # the maximum quantity a seller can sell
 maxUnits = 10
 # waiting time for a buyer to receive responses from sellers
