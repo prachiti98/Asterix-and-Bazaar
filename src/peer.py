@@ -31,7 +31,7 @@ nodeMapping = {
     6: [[False, True, False, False, False, False],[True, False, True, False, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]
 }
 #---------------------------------------------------------
-deployOnLocalhost = False
+deployOnLocalhost = True
 
 # number of peers to be initialized on a machine
 # Note that the number of peers on each machine = totalPeers / '# of MACHINES'
@@ -102,12 +102,7 @@ class Peer(t.Thread):
         except xmlrpc.client.ProtocolError as err:
             self.printOnConsole('Proxy Server Error - code: '+str(err.errcode)+', msg: '+str(err.errmsg))
             return None
-        
-        
-        # try:
-        #     proxyServer.getAcknowledged()       # check if the server proxyServer exists and is started #no need
-        
-            
+          
         return proxyServer
 
     def initialiseBuyer(self):
@@ -123,7 +118,7 @@ class Peer(t.Thread):
             f.close()
 
             self.startBuyTime = datetime.datetime.now()
-            self.responseTime = 0
+            self.responseTime = []
 
             # ask neighbors
             self.potentialSellers = []
@@ -139,15 +134,18 @@ class Peer(t.Thread):
                 f.write(str(datetime.datetime.now()) +" Stopped buying "+toGoodsStringName[self.target]+ " because no sellers" + "\n")
                 f.close()
 
-            # check candidate sellers and trade, choose the first seller
+            totalResponseTime = sum(self.responseTime)
+            # check candidate sellers and trade, choose the first seller [one with least response time]
             for sellerId in self.potentialSellers:
                 proxyServer = self.getPeerIdServer(sellerId)
+                
                 if proxyServer != None and proxyServer.buy(self.target,self.peerId):
                     #to do the calculation
-                    self.printOnConsole(str(datetime.datetime.now())+" Peer "+str(self.peerId)+" buys "+str(toGoodsStringName[self.target])+" from peer "+str(sellerId)+"; avg. response time: "+str(self.responseTime / len(self.potentialSellers))+" (sec/req)")
+                    self.printOnConsole(str(datetime.datetime.now())+" Peer "+str(self.peerId)+" buys "+str(toGoodsStringName[self.target])+" from peer "+str(sellerId)+"; avg. response time: "+str(totalResponseTime / len(self.potentialSellers))+" (sec/req)")
                     f = open("Peer"+str(self.peerId)+"/output.txt","a")
                     f.write(str(datetime.datetime.now()) + " Bought " + str(toGoodsStringName[self.target]) +" from peerID " + str(sellerId) + "\n")
-                    f.write("The average response time: "+str(self.responseTime/len(self.potentialSellers))+" \n")
+                    f.write("The response time of the seller chosen : " +str(self.responseTime[0])+"\n")
+                    f.write("The average response time for buying "+str(toGoodsStringName[self.target])+": "+str(totalResponseTime/len(self.potentialSellers))+" \n")
                     f.close()
                     break
 
@@ -167,13 +165,6 @@ class Peer(t.Thread):
     def lookup(self, productName, hopCount, path):
         footprints = path.split('-')
         
-         # discard
-        # if hopCount == 0:
-        #     #print the reply in last peer's directory
-        #     f = open("Peer"+str(self.peerId)+"/output.txt","a")
-        #     f.write(str(datetime.datetime.now()) + " Max Hop count reached, Lookup stopped Path: "+ str(path) + "\n")
-        #     f.close()
-        #     return False
 
         # have the product
         if self.role != buyer and productName == self.good:
@@ -222,7 +213,7 @@ class Peer(t.Thread):
         self.latency += (timeStop - timeStart).total_seconds()
         self.requestCount += 1
         if self.requestCount % 1000 == 0:
-            self.printOnConsole('**** [PERFORMANCE] Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req) ****')
+            self.printOnConsole('[PERFORMANCE] Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req)')
 
     # for thread to execute
     def replyUtil(self, peerId, sellerId, productName, newPath):
@@ -232,11 +223,6 @@ class Peer(t.Thread):
             proxyServer.reply(sellerId, productName, newPath)
             timeStop = datetime.datetime.now()
             self.calculateLatency(timeStart, timeStop)
-  
-
-    # def getAcknowledged(self): #can be removed
-    #     return True
-
 
     def reply(self, sellerId, productName, path):
         # 1. The reply request arrives to the buyer
@@ -246,7 +232,7 @@ class Peer(t.Thread):
                 return False
 
             response = datetime.datetime.now()
-            self.responseTime += (response - self.startBuyTime).total_seconds()
+            self.responseTime.append((response - self.startBuyTime).total_seconds())
             self.potentialSellers.append(sellerId)
             
             #print the reply in receiver's (buyer) directory
@@ -308,13 +294,16 @@ class Peer(t.Thread):
         return True
 
 def getRandomRoles(totalPeers):
-    roles = [1,2]
+    roles = [1,2] #set first peer to buyer, second seller 
+
+    #randomisze roles for other peers
     for _ in range(totalPeers-2):
         roles.append(random.randint(buyer,seller))
     return roles
     
 
 if __name__ == "__main__":
+    #pass the number of peers via command line argument
     totalPeers = int(sys.argv[1])
     role = getRandomRoles(totalPeers)
     if totalPeers<2:
@@ -326,27 +315,31 @@ if __name__ == "__main__":
         print('Running on: '+currentServer)
         print('Number of nodes: '+str(totalPeers))
         print('Roles:'," ".join([toRoleStringName[i] for i in role]))
-        print('Graph:')
+        print('Neighbor Graph:')
         for row in peerNeighborMap:
             print(row)
 
         print('Hopcount:' + str(hopCount))
         print("Marketplace is live! Check output.txt in PeerID directory to check the logging \n")
+        print("Note: Peers are 0 indexed \n")
 
         peers = []
-        # run at localhost
-        if deployOnLocalhost:
-            for peerId in range(totalPeers):
-                #check if directory exists for printing
-                path = 'Peer'+str(peerId)
-                
-                #else create
-                if(not os.path.isdir(path)):
-                    os.mkdir(path)
-                else:
-                    if(os.path.isfile(path+"/output.txt")): #if output.txt exists delete it for a new run
-                        os.remove(path+"/output.txt")
-                
+        
+        #always print where the program is run
+        for peerId in range(totalPeers):
+            #check if directory exists for printing
+            path = 'Peer'+str(peerId)
+            
+            #else create
+            if(not os.path.isdir(path)):
+                os.mkdir(path)
+            else:
+                if(os.path.isfile(path+"/output.txt")): #if output.txt exists delete it for a new run
+                    os.remove(path+"/output.txt")
+
+        # run on localhost
+        if deployOnLocalhost:  
+            for peerId in range(totalPeers):              
                 neighbors = []
                 for j in range(totalPeers):
                     if peerNeighborMap[peerId][j]:
@@ -358,8 +351,6 @@ if __name__ == "__main__":
                 peer.start()
         
         else:
-            # find the order of current machine & create peerServerList
-            # a machine with order 0 is the master machine
             curr_machine_order = 0
             if totalPeers%2 == 0:
                 num_of_peers_on_each_machine = int(totalPeers / len(MACHINES))
@@ -374,10 +365,6 @@ if __name__ == "__main__":
                 peerId_end   = min(peerId_start + num_of_peers_on_each_machine,totalPeers)
                 for peerId in range(peerId_start, peerId_end):
                     peerServerList.append('http://' + MACHINES[i]['ip'] + ':')
-                
-            # peerId_start = num_of_peers_on_each_machine * curr_machine_order
-            # peerId_end   = peerId_start + num_of_peers_on_each_machine
-            # for peerId in range(peerId_start, peerId_end):
                     neighbors = []
                     for j in range(totalPeers):
                         if peerNeighborMap[peerId][j]:
@@ -388,7 +375,7 @@ if __name__ == "__main__":
                     peer.start()
                 
 
-        # avoid closing main thread 
+        # dont close the main thread until interrupt
         for peer in peers:
             try:
                 peer.join()

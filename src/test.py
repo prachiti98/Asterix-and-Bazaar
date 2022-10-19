@@ -28,7 +28,7 @@ addLock = Lock()
 peerServerList = []
 currentServer = 'localhost' 
 # the port number of each RPC peer server is (PORT_START_NUM + peer_id)
-portNumber = 5000
+portNumber = 16304
 # the maximum quantity a seller can sell
 maxUnits = 10
 # waiting time for a buyer to receive responses from sellers
@@ -114,7 +114,7 @@ class Peer(t.Thread):
             f.close()
 
             self.startBuyTime = datetime.datetime.now()
-            self.responseTime = 0
+            self.responseTime = []
 
             # ask neighbors
             self.potentialSellers = []
@@ -130,15 +130,18 @@ class Peer(t.Thread):
                 f.write(str(datetime.datetime.now()) +" Stopped buying "+toGoodsStringName[self.target]+ " because no sellers" + "\n")
                 f.close()
 
-            # check candidate sellers and trade, choose the first seller
+            totalResponseTime = sum(self.responseTime)
+            # check candidate sellers and trade, choose the first seller [one with least response time]
             for sellerId in self.potentialSellers:
                 proxyServer = self.getPeerIdServer(sellerId)
+                
                 if proxyServer != None and proxyServer.buy(self.target,self.peerId):
                     #to do the calculation
-                    self.printOnConsole(str(datetime.datetime.now())+" Peer "+str(self.peerId)+" buys "+str(toGoodsStringName[self.target])+" from peer "+str(sellerId)+"; avg. response time: "+str(self.responseTime / len(self.potentialSellers))+" (sec/req)")
+                    self.printOnConsole(str(datetime.datetime.now())+" Peer "+str(self.peerId)+" buys "+str(toGoodsStringName[self.target])+" from peer "+str(sellerId)+"; avg. response time: "+str(totalResponseTime / len(self.potentialSellers))+" (sec/req)")
                     f = open("Peer"+str(self.peerId)+"/output.txt","a")
                     f.write(str(datetime.datetime.now()) + " Bought " + str(toGoodsStringName[self.target]) +" from peerID " + str(sellerId) + "\n")
-                    f.write("The average response time: "+str(self.responseTime/len(self.potentialSellers))+" \n")
+                    f.write("The response time of the seller chosen : " +str(self.responseTime[0])+"\n")
+                    f.write("The average response time for buying "+str(toGoodsStringName[self.target])+": "+str(totalResponseTime/len(self.potentialSellers))+" \n")
                     f.close()
                     break
 
@@ -157,13 +160,7 @@ class Peer(t.Thread):
 
     def lookup(self, productName, hopCount, path):
         footprints = path.split('-')
-                # discard
-        # if hopCount == 0:
-        #     #print the reply in last peer's directory
-        #     f = open("Peer"+str(self.peerId)+"/output.txt","a")
-        #     f.write(str(datetime.datetime.now()) + " Max Hop count reached, Lookup stopped Path: "+ str(path) + "\n")
-        #     f.close()
-        #     return False
+
 
         # have the product
         if self.role != buyer and productName == self.good:
@@ -211,7 +208,7 @@ class Peer(t.Thread):
         self.latency += (timeStop - timeStart).total_seconds()
         self.requestCount += 1
         if self.requestCount % 1000 == 0:
-            self.printOnConsole('**** [PERFORMANCE] Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req) ****')
+            self.printOnConsole('[PERFORMANCE] Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req)')
 
     # for thread to execute
     def replyUtil(self, peerId, sellerId, productName, newPath):
@@ -231,7 +228,7 @@ class Peer(t.Thread):
                 return False
 
             response = datetime.datetime.now()
-            self.responseTime += (response - self.startBuyTime).total_seconds()
+            self.responseTime.append((response - self.startBuyTime).total_seconds())
             self.potentialSellers.append(sellerId)
             
             #print the reply in receiver's (buyer) directory
@@ -293,7 +290,7 @@ class Peer(t.Thread):
         return True
 
 if __name__ == "__main__":
-    #Pass the testcase via cmd line arg
+    #Pass the testcase number via cmd line arg
     testNode = int(sys.argv[1])
     #Intiial checks
     if len(testMapping[testNode][0])<2:
@@ -313,12 +310,13 @@ if __name__ == "__main__":
 
         print('Running on: '+currentServer)
         print('Number of nodes: '+str(testNode))
-        print('Graph:')
+        print('Neighbor Graph:')
         for row in peerNeighborMap:
             print(row)
         print('Hopcount:' + str(hopCount))
 
         print("Marketplace is live! Check output.txt in PeerID directory to check the logging \n")
+        print("Note: Peers are 0 indexed \n")
 
         peers = []
         for peerId in range(totalPeers):
