@@ -19,6 +19,7 @@ import random
 #6 If item runs out then replace with new item 
 #7 If item not present 
 #8 Buyers want the same thing but one gets rejected because of the lock
+#9 Check if graph is fully connected
 
 
 #Initializing variables
@@ -42,7 +43,8 @@ testMapping = {
     5: [[buyer, buyer, buyer, buyer, seller],[[False, True, False, False, False],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]]],
     6: [[buyer, seller],[[False, True],[True, False]]],
     7: [[buyer, seller],[[False, True],[True, False]]],
-    8: [[buyer, buyer, seller],[[False, True, True],[True, False, True],[True, True, False]]]
+    8: [[buyer, buyer, seller],[[False, True, True],[True, False, True],[True, True, False]]],
+    9: [[buyer, buyer, seller, buyer, buyer, seller],[[False, False, False, False, False, False],[True, False, True, True, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]]
 }
 
 class Peer(t.Thread):
@@ -289,6 +291,31 @@ class Peer(t.Thread):
         f.close()
         return True
 
+#To check if the graph is a fully connected graph
+def check_connected(testNode):
+    def create_graph(testNode):
+        graph = {}
+        for index,i in enumerate(testMapping[testNode][1]):
+            graph[index] = []
+            for index2,j in enumerate(i):
+                if j == True:
+                    graph[index].append(index2)
+        return graph
+    graph =  create_graph(testNode)
+    
+    def dfs(temp, v, visited):
+        visited.add(v)
+        temp.append(v)
+        for i in graph[v]:
+            if i not in visited:
+                temp = dfs(temp, i, visited)
+        return temp
+    visited, c = set(), [] 
+    for v in graph:
+        if v not in visited:
+            c.append(dfs([], v, visited))
+    return False if len(c)>1 else True
+
 if __name__ == "__main__":
     #Pass the testcase number via cmd line arg
     testNode = int(sys.argv[1])
@@ -301,6 +328,8 @@ if __name__ == "__main__":
         print('Atleast one seller must be present')
     elif(any(sum(i)>3 for i in testMapping[testNode][1])):
         print('Peer has more than 3 neighbors!')
+    elif(not check_connected(testNode)):
+        print('Graph is not fully connected!')
     else:
         role = testMapping[testNode][0]
         peerNeighborMap = testMapping[testNode][1]
