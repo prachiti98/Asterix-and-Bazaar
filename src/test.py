@@ -44,7 +44,9 @@ testMapping = {
     6: [[buyer, seller],[[False, True],[True, False]]],
     7: [[buyer, seller],[[False, True],[True, False]]],
     8: [[buyer, buyer, seller],[[False, True, True],[True, False, True],[True, True, False]]],
-    9: [[buyer, buyer, seller, buyer, buyer, seller],[[False, False, False, False, False, False],[True, False, True, True, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]]
+    9: [[buyer, buyer, buyer, buyer, buyer, seller],[[False, False, False, False, False, False],[True, False, True, True, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]],
+    10: [[buyer, buyer, buyer, buyer, buyer, seller],[[False, True, False, False, False, False],[True, False, True, False, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]],
+    11: [[buyer, buyer, seller, buyer, buyer, seller],[[False, True, False, False, False, False],[True, False, True, False, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]]
 }
 
 class Peer(t.Thread):
@@ -139,7 +141,6 @@ class Peer(t.Thread):
                 
                 if proxyServer != None and proxyServer.buy(self.target,self.peerId):
                     #to do the calculation
-                    self.printOnConsole(str(datetime.datetime.now())+" Peer "+str(self.peerId)+" buys "+str(toGoodsStringName[self.target])+" from peer "+str(sellerId)+"; avg. response time: "+str(totalResponseTime / len(self.potentialSellers))+" (sec/req)")
                     f = open("Peer"+str(self.peerId)+"/output.txt","a")
                     f.write(str(datetime.datetime.now()) + " Bought " + str(toGoodsStringName[self.target]) +" from peerID " + str(sellerId) + "\n")
                     f.write("The response time of the seller chosen : " +str(self.responseTime[0])+"\n")
@@ -210,7 +211,7 @@ class Peer(t.Thread):
         self.latency += (timeStop - timeStart).total_seconds()
         self.requestCount += 1
         if self.requestCount % 1000 == 0:
-            self.printOnConsole('[PERFORMANCE] Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req)')
+            self.printOnConsole('Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req)')
 
     # for thread to execute
     def replyUtil(self, peerId, sellerId, productName, newPath):
@@ -338,14 +339,13 @@ if __name__ == "__main__":
         hopCount = 2
 
         print('Running on: '+currentServer)
-        print('Number of nodes: '+str(testNode))
+        print('Testcase: '+str(testNode))
         print('Neighbor Graph:')
         for row in peerNeighborMap:
             print(row)
         print('Hopcount:' + str(hopCount))
 
         print("Marketplace is live! Check output.txt in PeerID directory to check the logging \n")
-        print("Note: Peers are 0 indexed \n")
 
         peers = []
         for peerId in range(totalPeers):

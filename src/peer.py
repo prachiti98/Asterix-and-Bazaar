@@ -228,7 +228,7 @@ class Peer(t.Thread):
         self.latency += (timeStop - timeStart).total_seconds()
         self.requestCount += 1
         if self.requestCount % 1000 == 0:
-            self.printOnConsole('[PERFORMANCE] Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req)')
+            self.printOnConsole('Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req)')
 
     # for thread to execute
     def replyUtil(self, peerId, sellerId, productName, newPath):
