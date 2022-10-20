@@ -9,6 +9,7 @@ import time, datetime
 import sys
 import datetime
 import random
+from distance import *
 
 #Testcases
 #1 Less than 2 peers
@@ -36,7 +37,7 @@ maxUnits = 10
 clientWaitTime = 4
 
 testMapping = {
-    1: [[buyer],[False]],
+    1: [[buyer],[[False]]],
     2: [[buyer, buyer],[[False, True],[True, False]]],
     3: [[seller, seller],[[False, True],[True, False]]],
     4: [[buyer, seller, seller, buyer, buyer],[[False, True, True, True, True],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]]],
@@ -317,9 +318,41 @@ def check_connected(testNode):
             c.append(dfs([], v, visited))
     return False if len(c)>1 else True
 
+def getMaxDistance(testNode):
+    v = []
+    
+    n = len(testMapping[testNode][0])
+    # Loop to create the nodes
+    for i in range(n):
+        a = Node(i)
+        v.append(a)
+   
+    # Creating directed
+    # weighted edges
+    for index,i in enumerate(testMapping[testNode][1]):
+            #print(i)
+            for index2,j in enumerate(i):
+                if j == True:
+                    v[index].Add_child(index2)
+
+    
+    maxDistance = 0
+    path = [0 for i in range(len(v))]
+    for s in range(n):
+        dist = dijkstraDist(v, s, path)            
+        maxDistance = max(maxDistance,max(dist))
+    
+    return maxDistance
+
 if __name__ == "__main__":
     #Pass the testcase number via cmd line arg
     testNode = int(sys.argv[1])
+
+    
+    longestShortestPath = getMaxDistance(testNode)
+    print("Longest Shortest Path: " +str(longestShortestPath))
+
+
     #Intiial checks
     if len(testMapping[testNode][0])<=2:
         print('Enter more than 2 peers!')
@@ -331,13 +364,15 @@ if __name__ == "__main__":
         print('Peer has more than 3 neighbors!')
     elif(not check_connected(testNode)):
         print('Graph is not fully connected!')
+    elif(longestShortestPath <= 1):
+        print("Hopcount = 0. Please change test mapping")
     else:
         role = testMapping[testNode][0]
         peerNeighborMap = testMapping[testNode][1]
         totalPeers = len(role)
 
-        #Set to 2 for testing
-        hopCount = 2
+        #Set to maximum 2 for testing
+        hopCount = random.randint(1,min(2,longestShortestPath-1))
 
         print('Running on: '+currentServer)
         print('Testcase: '+str(testNode))

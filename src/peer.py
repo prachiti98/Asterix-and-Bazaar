@@ -10,6 +10,7 @@ import time, datetime
 import sys
 import datetime
 import random
+from distance import *
 
 #Initializing variables
 buyer,seller,fish,salt,boar  = 1,2,3,4,5
@@ -28,7 +29,7 @@ nodeMapping = {
         [True, False,False],
         [True, False, False]],
     4: [[False, True, False, False],
-        [True, False, True, True],
+        [True, False, True, False],
         [False, True, False, True],
         [True, True, True, False]],
     5: [[False, True, False, False, False],
@@ -53,7 +54,7 @@ MACHINES = [{
    'ip': 'localhost'
 }, {
    
-   'ip': 'localhost'
+   'ip': '192.168.1.42'
 }]
 
 
@@ -107,7 +108,7 @@ class Peer(t.Thread):
         try:
             proxyServer.getCurrentTime() #check if server is up and running and ready to accept requests
         except socket.error:
-            self.printOnConsole('Failed to connect to host. Please check all hosts')
+            self.printOnConsole('Failed to connect to host. Please check host: ' +str(addr))
             return None
         except xmlrpc.client.Fault as err:
             self.printOnConsole('Proxy Server Error - code: '+str(err.faultCode)+', msg: '+str(err.faultString))
@@ -338,23 +339,49 @@ def check_connected(totalPeers):
             c.append(dfs([], v, visited))
     return False if len(c)>1 else True
 
+def getMaxDistance(n):
+    v = []
+    
+    # Loop to create the nodes
+    for i in range(n):
+        a = Node(i);
+        v.append(a);
+   
+    # Creating directed
+    # weighted edges
+    for index,i in enumerate(nodeMapping[n]):
+            
+            for index2,j in enumerate(i):
+                if j == True:
+                    v[index].Add_child(index2)
+
+
+    maxDistance = 0
+    path = [0 for i in range(len(v))]
+    for s in range(n):
+        dist = dijkstraDist(v, s, path)     
+        maxDistance = max(maxDistance,max(dist))
+    
+    return maxDistance
+
 if __name__ == "__main__":
     #pass the number of peers via command line argument
     totalPeers = int(sys.argv[1])
     role = getRandomRoles(totalPeers)
+    longestShortestPath = getMaxDistance(totalPeers)
+    print("Longest Shortest Path: " +str(longestShortestPath))
+
     if totalPeers<=2:
         print('Enter more than 2 peers!')
     elif(not check_connected(totalPeers)):
         print('Graph is not fully connected!')
+    elif(longestShortestPath <= 1):
+        print("Hopcount = 0. Please change node mapping")
     else:
         peerNeighborMap = nodeMapping[totalPeers]
+
+        hopCount = random.randint(1,longestShortestPath-1)
         
-        if(totalPeers == 3):
-            hopCount = 1
-        else:
-            hopCount = 2
-        
-        print('Running on: '+currentServer)
         print('Number of nodes: '+str(totalPeers))
         print('Roles:'," ".join([toRoleStringName[i] for i in role]))
         print('Neighbor Graph:')
@@ -380,7 +407,8 @@ if __name__ == "__main__":
                     os.remove(path+"/output.txt")
 
         # run on localhost
-        if deployOnLocalhost:  
+        if deployOnLocalhost: 
+            print('Running on: '+currentServer) 
             for peerId in range(totalPeers):              
                 neighbors = []
                 for j in range(totalPeers):
@@ -398,7 +426,7 @@ if __name__ == "__main__":
                 num_of_peers_on_each_machine = int(totalPeers / len(MACHINES))
             else:
                 num_of_peers_on_each_machine = int((totalPeers+1) / len(MACHINES))
-            
+            print('Master machine is running on: '+currentServer)
             for i in range(len(MACHINES)):
                 if currentServer == MACHINES[i]['ip']:
                     curr_machine_order = i
@@ -415,6 +443,7 @@ if __name__ == "__main__":
                     peer = Peer(peerId, role[peerId], neighbors)
                     peers.append(peer)
                     peer.start()
+                
                 
 
         # dont close the main thread until interrupt
