@@ -38,12 +38,12 @@ clientWaitTime = 4
 
 testMapping = {
     1: [[buyer],[[False]]],
-    2: [[buyer, buyer],[[False, True],[True, False]]],
-    3: [[seller, seller],[[False, True],[True, False]]],
+    2: [[buyer, buyer, buyer],[[False, True, True], [True, False,False],[True, False, False]]],
+    3: [[seller, seller, seller],[[False, True, True], [True, False,False],[True, False, False]]],
     4: [[buyer, seller, seller, buyer, buyer],[[False, True, True, True, True],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]]],
     5: [[buyer, buyer, buyer, buyer, seller],[[False, True, False, False, False],[True, False, True, False, False],[False, True, False, True, False],[False, False, True, False, True],[False, False, False, True, False]]],
-    6: [[buyer, seller],[[False, True],[True, False]]],
-    7: [[buyer, seller],[[False, True],[True, False]]],
+    6: [[buyer, seller, buyer],[[False, True, True], [True, False,False],[True, False, False]]],
+    7: [[buyer, seller, buyer],[[False, True, True], [True, False,False],[True, False, False]]],
     8: [[buyer, buyer, seller],[[False, True, True],[True, False, True],[True, True, False]]],
     9: [[buyer, buyer, buyer, buyer, buyer, seller],[[False, False, False, False, False, False],[True, False, True, True, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]],
     10: [[buyer, buyer, buyer, buyer, buyer, seller],[[False, True, False, False, False, False],[True, False, True, False, False, False],[False, True, False, True, False, False],[False, False, True, False, True, False],[False, False, False, True, False, True],[False, False, False, False, True, False]]],
@@ -79,7 +79,7 @@ class Peer(t.Thread):
         
         server.register_function(self.reply) 
 
-        # Clients (BUYERS) don't have to listen to buy requests 
+        #Register only to seller
         if self.role != buyer:
             server.register_function(self.buy)
         
@@ -149,24 +149,23 @@ class Peer(t.Thread):
                     f.close()
                     break
 
+    def initialiseSeller(self):
+        self.good = random.randint(fish, boar)
+        self.goodQuantity = random.randint(1, maxUnits)
+        self.goodLock = Lock()
+
+        f = open("Peer"+str(self.peerId)+"/output.txt","a")
+        f.write(str(datetime.datetime.now()) + " Selling " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+" Unit(s) \n")
+        f.close()
+
     def printOnConsole(self, msg):
         with addLock:
             print(msg)
 
-    # find the server and call the main lookup
-    def lookupUtil(self, peerId, productName, hopCount, path):
-        proxyServer = self.getPeerIdServer(peerId)
-        if proxyServer != None:
-            timeStart = datetime.datetime.now()
-            proxyServer.lookup(productName, hopCount, path)
-            timeEnd = datetime.datetime.now()
-            self.calculateLatency(timeStart, timeEnd)
-
     def lookup(self, productName, hopCount, path):
         footprints = path.split('-')
 
-
-        # have the product
+        #seller with prodcut present
         if self.role != buyer and productName == self.good:
             fromNeighborId = int(footprints[0])
             newPath = '' if len(footprints) == 1 else "-".join(footprints[1:])
@@ -181,7 +180,7 @@ class Peer(t.Thread):
                 thread.start()
             return True
 
-        # propagate the request
+        #send the request forward
         for neighborId in self.neighbors:
             if str(neighborId) not in footprints: #to avoid a cycle
                 newPath = str(self.peerId)+'-'+str(path) 
@@ -199,14 +198,14 @@ class Peer(t.Thread):
 
         return True
 
-    def initialiseSeller(self):
-        self.good = random.randint(fish, boar)
-        self.goodQuantity = random.randint(1, maxUnits)
-        self.goodLock = Lock()
-
-        f = open("Peer"+str(self.peerId)+"/output.txt","a")
-        f.write(str(datetime.datetime.now()) + " Selling " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+" Unit(s) \n")
-        f.close()
+    # find the server and call the main lookup
+    def lookupUtil(self, peerId, productName, hopCount, path):
+        proxyServer = self.getPeerIdServer(peerId)
+        if proxyServer != None:
+            timeStart = datetime.datetime.now()
+            proxyServer.lookup(productName, hopCount, path)
+            timeEnd = datetime.datetime.now()
+            self.calculateLatency(timeStart, timeEnd)
 
     def calculateLatency(self, timeStart, timeStop):
         self.latency += (timeStop - timeStart).total_seconds()
@@ -214,20 +213,9 @@ class Peer(t.Thread):
         if self.requestCount % 1000 == 0:
             self.printOnConsole('Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req)')
 
-    # for thread to execute
-    def replyUtil(self, peerId, sellerId, productName, newPath):
-        proxyServer = self.getPeerIdServer(peerId)
-        if proxyServer != None:
-            timeStart = datetime.datetime.now()
-            proxyServer.reply(sellerId, productName, newPath)
-            timeStop = datetime.datetime.now()
-            self.calculateLatency(timeStart, timeStop)
-  
-
     def reply(self, sellerId, productName, path):
-        # 1. The reply request arrives to the buyer
+        #buyer recieves reply
         if len(path) == 0:
-            # target product has been updated (timeout)
             if productName != self.target:
                 return False
 
@@ -242,7 +230,6 @@ class Peer(t.Thread):
 
             return True
         
-        # 2. Otherwise, a peer propagates the reply request
         footprints = path.split('-')
         neighborId = int(footprints[0])
         newPath = '' if len(footprints) == 1 else "-".join(footprints[1:])
@@ -256,6 +243,13 @@ class Peer(t.Thread):
         thread.start()
         return True
 
+    def replyUtil(self, peerId, sellerId, productName, newPath):
+        proxyServer = self.getPeerIdServer(peerId)
+        if proxyServer != None:
+            timeStart = datetime.datetime.now()
+            proxyServer.reply(sellerId, productName, newPath)
+            timeStop = datetime.datetime.now()
+            self.calculateLatency(timeStart, timeStop)
 
     def buy(self, productName,buyerId):
         if productName != self.good:
@@ -320,7 +314,6 @@ def check_connected(testNode):
 
 def getMaxDistance(testNode):
     v = []
-    
     n = len(testMapping[testNode][0])
     # Loop to create the nodes
     for i in range(n):
@@ -334,81 +327,74 @@ def getMaxDistance(testNode):
             for index2,j in enumerate(i):
                 if j == True:
                     v[index].Add_child(index2)
-
-    
     maxDistance = 0
     path = [0 for i in range(len(v))]
     for s in range(n):
         dist = dijkstraDist(v, s, path)            
         maxDistance = max(maxDistance,max(dist))
-    
     return maxDistance
 
 if __name__ == "__main__":
     #Pass the testcase number via cmd line arg
     testNode = int(sys.argv[1])
-
-    
-    longestShortestPath = getMaxDistance(testNode)
-    print("Longest Shortest Path: " +str(longestShortestPath))
-
-
     #Intiial checks
     if len(testMapping[testNode][0])<=2:
         print('Enter more than 2 peers!')
-    elif(testMapping[testNode][0].count(buyer)<1):
-        print('Atleast one buyer must be present')
-    elif(testMapping[testNode][0].count(seller)<1):
-        print('Atleast one seller must be present')
-    elif(any(sum(i)>3 for i in testMapping[testNode][1])):
-        print('Peer has more than 3 neighbors!')
-    elif(not check_connected(testNode)):
-        print('Graph is not fully connected!')
-    elif(longestShortestPath <= 1):
-        print("Hopcount = 0. Please change test mapping")
     else:
-        role = testMapping[testNode][0]
-        peerNeighborMap = testMapping[testNode][1]
-        totalPeers = len(role)
+        longestShortestPath = getMaxDistance(testNode)
+        print("Longest Shortest Path: " +str(longestShortestPath))
+        if(testMapping[testNode][0].count(buyer)<1):
+            print('Atleast one buyer must be present')
+        elif(testMapping[testNode][0].count(seller)<1):
+            print('Atleast one seller must be present')
+        elif(any(sum(i)>3 for i in testMapping[testNode][1])):
+            print('Peer has more than 3 neighbors!')
+        elif(not check_connected(testNode)):
+            print('Graph is not fully connected!')
+        elif(longestShortestPath <= 1):
+            print("Hopcount = 0. Please change test mapping")
+        else:
+            role = testMapping[testNode][0]
+            peerNeighborMap = testMapping[testNode][1]
+            totalPeers = len(role)
 
-        #Set to maximum 2 for testing
-        hopCount = random.randint(1,min(2,longestShortestPath-1))
+            #Set to maximum 2 for testing
+            hopCount = random.randint(1,min(2,longestShortestPath-1))
 
-        print('Running on: '+currentServer)
-        print('Testcase: '+str(testNode))
-        print('Neighbor Graph:')
-        for row in peerNeighborMap:
-            print(row)
-        print('Hopcount:' + str(hopCount))
+            print('Running on: '+currentServer)
+            print('Testcase: '+str(testNode))
+            print('Neighbor Graph:')
+            for row in peerNeighborMap:
+                print(row)
+            print('Hopcount:' + str(hopCount))
 
-        print("Marketplace is live! Check output.txt in PeerID directory to check the logging \n")
+            print("Marketplace is live! Check output.txt in PeerID directory to check the logging \n")
 
-        peers = []
-        for peerId in range(totalPeers):
-            #check if directory exists for printing
-            path = 'Peer'+str(peerId)
-            
-            #else create
-            if(not os.path.isdir(path)):
-                os.mkdir(path)
-            else:
-                if(os.path.isfile(path+"/output.txt")): #if output.txt exists delete it for a new run
-                    os.remove(path+"/output.txt")
-            
-            neighbors = []
-            for j in range(totalPeers):
-                if peerNeighborMap[peerId][j]:
-                    neighbors.append(j)
+            peers = []
+            for peerId in range(totalPeers):
+                #check if directory exists for printing
+                path = 'Peer'+str(peerId)
+                
+                #else create
+                if(not os.path.isdir(path)):
+                    os.mkdir(path)
+                else:
+                    if(os.path.isfile(path+"/output.txt")): #if output.txt exists delete it for a new run
+                        os.remove(path+"/output.txt")
+                
+                neighbors = []
+                for j in range(totalPeers):
+                    if peerNeighborMap[peerId][j]:
+                        neighbors.append(j)
 
-            peerServerList.append('http://localhost:')
-            peer = Peer(peerId, role[peerId], neighbors) #calls init
-            peers.append(peer)
-            peer.start()
+                peerServerList.append('http://localhost:')
+                peer = Peer(peerId, role[peerId], neighbors) #calls init
+                peers.append(peer)
+                peer.start()
 
-        # avoid closing main thread 
-        for peer in peers:
-            try:
-                peer.join()
-            except KeyboardInterrupt:
-                print("Keyboard Interrupted. Stopped the thread. Press Ctrl + C again to end all threads")
+            for peer in peers:
+                try:
+                    peer.join()
+                except KeyboardInterrupt:
+                    print("Keyboard Interrupted. Stopped the thread. Press Ctrl + C again to end all threads")
                 
