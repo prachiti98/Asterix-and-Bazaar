@@ -91,7 +91,7 @@ class Peer(t.Thread):
         
         server.register_function(self.reply) 
 
-        # Clients (BUYERS) don't have to listen to buy requests 
+        #Register only to seller
         if self.role != buyer:
             server.register_function(self.buy)
         
@@ -163,24 +163,24 @@ class Peer(t.Thread):
                     f.close()
                     break
 
+    def initialiseSeller(self):
+        self.good = random.randint(fish, boar)
+        self.goodQuantity = random.randint(1, maxUnits)
+        self.goodLock = Lock()
+
+        f = open("Peer"+str(self.peerId)+"/output.txt","a")
+        f.write(str(datetime.datetime.now()) + " Selling " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+" Unit(s) \n")
+        f.close()
+
     def printOnConsole(self, msg):
         with addLock:
             print(msg)
-
-    # find the server and call the main lookup
-    def lookupUtil(self, peerId, productName, hopCount, path):
-        proxyServer = self.getPeerIdServer(peerId)
-        if proxyServer != None:
-            timeStart = datetime.datetime.now()
-            proxyServer.lookup(productName, hopCount, path)
-            timeEnd = datetime.datetime.now()
-            self.calculateLatency(timeStart, timeEnd)
 
     def lookup(self, productName, hopCount, path):
         footprints = path.split('-')
         
 
-        # have the product
+        #seller with prodcut present
         if self.role != buyer and productName == self.good:
             fromNeighborId = int(footprints[0])
             newPath = '' if len(footprints) == 1 else "-".join(footprints[1:])
@@ -195,7 +195,7 @@ class Peer(t.Thread):
                 thread.start()
             return True
 
-        # propagate the request
+        #send the request forward
         for neighborId in self.neighbors:
             if str(neighborId) not in footprints: #to avoid a cycle
                 newPath = str(self.peerId)+'-'+str(path) #till current
@@ -214,14 +214,14 @@ class Peer(t.Thread):
 
         return True
 
-    def initialiseSeller(self):
-        self.good = random.randint(fish, boar)
-        self.goodQuantity = random.randint(1, maxUnits)
-        self.goodLock = Lock()
-
-        f = open("Peer"+str(self.peerId)+"/output.txt","a")
-        f.write(str(datetime.datetime.now()) + " Selling " +str(toGoodsStringName[self.good])+': '+str(self.goodQuantity)+" Unit(s) \n")
-        f.close()
+    # find the server and call the main lookup
+    def lookupUtil(self, peerId, productName, hopCount, path):
+        proxyServer = self.getPeerIdServer(peerId)
+        if proxyServer != None:
+            timeStart = datetime.datetime.now()
+            proxyServer.lookup(productName, hopCount, path)
+            timeEnd = datetime.datetime.now()
+            self.calculateLatency(timeStart, timeEnd)
 
     def calculateLatency(self, timeStart, timeStop):
         self.latency += (timeStop - timeStart).total_seconds()
@@ -229,19 +229,9 @@ class Peer(t.Thread):
         if self.requestCount % 1000 == 0:
             self.printOnConsole('Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req)')
 
-    # for thread to execute
-    def replyUtil(self, peerId, sellerId, productName, newPath):
-        proxyServer = self.getPeerIdServer(peerId)
-        if proxyServer != None:
-            timeStart = datetime.datetime.now()
-            proxyServer.reply(sellerId, productName, newPath)
-            timeStop = datetime.datetime.now()
-            self.calculateLatency(timeStart, timeStop)
-
     def reply(self, sellerId, productName, path):
-        # 1. The reply request arrives to the buyer
+        #buyer recieves reply
         if len(path) == 0:
-            # target product has been updated (timeout)
             if productName != self.target:
                 return False
 
@@ -256,7 +246,7 @@ class Peer(t.Thread):
 
             return True
         
-        # 2. Otherwise, a peer propagates the reply request
+        #send request forward
         footprints = path.split('-')
         neighborId = int(footprints[0])
         newPath = '' if len(footprints) == 1 else "-".join(footprints[1:])
@@ -270,6 +260,13 @@ class Peer(t.Thread):
         thread.start()
         return True
 
+    def replyUtil(self, peerId, sellerId, productName, newPath):
+        proxyServer = self.getPeerIdServer(peerId)
+        if proxyServer != None:
+            timeStart = datetime.datetime.now()
+            proxyServer.reply(sellerId, productName, newPath)
+            timeStop = datetime.datetime.now()
+            self.calculateLatency(timeStart, timeStop)
 
     def buy(self, productName,buyerId):
         if productName != self.good:
@@ -341,12 +338,10 @@ def check_connected(totalPeers):
 
 def getMaxDistance(n):
     v = []
-    
     # Loop to create the nodes
     for i in range(n):
-        a = Node(i);
-        v.append(a);
-   
+        a = Node(i)
+        v.append(a)
     # Creating directed
     # weighted edges
     for index,i in enumerate(nodeMapping[n]):
@@ -354,102 +349,96 @@ def getMaxDistance(n):
             for index2,j in enumerate(i):
                 if j == True:
                     v[index].Add_child(index2)
-
-
     maxDistance = 0
     path = [0 for i in range(len(v))]
     for s in range(n):
         dist = dijkstraDist(v, s, path)     
         maxDistance = max(maxDistance,max(dist))
-    
     return maxDistance
 
 if __name__ == "__main__":
     #pass the number of peers via command line argument
     totalPeers = int(sys.argv[1])
     role = getRandomRoles(totalPeers)
-    longestShortestPath = getMaxDistance(totalPeers)
-    print("Longest Shortest Path: " +str(longestShortestPath))
-
     if totalPeers<=2:
         print('Enter more than 2 peers!')
-    elif(not check_connected(totalPeers)):
-        print('Graph is not fully connected!')
-    elif(longestShortestPath <= 1):
-        print("Hopcount = 0. Please change node mapping")
     else:
-        peerNeighborMap = nodeMapping[totalPeers]
-
-        hopCount = random.randint(1,longestShortestPath-1)
-        
-        print('Number of nodes: '+str(totalPeers))
-        print('Roles:'," ".join([toRoleStringName[i] for i in role]))
-        print('Neighbor Graph:')
-        for row in peerNeighborMap:
-            print(row)
-
-        print('Hopcount:' + str(hopCount))
-        print("Marketplace is live! Check output.txt in PeerID directory to check the logging \n")
-        print("Note: Peers are 0 indexed \n")
-
-        peers = []
-        
-        #always print where the program is run
-        for peerId in range(totalPeers):
-            #check if directory exists for printing
-            path = 'Peer'+str(peerId)
-            
-            #else create
-            if(not os.path.isdir(path)):
-                os.mkdir(path)
-            else:
-                if(os.path.isfile(path+"/output.txt")): #if output.txt exists delete it for a new run
-                    os.remove(path+"/output.txt")
-
-        # run on localhost
-        if deployOnLocalhost: 
-            print('Running on: '+currentServer) 
-            for peerId in range(totalPeers):              
-                neighbors = []
-                for j in range(totalPeers):
-                    if peerNeighborMap[peerId][j]:
-                        neighbors.append(j)
-
-                peerServerList.append('http://localhost:')
-                peer = Peer(peerId, role[peerId], neighbors) #calls init
-                peers.append(peer)
-                peer.start()
-        
+        longestShortestPath = getMaxDistance(totalPeers)
+        print("Longest Shortest Path: " +str(longestShortestPath))
+        if(not check_connected(totalPeers)):
+            print('Graph is not fully connected!')
+        elif(longestShortestPath <= 1):
+            print("Hopcount = 0. Please change node mapping")
         else:
-            curr_machine_order = 0
-            if totalPeers%2 == 0:
-                num_of_peers_on_each_machine = int(totalPeers / len(MACHINES))
-            else:
-                num_of_peers_on_each_machine = int((totalPeers+1) / len(MACHINES))
-            print('Master machine is running on: '+currentServer)
-            for i in range(len(MACHINES)):
-                if currentServer == MACHINES[i]['ip']:
-                    curr_machine_order = i
+            peerNeighborMap = nodeMapping[totalPeers]
+
+            hopCount = random.randint(1,longestShortestPath-1)
+            
+            print('Number of nodes: '+str(totalPeers))
+            print('Roles:'," ".join([toRoleStringName[i] for i in role]))
+            print('Neighbor Graph:')
+            for row in peerNeighborMap:
+                print(row)
+
+            print('Hopcount:' + str(hopCount))
+            print("Marketplace is live! Check output.txt in PeerID directory to check the logging \n")
+            print("Note: Peers are 0 indexed \n")
+
+            peers = []
+            
+            #always print where the program is run
+            for peerId in range(totalPeers):
+                #check if directory exists for printing
+                path = 'Peer'+str(peerId)
                 
-                peerId_start = num_of_peers_on_each_machine * i
-                peerId_end   = min(peerId_start + num_of_peers_on_each_machine,totalPeers)
-                for peerId in range(peerId_start, peerId_end):
-                    peerServerList.append('http://' + MACHINES[i]['ip'] + ':')
+                #else create
+                if(not os.path.isdir(path)):
+                    os.mkdir(path)
+                else:
+                    if(os.path.isfile(path+"/output.txt")): #if output.txt exists delete it for a new run
+                        os.remove(path+"/output.txt")
+
+            # run on localhost
+            if deployOnLocalhost: 
+                print('Running on: '+currentServer) 
+                for peerId in range(totalPeers):              
                     neighbors = []
                     for j in range(totalPeers):
                         if peerNeighborMap[peerId][j]:
                             neighbors.append(j)
 
-                    peer = Peer(peerId, role[peerId], neighbors)
+                    peerServerList.append('http://localhost:')
+                    peer = Peer(peerId, role[peerId], neighbors) #calls init
                     peers.append(peer)
                     peer.start()
-                
-                
+            
+            else:
+                curr_machine_order = 0
+                if totalPeers%2 == 0:
+                    num_of_peers_on_each_machine = int(totalPeers / len(MACHINES))
+                else:
+                    num_of_peers_on_each_machine = int((totalPeers+1) / len(MACHINES))
+                print('Master machine is running on: '+currentServer)
+                for i in range(len(MACHINES)):
+                    if currentServer == MACHINES[i]['ip']:
+                        curr_machine_order = i
+                    
+                    peerId_start = num_of_peers_on_each_machine * i
+                    peerId_end   = min(peerId_start + num_of_peers_on_each_machine,totalPeers)
+                    for peerId in range(peerId_start, peerId_end):
+                        peerServerList.append('http://' + MACHINES[i]['ip'] + ':')
+                        neighbors = []
+                        for j in range(totalPeers):
+                            if peerNeighborMap[peerId][j]:
+                                neighbors.append(j)
 
-        # dont close the main thread until interrupt
-        for peer in peers:
-            try:
-                peer.join()
-            except KeyboardInterrupt:
-                print("Keyboard Interrupted. Stopped the thread. Press Ctrl + C again to end all threads")
+                        peer = Peer(peerId, role[peerId], neighbors)
+                        peers.append(peer)
+                        peer.start()
+                    
+            for peer in peers:
+                try:
+                    peer.join()
+                except KeyboardInterrupt:
+                    print("Keyboard Interrupted. Stopped the thread. Press Ctrl + C again to end all threads")
                 
