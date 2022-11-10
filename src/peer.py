@@ -11,12 +11,13 @@ import sys
 import datetime
 import random
 from distance import *
+import numpy as np
 
 #Initializing variables
 buyer,seller,fish,salt,boar  = 1,2,3,4,5
 toGoodsStringName = {fish:'Fish', salt:'Salt', boar:'Boar'}
 toRoleStringName = {buyer:'Buyer', seller:'Seller'}
-# the port number of each RPC peer server is (PORT_START_NUM + peer_id)
+# the port number of each RPC peer server is (PORT_START_NUM + peerId)
 portNumber = 49151
 # the maximum quantity a seller can sell
 maxUnits = 10
@@ -45,6 +46,7 @@ nodeMapping = {
         [False, False, False, False, True, False]]
 }
 #---------------------------------------------------------
+totalPeers = 0
 deployOnLocalhost = True
 
 # number of peers to be initialized on a machine
@@ -72,11 +74,28 @@ class Peer(t.Thread):
         
         self.latency = 0
         self.requestCount = 0
+
+        # self.db = db 
+        self.trader = {}
+
+        # Shared Resources
+        self.didReceiveOK = False # Flag
+        self.didReceiveWon = False # Flag
+        self.isElectionRunning = False # Flag
+        self.trade_list = {} 
+
+        # Semaphores 
+        self.flag_won_semaphore = t.BoundedSemaphore(1)  #if peer is leader val = True
             
     # start the thread
     def run(self):
         server = t.Thread(target=self.initialiseRPCServer)
         server.start()
+
+        # Starting the election, higher Id peers
+        if peerId == totalPeers-1:
+            thread1 = t.Thread(target=self.start_election) # Start Server
+            thread1.start()
         if self.role == buyer:
             self.initialiseBuyer()
         else:
@@ -88,7 +107,7 @@ class Peer(t.Thread):
 
         server.register_function(self.getCurrentTime)
         server.register_function(self.lookup)
-        
+        server.register_function(self.election_message,'election_message')
         server.register_function(self.reply) 
 
         #Register only to seller
@@ -229,6 +248,136 @@ class Peer(t.Thread):
         if self.requestCount % 1000 == 0:
             self.printOnConsole('Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req)')
 
+    def send_message(self,message,neighbor):
+        #self is winner if message I won
+        proxyServer = self.getPeerIdServer(neighbor)
+        if proxyServer != None:
+            proxyServer.election_message(message,self.peerId) #only used peerId because getPeerIdServer does the rest
+        # connected,proxy = self.get_rpc(neighbor['host_addr'])
+        # if connected:
+        #     proxy.election_message(message,{'peer_id':self.peer_id,'host_addr':self.host_addr})
+
+    def start_election(self):
+        print("Peer ",self.peerId,": Started the election")
+        self.flag_won_semaphore.acquire() 
+        self.isElectionRunning = True # Set the flag
+        self.flag_won_semaphore.release()
+        time.sleep(5)
+
+        # Check number of peers higher than you.
+
+        # peers = [x for x in totalPeers]
+        # peers = np.array(peers)
+        # x = len(peers[peers > self.peerId])
+        # if x > 0:
+        if self.peerId < totalPeers-1:
+            self.didReceiveOK = False
+            self.didReceiveWon = False
+            for neighborId in range(totalPeers):
+                if neighborId > self.peerId:
+                    if self.trader != {} and neighborId == self.trader['peer_id']: # Don't send it to previous trader as he left the position.
+                        pass
+                    else:    
+                        thread = t.Thread(target=self.send_message,args=("election",neighborId)) # Start Server
+                        thread.start()  
+            time.sleep(6)
+            self.flag_won_semaphore.acquire()
+            # if self.didReceiveOK == False or self.didReceiveWon == False: #might take time to receive won
+            if self.didReceiveOK == False or self.didReceiveWon == False: 
+                # print("yes1")
+                self.fwd_won_message()
+            else:
+                print("no1")
+                print(self.peerId,"Stopping election")
+                self.flag_won_semaphore.release()
+        
+        else: # No higher peers
+            # print("yes2")
+            self.flag_won_semaphore.acquire()
+            self.fwd_won_message() # Release of semaphore is in fwd_won_message
+
+    # Helper method : To send the flags and send the "I won" message to peers.
+    def fwd_won_message(self):
+        print("Dear buyers and sellers, My ID is ",self.peerId, "and I am the new coordinator")
+        self.didReceiveWon = True
+        self.trader = {'peer_id':self.peerId}
+        # self.trader = {'peer_id':self.peerId,'host_addr':self.host_addr}
+        #self.db['Role'] = 'Trader' #need to think
+        self.flag_won_semaphore.release()
+        for neighborId in range(totalPeers):
+            if neighborId != self.peerId:
+                thread = t.Thread(target=self.send_message,args=("I won",neighborId)) # Start Server
+                thread.start()         
+        #thread2 = t.Thread(target=peer_local.begin_trading,args=())
+        #thread2.start()   
+
+    # election_message: This method handles three types of messages:
+    # 1) "election" : Upon receiving this message, peer will reply to the sender with "OK" message and if there are any higher peers, forwards the message and waits for OK messages, if it doesn't receives any then its the leader.
+    # 2) "OK" : Drops out of the election, sets the flag didReceiveOK, which prevents it from further forwading the election message.
+    # 3) "I won": Upon receiving this message, peer sets the leader details to the variable trader and starts the trading process. 
+    def election_message(self,message,neighbor):
+        if message == "election":
+            # Fwd the election to higher peers, if available. Response here are Ok and I won.
+            #tbd - is this if else required?
+            if self.didReceiveOK or self.didReceiveWon:
+                thread = t.Thread(target=self.send_message,args=("OK",neighbor)) # Start Server
+                thread.start()
+            else:
+                thread = t.Thread(target=self.send_message,args=("OK",neighbor)) # Start Server
+                thread.start()
+                # peers = [x for x in self.neighbors]
+                # peers = np.array(peers)
+                # x = len(peers[peers > self.peerId])
+
+                # if x > 0:
+                if self.peerId < totalPeers-1:
+                    self.flag_won_semaphore.acquire()
+                    self.isElectionRunning = True # Set the flag
+                    self.flag_won_semaphore.release()
+                    self.didReceiveOK = False
+                    for neighborId in range(totalPeers):
+                        if neighborId > self.peerId:
+                            if self.trader != {} and neighborId == self.trader['peer_id']:
+                                pass
+                            else:    
+                                thread = t.Thread(target=self.send_message,args=("election",neighbor)) # Start Server
+                                thread.start()
+                    time.sleep(6)
+                    
+                    self.flag_won_semaphore.acquire()
+                    # if self.didReceiveOK == False and self.didReceiveWon == False:  
+                    if self.didReceiveOK == False or self.didReceiveWon == False:                   
+                        self.fwd_won_message() # Release of semaphore is done by that method.
+                    else:
+                        print("no2")
+                        print(self.peerId,"Stopping election")
+                        self.flag_won_semaphore.release()
+                               
+                else:
+                    self.flag_won_semaphore.acquire()
+                    if self.didReceiveWon == False: #is it even required?
+                        self.fwd_won_message()
+                    else:
+                        self.flag_won_semaphore.release()
+                        
+        elif message == 'OK':
+            # Drop out and wait
+            self.didReceiveOK = True
+            
+            
+        elif message == 'I won':
+            print("Peer",self.peerId,": Election Won Msg Received from",neighbor)
+            #self.didReceiveOK = False
+            self.flag_won_semaphore.acquire()
+            self.didReceiveWon = True
+            self.flag_won_semaphore.release()
+            self.trader = neighbor
+            time.sleep(5)
+            # thread2 = t.Thread(target=peer_local.begin_trading,args=())
+            # thread2.start()
+            # self.leader is neighbor, if  peer is a seller, he has to register his products with the trader.
+
+
     def reply(self, sellerId, productName, path):
         #buyer recieves reply
         if len(path) == 0:
@@ -303,6 +452,8 @@ class Peer(t.Thread):
         f.write(str(datetime.datetime.now()) + " Hurry! PeerID " +str(self.peerId)+ " has "+toGoodsStringName[self.good]+" to sell"+"\n")
         f.close()
         return True
+
+    
 
 def getRandomRoles(totalPeers):
     roles = [1,2] #set first peer to buyer, second seller 
@@ -411,6 +562,7 @@ if __name__ == "__main__":
                     peer = Peer(peerId, role[peerId], neighbors) #calls init
                     peers.append(peer)
                     peer.start()
+                
             
             else:
                 curr_machine_order = 0
