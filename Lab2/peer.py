@@ -255,11 +255,12 @@ class peer:
             self.didReceiveWon = False
             for neighbor in self.neighbors:
                 if neighbor['peer_id'] > self.peer_id:
-                    if self.trader != {} and neighbor['peer_id'] == self.trader['peer_id']: # Don't send it to previous trader as he left the position.
-                        pass
-                    else:    
-                        thread = td.Thread(target=self.send_message,args=("election",neighbor)) # Start Server
-                        thread.start()  
+                    #todo
+                    # if self.trader != {} and neighbor['peer_id'] == self.trader['peer_id']: #  Don't send it to previous trader as he left the position.
+                    #     pass
+                    # else:   
+                    thread = td.Thread(target=self.send_message,args=("election",neighbor)) # Start Server
+                    thread.start()  
             time.sleep(2.0)
             self.flag_won_semaphore.acquire()
             if self.didReceiveOK == False and self.didReceiveWon == False:
@@ -426,7 +427,7 @@ if __name__ == "__main__":
     
     # Computing Neigbors
     peer_ids = [x for x in range(1,num_peers+1)]
-    host_ports = [(10007 + x) for x in range(0,num_peers)]
+    host_ports = [(10030 + x) for x in range(0,num_peers)]
     host_addrs = [(host_ip + ':' + str(port)) for port in host_ports]
     neighbors = [{'peer_id':p,'host_addr':h} for p,h in zip(peer_ids,host_addrs)]
     neighbors.remove({'peer_id':peer_id,'host_addr':host_addr})
@@ -435,7 +436,7 @@ if __name__ == "__main__":
     peer_local = peer(host_addr,peer_id,neighbors,db)
     thread1 = td.Thread(target=peer_local.startServer,args=()) # Start Server
     thread1.start()    
-    # Starting the election, lower peers.
-    if peer_id <= 2:
+    # Starting the election, highest peer to not waste time
+    if peer_id == num_peers:
         thread1 = td.Thread(target=peer_local.start_election,args=()) # Start Server
         thread1.start()
