@@ -272,15 +272,11 @@ class peer:
         # If Seller, register the poducts.
         if self.db["Role"] == "Seller":
             connected,proxy = self.get_rpc(self.trader["host_addr"])
-            p_n = None
-            p_c = None
             for product_name, product_count in self.db['Inv'].items():
                 if product_count > 0:
-                    p_n= product_name
-                    p_c = product_count
-            seller_info = {'seller': {'peer_id':self.peer_id,'host_addr':self.host_addr},'product_name':p_n,'product_count':p_c} 
-            if connected:
-                proxy.register_products(seller_info)
+                    seller_info = {'seller': {'peer_id':self.peer_id,'host_addr':self.host_addr,'product_name':product_name},'product_name':product_name,'product_count':product_count} 
+                    if connected:
+                        proxy.register_products(seller_info)
         # If buyer, wait for 2 sec for seller to register products and then start buying.
         elif self.db["Role"] == "Buyer":
             time.sleep(1.0 + self.peer_id/10.0) # Allow sellers to register the products.
@@ -320,7 +316,9 @@ class peer:
     # register_products: Trader registers the seller goods.
     def register_products(self,seller_info): # Trader End.
         self.trade_list_semaphore.acquire()
-        self.trade_list[str(seller_info['seller']['peer_id'])] = seller_info 
+        self.trade_list[str(seller_info['seller']['peer_id'])+str(seller_info['seller']['product_name'])] = seller_info 
+        #print(self.trade_list) 
+        seller_log(self.trade_list) #not sure
         self.trade_list_semaphore.release()
 
     # Check if all other buyers have already bought, If this is true then can buy else wait for others to buy first 
@@ -342,10 +340,13 @@ class peer:
         self.clock_forward('Buyer',buyer_id)
         
         seller_list = []
-        for peer_id,seller_info in self.trade_list.items():
-            if seller_info["product_name"] == product_name:
-                #print "Product Found"
-                seller_list.append(seller_info["seller"])
+        #print(self.trade_list)
+        for seller_info in self.trade_list.items():
+            x = seller_info[1]  
+            if x['product_name'] == product_name:
+                seller_list.append(x['seller'])
+
+        
         if len(seller_list) > 0:
             # Log the request
             seller = seller_list[0]
@@ -355,8 +356,7 @@ class peer:
             connected,proxy = self.get_rpc(host_addr)
             
             self.trade_list_semaphore.acquire()
-            
-            self.trade_list[str(seller['peer_id'])]["product_count"]  = self.trade_list[str(seller['peer_id'])]["product_count"] -1     
+            self.trade_list[str(seller['peer_id'])+str(seller['product_name'])]["product_count"]  = self.trade_list[str(seller['peer_id'])+str(seller['product_name'])]["product_count"] -1     
             
             self.trade_list_semaphore.release()
             if connected: # Pass the message to buyer that transaction is succesful
@@ -367,6 +367,9 @@ class peer:
                 
             # Relog the request as done ***Fix last arg as buyers clock**
             mark_transaction_complete('transactions.csv',transaction_log,str(0))
+
+            # if buyer_clock == 6:
+            #     csv_operations.seller_log(self.trade_list)
 
             
     # transaction : Seller just deducts the product count, Buyer prints the message.    
@@ -382,7 +385,7 @@ class peer:
                 product_list = ['Fish','Salt','Boar']
                 x = random.randint(0, 2)
                 self.db['Inv'][product_list[x]] = 3
-                seller_info = {'seller': {'peer_id':self.peer_id,'host_addr':self.host_addr},'product_name':product_list[x],'product_count':3}
+                seller_info = {'seller': {'peer_id':self.peer_id,'host_addr':self.host_addr,'product_name':product_list[x]},'product_name':product_list[x],'product_count':3}
                 
                 connected,proxy = self.get_rpc(self.trader["host_addr"]) 
                 if connected: 
@@ -391,13 +394,13 @@ db_load = {
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish"]}',
     2:'{"Role": "Seller","Inv":{"Fish":300},"shop":{}}',
     3:'{"Role": "Buyer","Inv":{},"shop":["Salt","Boar","Fish"]}',
-    4:'{"Role": "Seller","Inv":{"Fish":300,"Boar":0,"Salt":0},"shop":{}}',
+    4:'{"Role": "Seller","Inv":{"Fish":200,"Boar":1,"Salt":2},"shop":{}}',
     5:'{"Role": "Buyer","Inv":{},"shop":["Boar","Fish","Salt"]}',
     6:'{"Role": "Seller","Inv":{"Fish":300,"Boar":300,"Salt":3},"shop":{}}',
     7:'{"Role": "Seller","Inv":{"Fish":300,"Boar":300,"Salt":3},"shop":{}}'
 }                   
 if __name__ == "__main__":
-    port = 10006
+    port = 10030
     host_ip = '127.0.0.1'
     totalPeers = int(sys.argv[1])
     for peerId in range(1,totalPeers+1):
