@@ -105,7 +105,7 @@ class peer:
         self.didReceiveOK = False # Flag
         self.didReceiveWon = False # Flag
         self.isElectionRunning = False # Flag
-        self.trade_list = {} 
+        self.trade_list = {}  #only for trader to save seller info
         
         # Lamport Clock.
         self.lamport_clock = LamportClock()
@@ -115,7 +115,7 @@ class peer:
        
         # Semaphores 
         self.flag_won_semaphore = td.BoundedSemaphore(1) 
-        self.trade_list_semaphore = td.BoundedSemaphore(1)
+        self.trade_list_semaphore = td.BoundedSemaphore(1) #required only for trader
         self.clock_semaphore = td.BoundedSemaphore(1)       
         
    # Helper Method: Returns the proxy for specified address.
@@ -273,7 +273,7 @@ class peer:
      
     # begin_trading : For a seller, through this method they register there product at the trader. For buyer, they start lookup process for the products needed, in this lab every lookup process is directed at the trader and he sells those goods on behalf of the sellers.            
     def begin_trading(self):
-        time.sleep(2) # Delay so that al the election message are replied or election is dropped by peers other than the trader.
+        time.sleep(2) # Delay so that all the election message are replied or election is dropped by peers other than the trader.
         # Reset the flags.
         self.isElectionRunning = False
         self.didReceiveWon = False
