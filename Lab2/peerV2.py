@@ -317,7 +317,6 @@ class peer:
     def register_products(self,seller_info): # Trader End.
         self.trade_list_semaphore.acquire()
         self.trade_list[str(seller_info['seller']['peer_id'])+str(seller_info['seller']['product_name'])] = seller_info 
-        #print(self.trade_list) 
         seller_log(self.trade_list) #not sure
         self.trade_list_semaphore.release()
 
@@ -340,10 +339,9 @@ class peer:
         self.clock_forward('Buyer',buyer_id)
         
         seller_list = []
-        #print(self.trade_list)
         for seller_info in self.trade_list.items():
             x = seller_info[1]  
-            if x['product_name'] == product_name:
+            if x['product_name'] == product_name and x['product_count']>0:
                 seller_list.append(x['seller'])
 
         
@@ -356,6 +354,7 @@ class peer:
             connected,proxy = self.get_rpc(host_addr)
             
             self.trade_list_semaphore.acquire()
+            #todo - remove the count requested by buyer if it exists 
             self.trade_list[str(seller['peer_id'])+str(seller['product_name'])]["product_count"]  = self.trade_list[str(seller['peer_id'])+str(seller['product_name'])]["product_count"] -1     
             
             self.trade_list_semaphore.release()
@@ -376,25 +375,37 @@ class peer:
     def transaction(self, product_name, seller_id, buyer_id,trade_count): # Buyer & Seller
         if self.db["Role"] == "Buyer":
             print ( "Peer ", self.peer_id, " : Bought ",product_name, " from peer: ",seller_id["peer_id"])
-            #self.db['shop'].remove(product_name)  
+            if product_name in self.db['shop']:
+                self.db['shop'].remove(product_name)  #discuss - will need to be removed if all 
+            if len(self.db['shop']) == 0:
+                print("No products with buyer",self.peer_id)
+                product_list = ["Fish","Salt","Boar"]
+                x = random.randint(0, 2)
+                self.db['shop'].append(product_list[x])
+                print(self.peer_id,"Started buying:",product_list[x])
+                thread2 = td.Thread(target=self.begin_trading,args=())
+                thread2.start()
         elif self.db["Role"] == "Seller":
+            #todo - remove the count requested by buyer
             self.db['Inv'][product_name] = self.db['Inv'][product_name] - 1
+            
             #print "Sold ", product_name, " to peer: ",buyer_id["peer_id"]     
             if self.db['Inv'][product_name] == 0:
-                # Pickup a random item and register that product with trader.
-                product_list = ['Fish','Salt','Boar']
-                x = random.randint(0, 2)
-                self.db['Inv'][product_list[x]] = 3
-                seller_info = {'seller': {'peer_id':self.peer_id,'host_addr':self.host_addr,'product_name':product_list[x]},'product_name':product_list[x],'product_count':3}
+                #del self.db['Inv'][product_name]
+                
+                # Refill the item with seller               
+                x = random.randint(1, 50)
+                self.db['Inv'][product_name] = x
+                seller_info = {'seller': {'peer_id':self.peer_id,'host_addr':self.host_addr,'product_name':product_name},'product_name':product_name,'product_count':x}
                 
                 connected,proxy = self.get_rpc(self.trader["host_addr"]) 
                 if connected: 
                     proxy.register_products(seller_info)
 db_load = {
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish"]}',
-    2:'{"Role": "Seller","Inv":{"Fish":300},"shop":{}}',
-    3:'{"Role": "Buyer","Inv":{},"shop":["Salt","Boar","Fish"]}',
-    4:'{"Role": "Seller","Inv":{"Fish":200,"Boar":1,"Salt":2},"shop":{}}',
+    2:'{"Role": "Seller","Inv":{"Fish":3},"shop":{}}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Salt"]}',
+    4:'{"Role": "Seller","Inv":{"Fish":2,"Boar":1,"Salt":2},"shop":{}}',
     5:'{"Role": "Buyer","Inv":{},"shop":["Boar","Fish","Salt"]}',
     6:'{"Role": "Seller","Inv":{"Fish":300,"Boar":300,"Salt":3},"shop":{}}',
     7:'{"Role": "Seller","Inv":{"Fish":300,"Boar":300,"Salt":3},"shop":{}}'

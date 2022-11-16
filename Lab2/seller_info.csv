@@ -1,4 +1,4 @@
-"{""4Fish"": {""seller"": {""peer_id"": 4, ""host_addr"": ""127.0.0.1:10034"", ""product_name"": ""Fish""}, ""product_name"": ""Fish"", ""product_count"": 198}}"
-"{""2Fish"": {""seller"": {""peer_id"": 2, ""host_addr"": ""127.0.0.1:10032"", ""product_name"": ""Fish""}, ""product_name"": ""Fish"", ""product_count"": 300}}"
-"{""4Boar"": {""seller"": {""peer_id"": 4, ""host_addr"": ""127.0.0.1:10034"", ""product_name"": ""Boar""}, ""product_name"": ""Boar"", ""product_count"": 3}}"
-"{""4Salt"": {""seller"": {""peer_id"": 4, ""host_addr"": ""127.0.0.1:10034"", ""product_name"": ""Salt""}, ""product_name"": ""Salt"", ""product_count"": 0}}"
+"{""2Fish"": {""seller"": {""peer_id"": 2, ""host_addr"": ""127.0.0.1:10032"", ""product_name"": ""Fish""}, ""product_name"": ""Fish"", ""product_count"": 30}}"
+"{""4Fish"": {""seller"": {""peer_id"": 4, ""host_addr"": ""127.0.0.1:10034"", ""product_name"": ""Fish""}, ""product_name"": ""Fish"", ""product_count"": 2}}"
+"{""4Boar"": {""seller"": {""peer_id"": 4, ""host_addr"": ""127.0.0.1:10034"", ""product_name"": ""Boar""}, ""product_name"": ""Boar"", ""product_count"": 22}}"
+"{""4Salt"": {""seller"": {""peer_id"": 4, ""host_addr"": ""127.0.0.1:10034"", ""product_name"": ""Salt""}, ""product_name"": ""Salt"", ""product_count"": 32}}"
