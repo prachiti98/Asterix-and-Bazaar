@@ -334,9 +334,9 @@ class peer:
 
     # Check if all other buyers have already bought, If this is true then can buy else wait for others to buy first 
     def clockCheck(self,buyer_id):
-        wanted_keys = [1,3,5] # All buyers
-        only_buyer  = dict((k, self.clock[k]) for k in wanted_keys if k in self.clock)
-        only_buyer[buyer_id]-=1
+        buyer_keys = map(int,list(set([str(i) for i in range(1,totalPeers+1)])-set(list(self.trade_list.keys())+list(str(self.trader['peer_id'])))))  # All buyers
+        only_buyer  = dict((k, self.clock[k]) for k in buyer_keys if k in self.clock)
+        #only_buyer[buyer_id]-=1
         return any([only_buyer[buyer_id]-only_buyer[i]>1 for i in only_buyer])
     
     # lookup : Trader lookups the product that a buyer wants to buy and replies respective seller and buyer.
