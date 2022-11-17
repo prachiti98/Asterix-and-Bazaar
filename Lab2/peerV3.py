@@ -122,7 +122,7 @@ class peer:
         self.clock_semaphore.acquire()
         self.clock = {key:max(value,sending_clock[key]) for key, value in self.clock.items()}
         #Increment by 1 cause reciving clock max(a,b)+1
-        self.clock[self.peer_id]=max(self.clock[self.peer_id],sending_clock[sender_id])+1
+        self.clock[self.peer_id]+=1
         self.clock_semaphore.release()
         
     # Starting Server    
@@ -311,6 +311,7 @@ class peer:
                             thread.start() # Sending Neighbors reelection notification.
                         thread = td.Thread(target=self.start_election,args=())
                         thread.start()
+                    time.sleep(1)
         """ else:
             if os.path.isfile("seller_info.csv"): 
                trade_list = read_seller_log() 
@@ -333,8 +334,9 @@ class peer:
 
     # Check if all other buyers have already bought, If this is true then can buy else wait for others to buy first 
     def clockCheck(self,buyer_id):
-        wanted_keys = [1,3] # All buyers
+        wanted_keys = [1,3,5] # All buyers
         only_buyer  = dict((k, self.clock[k]) for k in wanted_keys if k in self.clock)
+        only_buyer[buyer_id]-=1
         return any([only_buyer[buyer_id]-only_buyer[i]>1 for i in only_buyer])
     
     # lookup : Trader lookups the product that a buyer wants to buy and replies respective seller and buyer.
@@ -351,17 +353,29 @@ class peer:
     #When there's only few items left then check the current buyer and all other buyers clock. 
     #If other buyers have lower cclock then make the current buyer sleep for 5 seconds.   
     def lookup(self,buyer_id,host_addr,product_name,buyer_clock):
+        #----------------
+        if buyer_id == 3:
+            time.sleep(5)
+        #----------------
         buyer_clock = json.loads(buyer_clock)
         buyer_clock = {int(k):int(v) for k,v in buyer_clock.items()}
+
         tot_prod = 0
         for i in self.trade_list:
             if self.trade_list[i]['product_name'] == product_name:
                     tot_prod+=self.trade_list[i]['product_count']
-        if tot_prod<3:
-            if self.clockCheck(buyer_id):
-                time.sleep(2) 
-        self.clock_adjust(buyer_clock,buyer_id)   
-        self.printOnConsole(" ".join(['Buyer->Trader after recieve','Trader clock:',str(self.clock),'Buyer clock:',str(buyer_clock)]))   
+
+        if tot_prod<10:
+            self.printOnConsole('Too few')
+            self.clock_adjust(buyer_clock,buyer_id)   
+            self.printOnConsole(" ".join(['Buyer->Trader after recieve','Trader clock:',str(self.clock),'Buyer clock:',str(buyer_clock)]))  
+            while self.clockCheck(buyer_id):
+                self.printOnConsole(" ".join([str(buyer_id),'Waiting for other']))
+                time.sleep(2)
+        else:
+            self.clock_adjust(buyer_clock,buyer_id)   
+            self.printOnConsole(" ".join(['Buyer->Trader after recieve','Trader clock:',str(self.clock),'Buyer clock:',str(buyer_clock)]))  
+
         seller_list = []
         for peer_id,seller_info in self.trade_list.items():
             if seller_info["product_name"] == product_name:
@@ -393,7 +407,6 @@ class peer:
         if self.db["Role"] == "Buyer":
             self.printOnConsole (" ".join(["Peer ", str(self.peer_id), " : Bought ",product_name, " from peer: ",str(seller_id["peer_id"])]))
             self.db['shop'].remove(product_name)  
-            self.printOnConsole (str(self.db['shop']))
             #Update buyers clock
             connected,proxy = self.get_rpc(self.trader["host_addr"]) 
             #Increase traders clock
@@ -427,10 +440,10 @@ class peer:
         
 db_load = {
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish"]}',
-    2:'{"Role": "Seller","Inv":{"Fish":10},"shop":{}}',
+    2:'{"Role": "Seller","Inv":{"Fish":3},"shop":{}}',
     3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish"]}',
     4:'{"Role": "Seller","Inv":{"Fish":3,"Boar":0,"Salt":0},"shop":{}}',
-    5:'{"Role": "Buyer","Inv":{},"shop":["Boar","Fish","Salt"]}',
+    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish"]}',
     6:'{"Role": "Seller","Inv":{"Fish":3,"Boar":3,"Salt":3},"shop":{}}',
     7:'{"Role": "Seller","Inv":{"Fish":3,"Boar":3,"Salt":3},"shop":{}}'
 }                   
