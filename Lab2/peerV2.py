@@ -15,7 +15,11 @@ import json
 #What are local events? (Only buy)
 #When A sends again check trader clock if other buyers have completed just as many buys or else wait till they do
 
-
+#all amounts are in USD
+COST_BOAR = 10
+COST_SALT = 5
+COST_FISH = 20
+COMMISSION = 2
 
 # Log a transaction
 def log_transaction(filename,log):
@@ -96,11 +100,14 @@ class peer:
         
         # Trade Counter
         self.trade_count = 0
+        
+        self.balance = self.db["Balance"]
        
         # Semaphores 
         self.flag_won_semaphore = td.BoundedSemaphore(1) 
         self.trade_list_semaphore = td.BoundedSemaphore(1)
-        self.clock_semaphore = td.BoundedSemaphore(1)       
+        self.clock_semaphore = td.BoundedSemaphore(1)     
+        self.balance_semaphore = td.BoundedSemaphore(1)   
         
    # Helper Method: Returns the proxy for specified address.
     def get_rpc(self,neighbor):
@@ -351,10 +358,11 @@ class peer:
             
             transaction_log = {str(self.clock[self.peer_id]) : {'product_name' : product_name, 'buyer_id' : buyer_id, 'seller_id':seller,'completed':False}}
             log_transaction('transactions.csv',transaction_log)
+
+            #buyer's proxy
             connected,proxy = self.get_rpc(host_addr)
             
             self.trade_list_semaphore.acquire()
-            #todo - remove the count requested by buyer if it exists 
             self.trade_list[str(seller['peer_id'])+str(seller['product_name'])]["product_count"]  = self.trade_list[str(seller['peer_id'])+str(seller['product_name'])]["product_count"] -1     
             
             self.trade_list_semaphore.release()
@@ -363,7 +371,9 @@ class peer:
             connected,proxy = self.get_rpc(seller["host_addr"])
             if connected:# Pass the message to seller that its product is sold
                 proxy.transaction(product_name,seller,buyer_id,self.trade_count)
-                
+
+            self.balance+=COMMISSION
+            print(self.peer_id,"Current Balance:",self.balance)
             # Relog the request as done ***Fix last arg as buyers clock**
             mark_transaction_complete('transactions.csv',transaction_log,str(0))
 
@@ -374,24 +384,56 @@ class peer:
     # transaction : Seller just deducts the product count, Buyer prints the message.    
     def transaction(self, product_name, seller_id, buyer_id,trade_count): # Buyer & Seller
         if self.db["Role"] == "Buyer":
-            print ( "Peer ", self.peer_id, " : Bought ",product_name, " from peer: ",seller_id["peer_id"])
+            print( "Peer ", self.peer_id, " : Bought ",product_name, " from peer: ",seller_id["peer_id"])
             if product_name in self.db['shop']:
-                self.db['shop'].remove(product_name)  #discuss - will need to be removed if all 
+                self.db['shop'].remove(product_name)
+                
+                self.balance_semaphore.acquire()
+                if product_name == "Boar":
+                    self.balance = self.balance - COST_BOAR
+                elif product_name == "Fish":
+                    self.balance = self.balance - COST_FISH
+                elif product_name == "Salt":
+                    self.balance = self.balance - COST_SALT
+                self.balance_semaphore.release()
+                print(self.peer_id,"Current Balance:",self.balance)
+
             if len(self.db['shop']) == 0:
                 print("No products with buyer",self.peer_id)
                 product_list = ["Fish","Salt","Boar"]
                 x = random.randint(0, 2)
                 self.db['shop'].append(product_list[x])
+
+                self.balance_semaphore.acquire()
+                if product_list[x] == "Boar":
+                    self.balance +=COST_BOAR
+                elif product_list[x] == "Fish":
+                    self.balance +=COST_FISH
+                elif product_list[x] == "Salt":
+                    self.balance += COST_SALT 
+                self.balance_semaphore.release()   
+
                 print(self.peer_id,"Started buying:",product_list[x])
+                print(self.peer_id,"Current Balance:",self.balance)
+
                 thread2 = td.Thread(target=self.begin_trading,args=())
                 thread2.start()
         elif self.db["Role"] == "Seller":
             #todo - remove the count requested by buyer
             self.db['Inv'][product_name] = self.db['Inv'][product_name] - 1
-            
+
+            self.balance_semaphore.acquire()
+            if product_name == "Boar":
+                self.balance += (COST_BOAR - COMMISSION)
+            elif product_name == "Fish":
+                self.balance += (COST_FISH - COMMISSION)
+            elif product_name == "Salt":
+                self.balance += (COST_SALT - COMMISSION)
+            self.balance_semaphore.release() 
+            print(self.peer_id,"Current Balance:",self.balance)
+
             #print "Sold ", product_name, " to peer: ",buyer_id["peer_id"]     
             if self.db['Inv'][product_name] == 0:
-                #del self.db['Inv'][product_name]
                 
                 # Refill the item with seller               
                 x = random.randint(1, 50)
@@ -402,13 +444,12 @@ class peer:
                 if connected: 
                     proxy.register_products(seller_info)
 db_load = {
-    1:'{"Role": "Buyer","Inv":{},"shop":["Fish"]}',
-    2:'{"Role": "Seller","Inv":{"Fish":3},"shop":{}}',
-    3:'{"Role": "Buyer","Inv":{},"shop":["Salt"]}',
-    4:'{"Role": "Seller","Inv":{"Fish":2,"Boar":1,"Salt":2},"shop":{}}',
-    5:'{"Role": "Buyer","Inv":{},"shop":["Boar","Fish","Salt"]}',
-    6:'{"Role": "Seller","Inv":{"Fish":300,"Boar":300,"Salt":3},"shop":{}}',
-    7:'{"Role": "Seller","Inv":{"Fish":300,"Boar":300,"Salt":3},"shop":{}}'
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish"],"Balance": 20}',
+    2:'{"Role": "Seller","Inv":{"Fish":3},"shop":{},"Balance": 0}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Boar"],"Balance": 15}',
+    4:'{"Role": "Seller","Inv":{"Fish":2,"Boar":1,"Salt":2},"shop":{},"Balance": 0}',
+    5:'{"Role": "Seller","Inv":{"Fish":2,"Boar":1,"Salt":3},"shop":{},"Balance": 0}',
+    6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
 }                   
 if __name__ == "__main__":
     port = 10030
