@@ -98,9 +98,9 @@ class peer:
         self.trade_count = 0
        
         # Semaphores 
-        self.flag_won_semaphore = td.BoundedSemaphore(1) 
-        self.trade_list_semaphore = td.BoundedSemaphore(1)
-        self.clock_semaphore = td.BoundedSemaphore(1)    
+        self.flag_won_semaphore = Lock() 
+        self.trade_list_semaphore = Lock()
+        self.clock_semaphore = Lock()    
         
    # Helper Method: Returns the proxy for specified address.
     def get_rpc(self,neighbor):
@@ -143,14 +143,14 @@ class peer:
     # Subsequent action is to set election running flag up.
     # This flag indicates to buyer who wants to buy, to wait till the election to restart the buying process.
     def election_restart_message(self):
-        self.flag_won_semaphore.acquire()
-        self.isElectionRunning = True
-        if self.db['Role'] == "Trader": 
-            if len(self.db['shop'])!= 0:
-                self.db['Role'] = "Buyer"
-            else:
-                self.db['Role'] = "Seller"
-        self.flag_won_semaphore.release()
+        with self.flag_won_semaphore:
+            self.isElectionRunning = True
+            if self.db['Role'] == "Trader": 
+                if len(self.db['shop'])!= 0:
+                    self.db['Role'] = "Buyer"
+                else:
+                    self.db['Role'] = "Seller"
+            
         
     # Helper method : To send election restart messages to a peer on a new thread.      
     def send_restart_election_messages(self,_,neighbor):
@@ -195,9 +195,8 @@ class peer:
                 x = len(peers[peers > self.peer_id])
 
                 if x > 0:
-                    self.flag_won_semaphore.acquire()
-                    self.isElectionRunning = True # Set the flag
-                    self.flag_won_semaphore.release()
+                    with self.flag_won_semaphore:
+                        self.isElectionRunning = True # Set the flag
                     self.didReceiveOK = False
                     for neighbor in self.neighbors:
                         if neighbor['peer_id'] > self.peer_id:
@@ -293,6 +292,7 @@ class peer:
         elif self.db["Role"] == "Buyer":
             time.sleep(1.0 + self.peer_id/10.0) # Allow sellers to register the products.
             while len(self.db['shop'])!= 0: 
+                time.sleep(random.randint(1,5))
                 if self.isElectionRunning == True:
                     return # If election has started, then stop the process. (This process is restarted once a new leader is elected.)
                 else:
@@ -353,10 +353,7 @@ class peer:
     #When there's only few items left then check the current buyer and all other buyers clock. 
     #If other buyers have lower cclock then make the current buyer sleep for 5 seconds.   
     def lookup(self,buyer_id,host_addr,product_name,buyer_clock):
-        #----------------
-        if buyer_id == 3:
-            time.sleep(5)
-        #----------------
+
         buyer_clock = json.loads(buyer_clock)
         buyer_clock = {int(k):int(v) for k,v in buyer_clock.items()}
 
@@ -408,13 +405,13 @@ class peer:
             self.printOnConsole (" ".join(["Peer ", str(self.peer_id), " : Bought ",product_name, " from peer: ",str(seller_id["peer_id"])]))
             self.db['shop'].remove(product_name)  
             #Update buyers clock
-            connected,proxy = self.get_rpc(self.trader["host_addr"]) 
+            #connected,proxy = self.get_rpc(self.trader["host_addr"]) 
             #Increase traders clock
-            other_clock = json.loads(proxy.clock_forward())
-            other_clock = {int(k):int(v) for k,v in other_clock.items()}
+            #other_clock = json.loads(proxy.clock_forward())
+            #other_clock = {int(k):int(v) for k,v in other_clock.items()}
             #Have to pass traders clock here not copy
-            self.clock_adjust(other_clock,self.trader['peer_id'])
-            self.printOnConsole(" ".join(['Trader->Buyer','Trader clock:',str(other_clock),'Buyer clock:',str(self.clock)]))
+            #self.clock_adjust(other_clock,self.trader['peer_id'])
+            #self.printOnConsole(" ".join(['Trader->Buyer','Trader clock:',str(other_clock),'Buyer clock:',str(self.clock)]))
         elif self.db["Role"] == "Seller":
             self.db['Inv'][product_name] = self.db['Inv'][product_name] - 1
             #print "Sold ", product_name, " to peer: ",buyer_id["peer_id"]     
