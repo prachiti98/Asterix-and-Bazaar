@@ -401,8 +401,11 @@ class peer:
             connected,proxy = self.get_rpc(seller["host_addr"])
             if connected:# Pass the message to seller that its product is sold
                 proxy.transaction(product_name,seller,buyer_id,self.trade_count)
-            #print(self.peer_id,"Current Balance:",self.balance)
+
+            self.balance+=COMMISSION
+            print(self.peer_id,"Trader's Current Balance:",self.balance)
                 
+
             # Relog the request as done ***Fix last arg as buyers clock**
             mark_transaction_complete('transactions.csv',transaction_log,str(0))
 
@@ -422,7 +425,8 @@ class peer:
                 elif product_name == "Salt":	
                     self.balance = self.balance - COST_SALT	
                 self.balance_semaphore.release()	
-                #print(self.peer_id,"Current Balance:",self.balance)	
+                print(self.peer_id,"Current Balance:",self.balance)	
+
             if len(self.db['shop']) == 0:	
                 #print("No products with buyer",self.peer_id)	
                 product_list = ["Fish","Salt","Boar"]	
@@ -437,7 +441,7 @@ class peer:
                     self.balance += COST_SALT 	
                 self.balance_semaphore.release()   	
                 #print(self.peer_id,"Started buying:",product_list[x])	
-                #print(self.peer_id,"Current Balance:",self.balance)	
+                print(self.peer_id,"Current Balance:",self.balance)	
                 thread2 = td.Thread(target=self.begin_trading,args=())	
                 thread2.start()	
         elif self.db["Role"] == "Seller":	
@@ -451,7 +455,7 @@ class peer:
             elif product_name == "Salt":	
                 self.balance += (COST_SALT - COMMISSION)	
             self.balance_semaphore.release() 	
-            #print(self.peer_id,"Current Balance:",self.balance)	
+            print(self.peer_id,"Current Balance:",self.balance)	
             #print "Sold ", product_name, " to peer: ",buyer_id["peer_id"]     	
             if self.db['Inv'][product_name] == 0:	
                 	
@@ -466,15 +470,15 @@ class peer:
 
         
 db_load = {
-    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 20}',
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 140}',
     2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{},"Balance": 0}',
-    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 15}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Boar","Boar"],"Balance": 40}',
     4:'{"Role": "Seller","Inv":{"Fish":5,"Boar":1,"Salt":2},"shop":{},"Balance": 0}',
     5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 0}',
     6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
 }                   
 if __name__ == "__main__":
-    port = 10006
+    port = 10030
     host_ip = '127.0.0.1'
     totalPeers = int(sys.argv[1])
     for peerId in range(1,totalPeers+1):
