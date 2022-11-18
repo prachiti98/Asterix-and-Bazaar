@@ -16,6 +16,12 @@ from threading import Lock
 #What are local events? (Only buy)
 #When A sends again check trader clock if other buyers have completed just as many buys or else wait till they do
 
+#all amounts are in USD
+COST_BOAR = 10
+COST_SALT = 5
+COST_FISH = 20
+COMMISSION = 2
+
 addLock = Lock()
 
 # Log a transaction
@@ -96,11 +102,14 @@ class peer:
         
         # Trade Counter
         self.trade_count = 0
+
+        self.balance = self.db["Balance"]
        
         # Semaphores 
         self.flag_won_semaphore = Lock() 
         self.trade_list_semaphore = Lock()
         self.clock_semaphore = Lock()    
+        self.balance_semaphore = td.BoundedSemaphore(1) 
         
    # Helper Method: Returns the proxy for specified address.
     def get_rpc(self,neighbor):
@@ -279,15 +288,11 @@ class peer:
         # If Seller, register the poducts.
         if self.db["Role"] == "Seller":
             connected,proxy = self.get_rpc(self.trader["host_addr"])
-            p_n = None
-            p_c = None
             for product_name, product_count in self.db['Inv'].items():
                 if product_count > 0:
-                    p_n= product_name
-                    p_c = product_count
-            seller_info = {'seller': {'peer_id':self.peer_id,'host_addr':self.host_addr},'product_name':p_n,'product_count':p_c} 
-            if connected:
-                proxy.register_products(seller_info)
+                    seller_info = {'seller': {'peer_id':self.peer_id,'host_addr':self.host_addr,'product_name':product_name},'product_name':product_name,'product_count':product_count} 	
+                if connected:
+                    proxy.register_products(seller_info)
         # If buyer, wait for 2 sec for seller to register products and then start buying.
         elif self.db["Role"] == "Buyer":
             time.sleep(1.0 + self.peer_id/10.0) # Allow sellers to register the products.
@@ -329,12 +334,14 @@ class peer:
     # register_products: Trader registers the seller goods.
     def register_products(self,seller_info): # Trader End.
         self.trade_list_semaphore.acquire()
-        self.trade_list[str(seller_info['seller']['peer_id'])] = seller_info 
+        self.trade_list[str(seller_info['seller']['peer_id'])+'_'+str(seller_info['seller']['product_name'])] = seller_info 	
+        seller_log(self.trade_list) #not sure
         self.trade_list_semaphore.release()
 
     # Check if all other buyers have already bought, If this is true then can buy else wait for others to buy first 
     def clockCheck(self,buyer_id):
-        buyer_keys = map(int,list(set([str(i) for i in range(1,totalPeers+1)])-set(list(self.trade_list.keys())+list(str(self.trader['peer_id'])))))  # All buyers
+        buyer_keys = map(int,list(set([str(i) for i in range(1,totalPeers+1)])-set(list(i.split('_')[0] for i in list(self.trade_list.keys()))+list(str(self.trader['peer_id'])))))  # All buyers
+        #print(buyer_keys)
         only_buyer  = dict((k, self.clock[k]) for k in buyer_keys if k in self.clock)
         #only_buyer[buyer_id]-=1
         return any([only_buyer[buyer_id]-only_buyer[i]>1 for i in only_buyer])
@@ -387,62 +394,84 @@ class peer:
             connected,proxy = self.get_rpc(host_addr)
     
             self.trade_list_semaphore.acquire()
-            self.trade_list[str(seller['peer_id'])]["product_count"]  = self.trade_list[str(seller['peer_id'])]["product_count"] -1     
+            self.trade_list[str(seller['peer_id'])+'_'+str(seller['product_name'])]["product_count"]  = self.trade_list[str(seller['peer_id'])+'_'+str(seller['product_name'])]["product_count"] -1     	   
             self.trade_list_semaphore.release()
             if connected: # Pass the message to buyer that transaction is succesful
-                proxy.transaction(product_name,seller,json.dumps(self.clock))
+                proxy.transaction(product_name,seller,buyer_id,self.trade_count)
             connected,proxy = self.get_rpc(seller["host_addr"])
             if connected:# Pass the message to seller that its product is sold
-                proxy.transaction(product_name,seller,json.dumps(self.clock))
+                proxy.transaction(product_name,seller,buyer_id,self.trade_count)
+            #print(self.peer_id,"Current Balance:",self.balance)
                 
             # Relog the request as done ***Fix last arg as buyers clock**
             mark_transaction_complete('transactions.csv',transaction_log,str(0))
 
-            
-    # transaction : Seller just deducts the product count, Buyer prints the message.    
-    def transaction(self, product_name, seller_id, other_clock): # Buyer & Seller
-        if self.db["Role"] == "Buyer":
+        
+	    # transaction : Seller just deducts the product count, Buyer prints the message.    	
+    def transaction(self, product_name, seller_id, buyer_id,trade_count): # Buyer & Seller	
+        if self.db["Role"] == "Buyer":	
             self.printOnConsole (" ".join(["Peer ", str(self.peer_id), " : Bought ",product_name, " from peer: ",str(seller_id["peer_id"])]))
-            self.db['shop'].remove(product_name)  
-            #Update buyers clock
-            #connected,proxy = self.get_rpc(self.trader["host_addr"]) 
-            #Increase traders clock
-            #other_clock = json.loads(proxy.clock_forward())
-            #other_clock = {int(k):int(v) for k,v in other_clock.items()}
-            #Have to pass traders clock here not copy
-            #self.clock_adjust(other_clock,self.trader['peer_id'])
-            #self.printOnConsole(" ".join(['Trader->Buyer','Trader clock:',str(other_clock),'Buyer clock:',str(self.clock)]))
-        elif self.db["Role"] == "Seller":
-            self.db['Inv'][product_name] = self.db['Inv'][product_name] - 1
-            #print "Sold ", product_name, " to peer: ",buyer_id["peer_id"]     
-            if self.db['Inv'][product_name] == 0:
-                self.printOnConsole('Restocking!')
-                # Pickup a random item and register that product with trader.
-                product_list = ['Fish','Salt','Boar']
-                x = random.randint(0, 0)
-                self.db['Inv'][product_list[x]] = 3
-                seller_info = {'seller': {'peer_id':self.peer_id,'host_addr':self.host_addr},'product_name':product_list[x],'product_count':3}
-                
-                connected,proxy = self.get_rpc(self.trader["host_addr"]) 
-                if connected: 
-                    proxy.register_products(seller_info)
-            #Update sellers clock
-            #connected,proxy = self.get_rpc(self.trader["host_addr"]) 
-            #other_clock = json.loads(proxy.clock_forward('Buyer',self.peer_id))
-            #other_clock = {int(k):int(v) for k,v in other_clock.items()}
-            #Have to pass traders clock here not copy
-            #self.clock_adjust(other_clock,self.trader['peer_id'])
-
+            if product_name in self.db['shop']:	
+                self.db['shop'].remove(product_name)	
+                	
+                self.balance_semaphore.acquire()	
+                if product_name == "Boar":	
+                    self.balance = self.balance - COST_BOAR	
+                elif product_name == "Fish":	
+                    self.balance = self.balance - COST_FISH	
+                elif product_name == "Salt":	
+                    self.balance = self.balance - COST_SALT	
+                self.balance_semaphore.release()	
+                #print(self.peer_id,"Current Balance:",self.balance)	
+            if len(self.db['shop']) == 0:	
+                #print("No products with buyer",self.peer_id)	
+                product_list = ["Fish","Salt","Boar"]	
+                x = random.randint(0, 0)	
+                self.db['shop'].append(product_list[x])	
+                self.balance_semaphore.acquire()	
+                if product_list[x] == "Boar":	
+                    self.balance +=COST_BOAR	
+                elif product_list[x] == "Fish":	
+                    self.balance +=COST_FISH	
+                elif product_list[x] == "Salt":	
+                    self.balance += COST_SALT 	
+                self.balance_semaphore.release()   	
+                #print(self.peer_id,"Started buying:",product_list[x])	
+                #print(self.peer_id,"Current Balance:",self.balance)	
+                thread2 = td.Thread(target=self.begin_trading,args=())	
+                thread2.start()	
+        elif self.db["Role"] == "Seller":	
+            #todo - remove the count requested by buyer	
+            self.db['Inv'][product_name] = self.db['Inv'][product_name] - 1	
+            self.balance_semaphore.acquire()	
+            if product_name == "Boar":	
+                self.balance += (COST_BOAR - COMMISSION)	
+            elif product_name == "Fish":	
+                self.balance += (COST_FISH - COMMISSION)	
+            elif product_name == "Salt":	
+                self.balance += (COST_SALT - COMMISSION)	
+            self.balance_semaphore.release() 	
+            #print(self.peer_id,"Current Balance:",self.balance)	
+            #print "Sold ", product_name, " to peer: ",buyer_id["peer_id"]     	
+            if self.db['Inv'][product_name] == 0:	
+                	
+                # Refill the item with seller               	
+                x = random.randint(1, 10)	
+                self.db['Inv'][product_name] = x	
+                seller_info = {'seller': {'peer_id':self.peer_id,'host_addr':self.host_addr,'product_name':product_name},'product_name':product_name,'product_count':x}	
+                	
+                connected,proxy = self.get_rpc(self.trader["host_addr"]) 	
+                if connected: 	
+                    proxy.register_products(seller_info)	
 
         
 db_load = {
-    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish"]}',
-    2:'{"Role": "Seller","Inv":{"Fish":3},"shop":{}}',
-    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish"]}',
-    4:'{"Role": "Seller","Inv":{"Fish":3,"Boar":0,"Salt":0},"shop":{}}',
-    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish"]}',
-    6:'{"Role": "Seller","Inv":{"Fish":3,"Boar":3,"Salt":3},"shop":{}}',
-    7:'{"Role": "Seller","Inv":{"Fish":3,"Boar":3,"Salt":3},"shop":{}}'
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 20}',
+    2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{},"Balance": 0}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 15}',
+    4:'{"Role": "Seller","Inv":{"Fish":5,"Boar":1,"Salt":2},"shop":{},"Balance": 0}',
+    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 0}',
+    6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
 }                   
 if __name__ == "__main__":
     port = 10006
