@@ -237,7 +237,7 @@ class peer:
     
     # StartElection: This methods starts the election by forwading election message to the peers, if there are no higehr peers, then its the leader and sends the "I won" message to the peers.        
     def StartElection(self):
-        self.printOnConsole (" ".join(["Peer ",str(self.peerId),": Started the election"]))
+        self.printOnConsole(" ".join(["Peer ",str(self.peerId),": Started the election"]))
         with self.WonLock:
             self.isElectionRunning = True # Set the flag
         time.sleep(1)
@@ -299,7 +299,6 @@ class peer:
                         proxy.lookup(self.peerId,self.HostAddr,item,json.dumps(self.clock))
                         timeEnd = datetime.datetime.now()
                         self.calculateLatency(timeStart, timeEnd)
-                        time.sleep(1.0)
                     else: # Trader is Down.
                         # Re-Election
                         for neighbor in self.neighbors:
