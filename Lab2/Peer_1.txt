@@ -1,0 +1,40 @@
+Peer  1 : Started the election 
+Peer  1 : Election Won Msg Received 
+Peer  1 : Requesting  Fish 
+Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 120 
+Peer  1 : Requesting  Fish 
+Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 100 
+Peer  1 : Requesting  Fish 
+Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 80 
+Peer  1 : Requesting  Fish 
+Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 60 
+Peer  1 : Requesting  Fish 
+Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 40 
+Peer  1 : Requesting  Fish 
+Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 20 
+Peer  1 : Requesting  Fish 
+Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 0 
+1 Current Balance: 5 
+Peer  1 : Requesting  Salt 
+Peer  1  : Bought  Salt  from peer:  4 
+1 Current Balance: 0 
+1 Current Balance: 20 
+Peer  1 : Requesting  Fish 
+Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 0 
+1 Current Balance: 20 
+Peer  1 : Requesting  Fish 
+Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 0 
+1 Current Balance: 5 
+Peer  1 : Requesting  Salt 
+Peer  1  : Bought  Salt  from peer:  4 
+1 Current Balance: 0 
+1 Current Balance: 10 

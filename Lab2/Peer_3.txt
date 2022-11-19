@@ -1,0 +1,48 @@
+Peer  3 : Election Won Msg Received 
+Peer  3 : Requesting  Boar 
+Peer  3  : Bought  Boar  from peer:  4 
+3 Current Balance: 30 
+Peer  3 : Requesting  Boar 
+Peer  3  : Bought  Boar  from peer:  4 
+3 Current Balance: 20 
+3 Current Balance: 30 
+Peer  3 : Requesting  Boar 
+Peer  3  : Bought  Boar  from peer:  4 
+3 Current Balance: 20 
+3 Current Balance: 25 
+Peer  3 : Requesting  Salt 
+Peer  3  : Bought  Salt  from peer:  4 
+3 Current Balance: 20 
+3 Current Balance: 25 
+Peer  3 : Requesting  Salt 
+Peer  3  : Bought  Salt  from peer:  4 
+3 Current Balance: 20 
+3 Current Balance: 25 
+Peer  3 : Requesting  Salt 
+Peer  3  : Bought  Salt  from peer:  4 
+3 Current Balance: 20 
+3 Current Balance: 40 
+Peer  3 : Requesting  Fish 
+Peer  3  : Bought  Fish  from peer:  2 
+3 Current Balance: 20 
+3 Current Balance: 30 
+Peer  3 : Requesting  Boar 
+Peer  3  : Bought  Boar  from peer:  4 
+3 Current Balance: 20 
+3 Current Balance: 30 
+Peer  3 : Requesting  Boar 
+Peer  3  : Bought  Boar  from peer:  4 
+3 Current Balance: 20 
+3 Current Balance: 25 
+Peer  3 : Requesting  Salt 
+Peer  3  : Bought  Salt  from peer:  4 
+3 Current Balance: 20 
+3 Current Balance: 30 
+Peer  3 : Requesting  Boar 
+Peer  3  : Bought  Boar  from peer:  4 
+3 Current Balance: 20 
+3 Current Balance: 40 
+Peer  3 : Requesting  Fish 
+Peer  3  : Bought  Fish  from peer:  2 
+3 Current Balance: 20 
+3 Current Balance: 25 

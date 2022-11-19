@@ -1,0 +1,14 @@
+Peer  4 : Election Won Msg Received 
+4 Current Balance: 8 
+4 Current Balance: 16 
+4 Current Balance: 24 
+4 Current Balance: 27 
+4 Current Balance: 30 
+4 Current Balance: 33 
+4 Current Balance: 41 
+4 Current Balance: 44 
+4 Current Balance: 47 
+4 Current Balance: 55 
+4 Current Balance: 58 
+4 Current Balance: 66 
+4 Current Balance: 69 

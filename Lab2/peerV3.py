@@ -171,7 +171,8 @@ class peer:
             
     # Helper method : To send the flags and send the "I won" message to peers.
     def ForwardWonMsg(self):
-        self.printOnConsole(" ".join(["Dear buyers and sellers, My ID is ",str(self.peerId), "and I am the new coordinator"]))
+        with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+            f.write(" ".join(["Dear buyers and sellers, My ID is ",str(self.peerId), "and I am the new coordinator",'\n']))
         self.didReceiveWon = True
         self.trader = {'peerId':self.peerId,'HostAddr':self.HostAddr}
         self.db['Role'] = 'Trader'
@@ -225,7 +226,8 @@ class peer:
             # Drop out and wait
             self.didReceiveOK = True
         elif message == 'I won':
-            self.printOnConsole(" ".join(["Peer ",str(self.peerId),": Election Won Msg Received"]))
+            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                f.write(" ".join(["Peer ",str(self.peerId),": Election Won Msg Received",'\n']))
             #self.didReceiveOK = False
             with self.WonLock:
                 self.didReceiveWon = True
@@ -237,7 +239,8 @@ class peer:
     
     # StartElection: This methods starts the election by forwading election message to the peers, if there are no higehr peers, then its the leader and sends the "I won" message to the peers.        
     def StartElection(self):
-        self.printOnConsole(" ".join(["Peer ",str(self.peerId),": Started the election"]))
+        with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+            f.write(" ".join(["Peer ",str(self.peerId),": Started the election",'\n']))
         with self.WonLock:
             self.isElectionRunning = True # Set the flag
         time.sleep(1)
@@ -294,7 +297,8 @@ class peer:
                     if connected:
                         #increment buyer
                         self.clockForward()
-                        self.printOnConsole (" ".join(["Peer ",str(self.peerId), ": Requesting ",item]))
+                        with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                            f.write(" ".join(["Peer ",str(self.peerId), ": Requesting ",item,'\n']))
                         timeStart = datetime.datetime.now()
                         proxy.lookup(self.peerId,self.HostAddr,item,json.dumps(self.clock))
                         timeEnd = datetime.datetime.now()
@@ -356,15 +360,19 @@ class peer:
             if self.tradeList[i]['productName'] == productName:
                     tot_prod+=self.tradeList[i]['productCount']
         if tot_prod<10:
-            self.printOnConsole('Too few')
+            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                f.write('too few'+'\n')
             self.clockAdjust(buyer_clock,buyer_id)   
-            self.printOnConsole(" ".join(['Buyer->Trader after recieve','Trader clock:',str(self.clock),'Buyer clock:',str(buyer_clock)]))  
+            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                f.write(" ".join(['Buyer->Trader after recieve','Trader clock:',str(self.clock),'Buyer clock:',str(buyer_clock),'\n']))  
             while self.clockCheck(buyer_id):
-                self.printOnConsole(" ".join([str(buyer_id),'Waiting for other']))
+                with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                    f.write(" ".join([str(buyer_id),'Waiting for other','\n']))
                 time.sleep(2)
         else:
             self.clockAdjust(buyer_clock,buyer_id)   
-            self.printOnConsole(" ".join(['Buyer->Trader after recieve','Trader clock:',str(self.clock),'Buyer clock:',str(buyer_clock)]))  
+            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                f.write(" ".join(['Buyer->Trader after recieve','Trader clock:',str(self.clock),'Buyer clock:',str(buyer_clock),'\n']))  
         seller_list = []
         for peerId,sellerInfo in self.tradeList.items():
             if sellerInfo["productName"] == productName:
@@ -384,7 +392,8 @@ class peer:
             if connected:# Pass the message to seller that its product is sold
                 proxy.transaction(productName,seller,buyer_id,self.tradeCount)
             self.balance+=COMMISSION
-            print(self.peerId,"Trader's Current Balance:",self.balance)
+            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                f.write(" ".join([str(self.peerId),"Trader's Current Balance:",str(self.balance),"\n"]))
             # Relog the request as done ***Fix last arg as buyers clock**
             mark_transaction_complete('transactions.csv',transaction_log,str(0))
 
@@ -392,7 +401,8 @@ class peer:
 	    # transaction : Seller just deducts the product count, Buyer prints the message.    	
     def transaction(self, productName, sellerId, buyer_id,tradeCount): # Buyer & Seller	
         if self.db["Role"] == "Buyer":	
-            self.printOnConsole(" ".join(["Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"])]))
+            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                f.write(" ".join(["Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
             if productName in self.db['shop']:	
                 self.db['shop'].remove(productName)	
                 with self.balanceLock:
@@ -402,7 +412,8 @@ class peer:
                         self.balance = self.balance - COST_FISH	
                     elif productName == "Salt":	
                         self.balance = self.balance - COST_SALT	
-                print(self.peerId,"Current Balance:",self.balance)	
+                with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                    f.write(" ".join([str(self.peerId),"Current Balance:",str(self.balance),'\n']))	
             if len(self.db['shop']) == 0:	
                 #print("No products with buyer",self.peerId)	
                 productList = ["Fish","Salt","Boar"]	
@@ -414,8 +425,9 @@ class peer:
                     elif productList[x] == "Fish":	
                         self.balance +=COST_FISH	
                     elif productList[x] == "Salt":	
-                        self.balance += COST_SALT 	
-                print(self.peerId,"Current Balance:",self.balance)	
+                        self.balance += COST_SALT 
+                with open('Peer_'+str(self.peerId)+".txt", "a") as f:	
+                    f.write(" ".join([str(self.peerId),"Current Balance:",str(self.balance),'\n']))
         elif self.db["Role"] == "Seller":	
             #todo - remove the count requested by buyer	
             self.db['Inv'][productName] = self.db['Inv'][productName] - 1	
@@ -426,7 +438,8 @@ class peer:
                     self.balance += (COST_FISH - COMMISSION)	
                 elif productName == "Salt":	
                     self.balance += (COST_SALT - COMMISSION)	
-            print(self.peerId,"Current Balance:",self.balance)	
+            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                f.write(" ".join([str(self.peerId),"Current Balance:",str(self.balance),'\n']))	
             if self.db['Inv'][productName] == 0:	
                 # Refill the item with seller               	
                 x = random.randint(1, 10)	
@@ -467,6 +480,10 @@ if __name__ == "__main__":
         thread1 = td.Thread(target=peer_local.startServer,args=()) # Start Server
         thread1.start()    
         # Starting the election, lower peers.
+        try:
+            os.remove('Peer'+'_'+str(peerId)+'.txt')
+        except OSError:
+            pass
         if peerId <= 2:
             thread1 = td.Thread(target=peer_local.StartElection,args=()) # Start Server
             thread1.start()

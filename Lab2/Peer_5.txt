@@ -1,0 +1,43 @@
+Peer  5 : Election Won Msg Received 
+Peer  5 : Requesting  Fish 
+Peer  5  : Bought  Fish  from peer:  2 
+5 Current Balance: -20 
+Peer  5 : Requesting  Fish 
+Peer  5  : Bought  Fish  from peer:  2 
+5 Current Balance: -40 
+Peer  5 : Requesting  Fish 
+Peer  5  : Bought  Fish  from peer:  2 
+5 Current Balance: -60 
+Peer  5 : Requesting  Fish 
+Peer  5  : Bought  Fish  from peer:  2 
+5 Current Balance: -80 
+Peer  5 : Requesting  Fish 
+Peer  5  : Bought  Fish  from peer:  2 
+5 Current Balance: -100 
+Peer  5 : Requesting  Fish 
+Peer  5  : Bought  Fish  from peer:  2 
+5 Current Balance: -120 
+Peer  5 : Requesting  Fish 
+Peer  5  : Bought  Fish  from peer:  2 
+5 Current Balance: -140 
+5 Current Balance: -120 
+Peer  5 : Requesting  Fish 
+Peer  5  : Bought  Fish  from peer:  2 
+5 Current Balance: -140 
+5 Current Balance: -135 
+Peer  5 : Requesting  Salt 
+Peer  5  : Bought  Salt  from peer:  4 
+5 Current Balance: -140 
+5 Current Balance: -120 
+Peer  5 : Requesting  Fish 
+Peer  5  : Bought  Fish  from peer:  2 
+5 Current Balance: -140 
+5 Current Balance: -120 
+Peer  5 : Requesting  Fish 
+Peer  5  : Bought  Fish  from peer:  2 
+5 Current Balance: -140 
+5 Current Balance: -120 
+Peer  5 : Requesting  Fish 
+Peer  5  : Bought  Fish  from peer:  2 
+5 Current Balance: -140 
+5 Current Balance: -135 

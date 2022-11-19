@@ -1,0 +1,24 @@
+Peer  2 : Started the election 
+Peer  2 : Election Won Msg Received 
+2 Current Balance: 18 
+2 Current Balance: 36 
+2 Current Balance: 54 
+2 Current Balance: 72 
+2 Current Balance: 90 
+2 Current Balance: 108 
+2 Current Balance: 126 
+2 Current Balance: 144 
+2 Current Balance: 162 
+2 Current Balance: 180 
+2 Current Balance: 198 
+2 Current Balance: 216 
+2 Current Balance: 234 
+2 Current Balance: 252 
+2 Current Balance: 270 
+2 Current Balance: 288 
+2 Current Balance: 306 
+2 Current Balance: 324 
+2 Current Balance: 342 
+2 Current Balance: 360 
+2 Current Balance: 378 
+2 Current Balance: 396 
