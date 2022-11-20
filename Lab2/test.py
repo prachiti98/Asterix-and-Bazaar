@@ -300,7 +300,7 @@ class peer:
                         #increment buyer
                         self.clockForward()
                         with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                            f.write(" ".join(["Peer ",str(self.peerId), ": Requesting ",item,'\n']))
+                            f.write(" ".join([str(datetime.datetime.now()),"Peer ",str(self.peerId), ": Requesting ",item,'\n']))
                         timeStart = datetime.datetime.now()
                         proxy.lookup(self.peerId,self.hostAddr,item,json.dumps(self.clock))
                         timeEnd = datetime.datetime.now()
@@ -406,7 +406,7 @@ class peer:
     def transaction(self, productName, sellerId, buyer_id,tradeCount): # Buyer & Seller	
         if self.db["Role"] == "Buyer":	
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                f.write(" ".join(["Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
+                f.write(" ".join([str(datetime.datetime.now()),"Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
             if productName in self.db['shop']:	
                 self.db['shop'].remove(productName)	
                 with self.balanceLock:
@@ -461,6 +461,8 @@ class peer:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join(['Trader->Buyer','Trader clock:',str(otherClock),'Seller clock:',str(self.clock),'\n']))
             if self.db['Inv'][productName] == 0:	
+                with open('Seller_'+str(self.peerId)+".txt", "a") as f:
+                    f.write(" ".join(['Trader->Buyer','Trader clock:',str(otherClock),'Seller clock:',str(self.clock),'\n']))
                 # Refill the item with seller               	
                 x = random.randint(1, 10)	
                 self.db['Inv'][productName] = x	
