@@ -471,6 +471,8 @@ class peer:
             if self.db['Inv'][productName] == 0:	
                 # Refill the item with seller               	
                 x = random.randint(1, 10)	
+                with open('Peer_'+str(self.peerId)+".txt", "a") as f:	
+                    f.write(" ".join([str(self.peerId),"restocking",str(productName),'by',str(x),'more','\n']))
                 self.db['Inv'][productName] = x	
                 sellerInfo = {'seller': {'peerId':self.peerId,'hostAddr':self.hostAddr,'productName':productName},'productName':productName,'productCount':x}	
                 connected,proxy = self.getRpc(self.trader["hostAddr"]) 	

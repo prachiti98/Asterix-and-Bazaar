@@ -465,6 +465,8 @@ class peer:
                     f.write(" ".join(['Trader->Buyer','Trader clock:',str(otherClock),'Seller clock:',str(self.clock),'\n']))
                 # Refill the item with seller               	
                 x = random.randint(1, 10)	
+                with open('Peer_'+str(self.peerId)+".txt", "a") as f:	
+                    f.write(" ".join([str(self.peerId),"restocking",str(productName),'by',str(x),'more','\n']))
                 self.db['Inv'][productName] = x	
                 sellerInfo = {'seller': {'peerId':self.peerId,'hostAddr':self.hostAddr,'productName':productName},'productName':productName,'productCount':x}	
                 connected,proxy = self.getRpc(self.trader["hostAddr"]) 	
@@ -495,11 +497,9 @@ testcases = {1:{
 },
 6:{
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 140}',
-    2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{},"Balance": 0}',
+    2:'{"Role": "Seller","Inv":{"Fish":2},"shop":{},"Balance": 0}',
     3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 40}',
     4:'{"Role": "Seller","Inv":{"Fish":5,"Boar":1,"Salt":2},"shop":{},"Balance": 0}',
-    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 0}',
-    6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
 },
 7:{
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 140}',
