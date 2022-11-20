@@ -471,6 +471,19 @@ class peer:
 
         
 testcases = {1:{
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1404}'
+},
+2:{
+    1:'{"Role": "Seller","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1404}',
+    2:'{"Role": "Seller","Inv":{"Fish":15},"shop":{},"Balance": 0}',
+    3:'{"Role": "Seller","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 404}',
+},
+3:{
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1404}',
+    2:'{"Role": "Buyer","Inv":{"Fish":15},"shop":{},"Balance": 0}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 404}',
+},
+4:{
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1404}',
     2:'{"Role": "Seller","Inv":{"Fish":15},"shop":{},"Balance": 0}',
     3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 404}',
@@ -493,35 +506,53 @@ testcases = {1:{
     4:'{"Role": "Seller","Inv":{"Fish":5,"Boar":1,"Salt":2},"shop":{},"Balance": 0}',
     5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 0}',
     6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
-} }                     
+},
+8:{
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 140}',
+    2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{},"Balance": 0}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 40}',
+    4:'{"Role": "Seller","Inv":{"Fish":5,"Boar":1,"Salt":2},"shop":{},"Balance": 0}',
+    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 0}',
+    6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
+}
+}  
+                   
 if __name__ == "__main__":
     port = 10030
     HostIp = '127.0.0.1'
     testCase = int(sys.argv[1])
     totalPeers = len(testcases[testCase].values())
     print("Marketplace is live! Check Peer_X.txt for logging!\n")
-    for peerId in range(1,totalPeers+1):
-        hostAddr = HostIp + ":" + str(port+peerId)
-        peerId = peerId
-        db = json.loads(testcases[testCase][peerId])
-        num_peers = totalPeers
-        
-        # Computing Neigbors
-        peer_ids = [x for x in range(1,num_peers+1)]
-        host_ports = [(port + x) for x in range(1,num_peers+1)]
-        host_addrs = [(HostIp + ':' + str(port)) for port in host_ports]
-        neighbors = [{'peerId':p,'hostAddr':h} for p,h in zip(peer_ids,host_addrs)]
-        neighbors.remove({'peerId':peerId,'hostAddr':hostAddr})
-        
-        #Declare a peer variable and start it.  
-        peer_local = peer(hostAddr,peerId,neighbors,db,totalPeers)
-        thread1 = td.Thread(target=peer_local.startServer,args=()) # Start Server
-        thread1.start()    
-        # Starting the election, lower peers.
-        try:
-            os.remove('Peer'+'_'+str(peerId)+'.txt')
-        except OSError:
-            pass
-        if peerId <= 2:
-            thread1 = td.Thread(target=peer_local.startElection,args=()) # Start Server
-            thread1.start()
+    if totalPeers<3:
+        print('Less than 3 peers passed!')
+    else:
+        buyerCnt = sum([1 if 'Buyer' in testcases[testCase][i] else 0 for i in testcases[testCase]])
+        sellerCnt = sum([1 if 'Seller' in testcases[testCase][i] else 0 for i in testcases[testCase]])
+        if buyerCnt<1 or sellerCnt<1:
+            print('Enter atleast 1 buyer and seller!')
+        else:
+            for peerId in range(1,totalPeers+1):
+                hostAddr = HostIp + ":" + str(port+peerId)
+                peerId = peerId
+                db = json.loads(testcases[testCase][peerId])
+                num_peers = totalPeers
+                
+                # Computing Neigbors
+                peer_ids = [x for x in range(1,num_peers+1)]
+                host_ports = [(port + x) for x in range(1,num_peers+1)]
+                host_addrs = [(HostIp + ':' + str(port)) for port in host_ports]
+                neighbors = [{'peerId':p,'hostAddr':h} for p,h in zip(peer_ids,host_addrs)]
+                neighbors.remove({'peerId':peerId,'hostAddr':hostAddr})
+                
+                #Declare a peer variable and start it.  
+                peer_local = peer(hostAddr,peerId,neighbors,db,totalPeers)
+                thread1 = td.Thread(target=peer_local.startServer,args=()) # Start Server
+                thread1.start()    
+                # Starting the election, lower peers.
+                try:
+                    os.remove('Peer'+'_'+str(peerId)+'.txt')
+                except OSError:
+                    pass
+                if peerId <= 2:
+                    thread1 = td.Thread(target=peer_local.startElection,args=()) # Start Server
+                    thread1.start()

@@ -67,9 +67,9 @@ def read_seller_log():
 # Return any unserved requests.    
 def get_unserved_requests():
     with open('transactions.csv','r', newline='') as csvF:
-        transaction_log = csv.reader(csvF,delimiter = ' ')
+        transactionLog = csv.reader(csvF,delimiter = ' ')
         open_requests = []
-        transaction_list = list(transaction_log)
+        transaction_list = list(transactionLog)
         last_request = json.loads(transaction_list[len(transaction_list)-1][0])
         for i,j in last_request.items():
             _,v = i,j
@@ -381,16 +381,16 @@ class peer:
             self.clockAdjust(buyer_clock,buyer_id)   
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join(['Buyer->Trader after recieve','Trader clock:',str(self.clock),'Buyer clock:',str(buyer_clock),'\n']))  
-        seller_list = []
+        sellerList = []
         for peerId,sellerInfo in self.tradeList.items():
             if sellerInfo["productName"] == productName:
                 #print "Product Found"
-                seller_list.append(sellerInfo["seller"])
-        if len(seller_list) > 0:
+                sellerList.append(sellerInfo["seller"])
+        if len(sellerList) > 0:
             # Log the request
-            seller = seller_list[0]
-            transaction_log = {str(self.clock[self.peerId]) : {'productName' : productName, 'buyer_id' : buyer_id, 'sellerId':seller,'completed':False}}
-            log_transaction('transactions.csv',transaction_log)
+            seller = sellerList[0]
+            transactionLog = {str(self.clock[self.peerId]) : {'productName' : productName, 'buyer_id' : buyer_id, 'sellerId':seller,'completed':False}}
+            log_transaction('transactions.csv',transactionLog)
             connected,proxy = self.getRpc(hostAddr)
             with self.tradeListLock:
                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1     	   
@@ -403,7 +403,7 @@ class peer:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(self.peerId),"Trader's Current Balance:",str(self.balance),"\n"]))
             # Relog the request as done ***Fix last arg as buyers clock**
-            mark_transaction_complete('transactions.csv',transaction_log,str(0))
+            mark_transaction_complete('transactions.csv',transactionLog,str(0))
         else:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(self.peerId),"Item is not present!","\n"]))
@@ -491,28 +491,36 @@ if __name__ == "__main__":
     HostIp = '127.0.0.1'
     totalPeers = int(sys.argv[1])
     print("Marketplace is live! Check Peer_X.txt for logging!\n")
-    for peerId in range(1,totalPeers+1):
-        hostAddr = HostIp + ":" + str(port+peerId)
-        peerId = peerId
-        db = json.loads(db_load[peerId])
-        num_peers = totalPeers
-        
-        # Computing Neigbors
-        peer_ids = [x for x in range(1,num_peers+1)]
-        host_ports = [(port + x) for x in range(1,num_peers+1)]
-        host_addrs = [(HostIp + ':' + str(port)) for port in host_ports]
-        neighbors = [{'peerId':p,'hostAddr':h} for p,h in zip(peer_ids,host_addrs)]
-        neighbors.remove({'peerId':peerId,'hostAddr':hostAddr})
-        
-        #Declare a peer variable and start it.  
-        peer_local = peer(hostAddr,peerId,neighbors,db,totalPeers)
-        thread1 = td.Thread(target=peer_local.startServer,args=()) # Start Server
-        thread1.start()    
-        # Starting the election, lower peers.
-        try:
-            os.remove('Peer'+'_'+str(peerId)+'.txt')
-        except OSError:
-            pass
-        if peerId <= 2:
-            thread1 = td.Thread(target=peer_local.startElection,args=()) # Start Server
-            thread1.start()
+    if totalPeers<3:
+        print('Less than 3 peers passed!')
+    else:
+        buyerCnt = sum([1 if 'Buyer' in db_load[i] else 0 for i in db_load])
+        sellerCnt = sum([1 if 'Seller' in db_load[i] else 0 for i in db_load])
+        if buyerCnt<1 or sellerCnt<1:
+            print('Enter atleast 1 buyer and seller!')
+        else:
+            for peerId in range(1,totalPeers+1):
+                hostAddr = HostIp + ":" + str(port+peerId)
+                peerId = peerId
+                db = json.loads(db_load[peerId])
+                num_peers = totalPeers
+                
+                # Computing Neigbors
+                peer_ids = [x for x in range(1,num_peers+1)]
+                host_ports = [(port + x) for x in range(1,num_peers+1)]
+                host_addrs = [(HostIp + ':' + str(port)) for port in host_ports]
+                neighbors = [{'peerId':p,'hostAddr':h} for p,h in zip(peer_ids,host_addrs)]
+                neighbors.remove({'peerId':peerId,'hostAddr':hostAddr})
+                
+                #Declare a peer variable and start it.  
+                peer_local = peer(hostAddr,peerId,neighbors,db,totalPeers)
+                thread1 = td.Thread(target=peer_local.startServer,args=()) # Start Server
+                thread1.start()    
+                # Starting the election, lower peers.
+                try:
+                    os.remove('Peer'+'_'+str(peerId)+'.txt')
+                except OSError:
+                    pass
+                if peerId <= 2:
+                    thread1 = td.Thread(target=peer_local.startElection,args=()) # Start Server
+                    thread1.start()
