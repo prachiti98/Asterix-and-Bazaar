@@ -102,7 +102,7 @@ class peer:
         self.tradeCount = 0
         self.balance = self.db["Balance"]
         # Semaphores 
-        self.WonLock = Lock() 
+        self.wonLock = Lock() 
         self.tradeListLock = Lock()
         self.clockLock = Lock()    
         self.balanceLock = Lock()  
@@ -151,7 +151,7 @@ class peer:
     # Subsequent action is to set election running flag up.
     # This flag indicates to buyer who wants to buy, to wait till the election to restart the buying process.
     def electionRestart(self):
-        with self.WonLock:
+        with self.wonLock:
             self.isElectionRunning = True
             if self.db['Role'] == "Trader": 
                 if len(self.db['shop'])!= 0:
@@ -172,13 +172,13 @@ class peer:
             proxy.electionMessage(message,{'peerId':self.peerId,'hostAddr':self.hostAddr})
 
     # Helper method : To send the flags and send the "I won" message to peers.
-    def ForwardWonMsg(self):
+    def forwardWonMsg(self):
         with open('Peer_'+str(self.peerId)+".txt", "a") as f:
             f.write(" ".join(["Dear buyers and sellers, My ID is ",str(self.peerId), "and I am the new coordinator",'\n']))
         self.didReceiveWon = True
         self.trader = {'peerId':self.peerId,'hostAddr':self.hostAddr}
         self.db['Role'] = 'Trader'
-        self.WonLock.release()
+        self.wonLock.release()
         for neighbor in self.neighbors:
             thread = td.Thread(target=self.sendMsg,args=("I won",neighbor)) # Start Server
             thread.start()         
@@ -202,7 +202,7 @@ class peer:
                 peers = np.array(peers)
                 x = len(peers[peers > self.peerId])
                 if x > 0:
-                    with self.WonLock:
+                    with self.wonLock:
                         self.isElectionRunning = True # Set the flag
                     self.didReceiveOK = False
                     for neighbor in self.neighbors:
@@ -213,17 +213,17 @@ class peer:
                                 thread = td.Thread(target=self.sendMsg,args=("election",neighbor)) # Start Server
                                 thread.start()
                     time.sleep(2.0)
-                    self.WonLock.acquire()
+                    self.wonLock.acquire()
                     if self.didReceiveOK == False and self.didReceiveWon == False: 
-                        self.ForwardWonMsg() # Release of semaphore is done by that method.
+                        self.forwardWonMsg() # Release of semaphore is done by that method.
                     else:
-                        self.WonLock.release()      
+                        self.wonLock.release()      
                 elif x == 0:
-                    self.WonLock.acquire()
+                    self.wonLock.acquire()
                     if self.didReceiveWon == False:
-                        self.ForwardWonMsg()
+                        self.forwardWonMsg()
                     else:
-                        self.WonLock.release()       
+                        self.wonLock.release()       
         elif message == 'OK':
             # Drop out and wait
             self.didReceiveOK = True
@@ -231,7 +231,7 @@ class peer:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join(["Peer ",str(self.peerId),": Election Won Msg Received",'\n']))
             #self.didReceiveOK = False
-            with self.WonLock:
+            with self.wonLock:
                 self.didReceiveWon = True
             self.trader = neighbor
             time.sleep(5.0)
@@ -243,7 +243,7 @@ class peer:
     def startElection(self):
         with open('Peer_'+str(self.peerId)+".txt", "a") as f:
             f.write(" ".join(["Peer ",str(self.peerId),": Started the election",'\n']))
-        with self.WonLock:
+        with self.wonLock:
             self.isElectionRunning = True # Set the flag
         time.sleep(1)
         # Check number of peers higher than you.
@@ -262,14 +262,14 @@ class peer:
                     thread = td.Thread(target=self.sendMsg,args=("election",neighbor)) # Start Server
                     thread.start()  
             time.sleep(2.0)
-            self.WonLock.acquire()
+            self.wonLock.acquire()
             if self.didReceiveOK == False and self.didReceiveWon == False:
-               self.ForwardWonMsg()
+               self.forwardWonMsg()
             else:
-                self.WonLock.release()
+                self.wonLock.release()
         else: # No higher peers
-            self.WonLock.acquire()
-            self.ForwardWonMsg() # Release of semaphore is in ForwardWonMsg
+            self.wonLock.acquire()
+            self.forwardWonMsg() # Release of semaphore is in forwardWonMsg
      
     # beginTrading : For a seller, through this method they register there product at the trader. For buyer, they start lookup process for the products needed, in this lab every lookup process is directed at the trader and he sells those goods on behalf of the sellers.            
     def beginTrading(self):
