@@ -286,6 +286,14 @@ class peer:
                     sellerInfo = {'seller': {'peerId':self.peerId,'hostAddr':self.hostAddr,'productName':productName},'productName':productName,'productCount':productCount} 	
                 if connected:
                     proxy.registerProducts(sellerInfo)
+                else: # Trader is Down in the start itself
+                    # Re-Election
+                    for neighbor in self.neighbors:
+                        thread = td.Thread(target = self.restartElectionMsg,args = (" ",neighbor))
+                        thread.start() # Sending Neighbors reelection notification.
+                    thread = td.Thread(target=self.StartElection,args=())
+                    thread.start()
+                time.sleep(1)
         # If buyer, wait for 2 sec for seller to register products and then start buying.
         elif self.db["Role"] == "Buyer":
             time.sleep(2) # Allow sellers to register the products.
