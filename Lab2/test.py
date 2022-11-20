@@ -398,7 +398,7 @@ class peer:
             mark_transaction_complete('transactions.csv',transaction_log,str(0))
         else:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                f.write(" ".join([str(self.peerId),"Item is not present!","\n"]))
+                f.write(" ".join(["BuyerId:",str(buyer_id),"requesting item is not available!","\n"]))
 
 
         
@@ -510,10 +510,8 @@ testcases = {1:{
 8:{
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 140}',
     2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{},"Balance": 0}',
-    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 40}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Boar"],"Balance": 40}',
     4:'{"Role": "Seller","Inv":{"Fish":5,"Boar":1,"Salt":2},"shop":{},"Balance": 0}',
-    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 0}',
-    6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
 }
 }  
                    
