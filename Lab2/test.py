@@ -470,23 +470,40 @@ class peer:
                     proxy.registerProducts(sellerInfo)	
 
         
-db_load = {
+testcases = {1:{
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1404}',
+    2:'{"Role": "Seller","Inv":{"Fish":15},"shop":{},"Balance": 0}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 404}',
+    4:'{"Role": "Seller","Inv":{"Fish":15},"shop":{},"Balance": 0}',
+    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1440}',
+    6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
+},
+6:{
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 140}',
     2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{},"Balance": 0}',
     3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 40}',
     4:'{"Role": "Seller","Inv":{"Fish":5,"Boar":1,"Salt":2},"shop":{},"Balance": 0}',
     5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 0}',
     6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
-}                   
+},
+7:{
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 140}',
+    2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{},"Balance": 0}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 40}',
+    4:'{"Role": "Seller","Inv":{"Fish":5,"Boar":1,"Salt":2},"shop":{},"Balance": 0}',
+    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 0}',
+    6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
+} }                     
 if __name__ == "__main__":
     port = 10030
     HostIp = '127.0.0.1'
-    totalPeers = int(sys.argv[1])
+    testCase = int(sys.argv[1])
+    totalPeers = len(testcases[testCase].values())
     print("Marketplace is live! Check Peer_X.txt for logging!\n")
     for peerId in range(1,totalPeers+1):
         hostAddr = HostIp + ":" + str(port+peerId)
         peerId = peerId
-        db = json.loads(db_load[peerId])
+        db = json.loads(testcases[testCase][peerId])
         num_peers = totalPeers
         
         # Computing Neigbors
