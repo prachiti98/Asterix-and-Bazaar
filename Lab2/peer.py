@@ -451,6 +451,8 @@ class peer:
         elif self.db["Role"] == "Seller":	
             #todo - remove the count requested by buyer	
             self.db['Inv'][productName] = self.db['Inv'][productName] - 1	
+            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                f.write(" ".join([str(datetime.datetime.now()),str(self.peerId),"sold an item. Remaining items are:",str( self.db['Inv']),'\n']))	
             with self.balanceLock:
                 if productName == "Boar":	
                     self.balance += (COST_BOAR - COMMISSION)	
