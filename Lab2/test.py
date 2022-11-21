@@ -52,32 +52,6 @@ def logSeller(tradeList):
             log = json.dumps({k:v})
             csvWriter.writerow([log])  
             
-# Read the seller log           
-def read_seller_log():
-    with open('sellerInfo.csv','r', newline='') as csvF:
-        logSeller = csv.reader(csvF,delimiter = ' ')
-        dictionary = {}
-        for log in logSeller:
-            log = json.loads(log[0])
-            for i,j in log.items():
-                k,v = i,j
-            dictionary[k] = v
-    return dictionary
-
-# Return any unserved requests.    
-def get_unserved_requests():
-    with open('transactions.csv','r', newline='') as csvF:
-        transactionLog = csv.reader(csvF,delimiter = ' ')
-        open_requests = []
-        transaction_list = list(transactionLog)
-        last_request = json.loads(transaction_list[len(transaction_list)-1][0])
-        for i,j in last_request.items():
-            _,v = i,j
-        if v['completed'] == False:
-            return last_request
-        else:
-            return None
-
 class AsyncXMLRPCServer(socketserver.ThreadingMixIn,SimpleXMLRPCServer): pass
 
 # Defining peer
@@ -101,6 +75,7 @@ class peer:
         self.tradeListLock = Lock()
         self.clockLock = Lock()    
         self.balanceLock = Lock()  
+        self.tradeCountLock = Lock()
         
    # Gets the the proxy for specified address.
     def getRpc(self,neighbor):
@@ -124,6 +99,11 @@ class peer:
         with self.clockLock:    
             self.clock[self.peerId]+=1
         return json.dumps(self.clock)
+
+    #Increment clock by 1
+    def tradeCountIncrease(self):    
+        with self.tradeCountLock:    
+            self.tradeCount+=1
 
     def clockAdjust(self,sendingClock,sender_id):
         #Element wise max and max of buyer and its own clock 
@@ -332,7 +312,8 @@ class peer:
             self.tradeList[str(sellerInfo['seller']['peerId'])+'_'+str(sellerInfo['seller']['productName'])] = sellerInfo 	
             logSeller(self.tradeList) #not sure
 
-    # Check if all other buyers have already bought, If this is true then can buy else wait for others to buy first 
+    # Check if all other buyers have already bought and informed by the trader that the item was successfully purchased
+    # If all buyers have already bought and been informed by trader then allow the current buy request, else delay the buy request
     def clockCheck(self,buyer_id):
         buyer_keys = map(int,list(set([str(i) for i in range(1,totalPeers+1)])-set(list(i.split('_')[0] for i in list(self.tradeList.keys()))+list(str(self.trader['peerId'])))))  # All buyers
         only_buyer  = dict((k, self.clock[k]) for k in buyer_keys if k in self.clock)
@@ -345,6 +326,7 @@ class peer:
 
     #Trader lookups the product that a buyer wants to buy and replies respective seller and buyer.
     def lookup(self,buyer_id,hostAddr,productName,buyer_clock):
+        self.tradeCountIncrease()
         buyer_clock = json.loads(buyer_clock)
         buyer_clock = {int(k):int(v) for k,v in buyer_clock.items()}
         tot_prod = 0
@@ -375,7 +357,7 @@ class peer:
         if len(sellerList) > 0:
             # Log the request
             seller = sellerList[0]
-            transactionLog = {str(self.clock[self.peerId]) : {'productName' : productName, 'buyer_id' : buyer_id, 'sellerId':seller,'completed':False}}
+            transactionLog = {str(self.tradeCount) : {'productName' : productName, 'buyer_id' : buyer_id, 'sellerId':seller,'completed':False}}
             logTransaction('transactions.csv',transactionLog)
             connected,proxy = self.getRpc(hostAddr)
             with self.tradeListLock:
@@ -522,6 +504,10 @@ if __name__ == "__main__":
     testCase = int(sys.argv[1])
     totalPeers = len(testcases[testCase].values())
     print("Marketplace is live! Check Peer_X.txt for logging!\n")
+    try:
+        os.remove('transactions.csv')
+    except OSError:
+        pass
     if totalPeers<3:
         print('Less than 3 peers passed!')
     else:

@@ -312,7 +312,8 @@ class peer:
             self.tradeList[str(sellerInfo['seller']['peerId'])+'_'+str(sellerInfo['seller']['productName'])] = sellerInfo 	
             logSeller(self.tradeList) #not sure
 
-    # Check if all other buyers have already bought, If this is true then can buy else wait for others to buy first 
+    # Check if all other buyers have already bought and informed by the trader that the item was successfully purchased
+    # If all buyers have already bought and been informed by trader then allow the current buy request, else delay the buy request
     def clockCheck(self,buyer_id):
         buyer_keys = map(int,list(set([str(i) for i in range(1,totalPeers+1)])-set(list(i.split('_')[0] for i in list(self.tradeList.keys()))+list(str(self.trader['peerId'])))))  # All buyers
         only_buyer  = dict((k, self.clock[k]) for k in buyer_keys if k in self.clock)
@@ -461,6 +462,10 @@ if __name__ == "__main__":
     HostIp = '127.0.0.1'
     totalPeers = int(sys.argv[1])
     print("Marketplace is live! Check Peer_X.txt for logging!\n")
+    try:
+        os.remove('transactions.csv')
+    except OSError:
+        pass
     if totalPeers<3:
         print('Less than 3 peers passed!')
     else:
