@@ -23,14 +23,14 @@ COMMISSION = 2
 addLock = Lock()
 
 # Log a transaction
-def log_transaction(filename,log):
+def logTransaction(filename,log):
     log = json.dumps(log)
     with open(filename,'a', newline='') as csvF:
         csvWriter = csv.writer(csvF,delimiter = ' ')
         csvWriter.writerow([log])
         
 # Mark Transaction Complete        
-def mark_transaction_complete(filename,transaction,identifier):
+def completeTransaction(filename,transaction,identifier):
     with open(filename, 'r', newline='') as csvFile:
         reader = csv.reader(csvFile, delimiter=' ')
         for row in reader:
@@ -45,7 +45,7 @@ def mark_transaction_complete(filename,transaction,identifier):
         csvWriter.writerow([row])
 
 # Log the seller info 
-def seller_log(tradeList):
+def logSeller(tradeList):
     with open('sellerInfo.csv','w', newline='') as csvF:
         csvWriter = csv.writer(csvF,delimiter = ' ')
         for k,v in tradeList.items():
@@ -55,9 +55,9 @@ def seller_log(tradeList):
 # Read the seller log           
 def read_seller_log():
     with open('sellerInfo.csv','r', newline='') as csvF:
-        seller_log = csv.reader(csvF,delimiter = ' ')
+        logSeller = csv.reader(csvF,delimiter = ' ')
         dictionary = {}
-        for log in seller_log:
+        for log in logSeller:
             log = json.loads(log[0])
             for i,j in log.items():
                 k,v = i,j
@@ -324,26 +324,13 @@ class peer:
                             thread.start() # Sending Neighbors reelection notification.
                         thread = td.Thread(target=self.startElection,args=())
                         thread.start()
-                    time.sleep(1)
-        """ else:
-            if os.path.isfile("sellerInfo.csv"): 
-               self.tradeList = read_seller_log() 
-            if os.path.isfile("transactions.csv"):
-                unserved_request = get_unserved_requests()
-                if unserved_request is None:
-                    pass
-                else:
-                    pass """
-                    #print(unserved_request)
-                    #for i,j in unserved_request.items():
-                    #    k,v = i,j
-                    #self.lookup(v['buyer_id'],,v['productName'])                          
+                    time.sleep(1)                  
     
     # registerProducts: Trader registers the seller goods.
     def registerProducts(self,sellerInfo): # Trader End.
         with self.tradeListLock:
             self.tradeList[str(sellerInfo['seller']['peerId'])+'_'+str(sellerInfo['seller']['productName'])] = sellerInfo 	
-            seller_log(self.tradeList) #not sure
+            logSeller(self.tradeList) #not sure
 
     # Check if all other buyers have already bought, If this is true then can buy else wait for others to buy first 
     def clockCheck(self,buyer_id):
@@ -389,7 +376,7 @@ class peer:
             # Log the request
             seller = sellerList[0]
             transactionLog = {str(self.clock[self.peerId]) : {'productName' : productName, 'buyer_id' : buyer_id, 'sellerId':seller,'completed':False}}
-            log_transaction('transactions.csv',transactionLog)
+            logTransaction('transactions.csv',transactionLog)
             connected,proxy = self.getRpc(hostAddr)
             with self.tradeListLock:
                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1     	   
@@ -403,7 +390,7 @@ class peer:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(self.peerId),"Trader's Current Balance:",str(self.balance),"\n"]))
             # Relog the request as done ***Fix last arg as buyers clock**
-            mark_transaction_complete('transactions.csv',transactionLog,str(0))
+            completeTransaction('transactions.csv',transactionLog,str(0))
         else:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(self.peerId),"Item is not present!","\n"]))

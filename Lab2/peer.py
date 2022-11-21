@@ -23,14 +23,14 @@ COMMISSION = 2
 addLock = Lock()
 
 # Log a transaction
-def log_transaction(filename,log):
+def logTransaction(filename,log):
     log = json.dumps(log)
     with open(filename,'a', newline='') as csvF:
         csvWriter = csv.writer(csvF,delimiter = ' ')
         csvWriter.writerow([log])
         
 # Mark Transaction Complete        
-def mark_transaction_complete(filename,transaction,identifier):
+def completeTransaction(filename,transaction,identifier):
     with open(filename, 'r', newline='') as csvFile:
         reader = csv.reader(csvFile, delimiter=' ')
         for row in reader:
@@ -45,38 +45,13 @@ def mark_transaction_complete(filename,transaction,identifier):
         csvWriter.writerow([row])
 
 # Log the seller info 
-def seller_log(tradeList):
+def logSeller(tradeList):
     with open('sellerInfo.csv','w', newline='') as csvF:
         csvWriter = csv.writer(csvF,delimiter = ' ')
         for k,v in tradeList.items():
             log = json.dumps({k:v})
             csvWriter.writerow([log])  
             
-# Read the seller log           
-def read_seller_log():
-    with open('sellerInfo.csv','r', newline='') as csvF:
-        seller_log = csv.reader(csvF,delimiter = ' ')
-        dictionary = {}
-        for log in seller_log:
-            log = json.loads(log[0])
-            for i,j in log.items():
-                k,v = i,j
-            dictionary[k] = v
-    return dictionary
-
-# Return any unserved requests.    
-def get_unserved_requests():
-    with open('transactions.csv','r', newline='') as csvF:
-        transactionLog = csv.reader(csvF,delimiter = ' ')
-        open_requests = []
-        transaction_list = list(transactionLog)
-        last_request = json.loads(transaction_list[len(transaction_list)-1][0])
-        for i,j in last_request.items():
-            _,v = i,j
-        if v['completed'] == False:
-            return last_request
-        else:
-            return None
 
 class AsyncXMLRPCServer(socketserver.ThreadingMixIn,SimpleXMLRPCServer): pass
 
@@ -101,7 +76,7 @@ class peer:
         self.tradeListLock = Lock()
         self.clockLock = Lock()    
         self.balanceLock = Lock()  
-        
+        self.tradeCountLock = Lock()
    # Gets the the proxy for specified address.
     def getRpc(self,neighbor):
         #Force the leader to fail. Test using test.py case #5
@@ -123,6 +98,11 @@ class peer:
         with self.clockLock:    
             self.clock[self.peerId]+=1
         return json.dumps(self.clock)
+
+    #Increment clock by 1
+    def tradeCountIncrease(self):    
+        with self.tradeCountLock:    
+            self.tradeCount+=1
 
     def clockAdjust(self,sendingClock,sender_id):
         #Element wise max and max of buyer and its own clock 
@@ -324,25 +304,13 @@ class peer:
                         thread = td.Thread(target=self.startElection,args=())
                         thread.start()
                     time.sleep(1)
-        """ else:
-            if os.path.isfile("sellerInfo.csv"): 
-               self.tradeList = read_seller_log() 
-            if os.path.isfile("transactions.csv"):
-                unserved_request = get_unserved_requests()
-                if unserved_request is None:
-                    pass
-                else:
-                    pass """
-                    #print(unserved_request)
-                    #for i,j in unserved_request.items():
-                    #    k,v = i,j
-                    #self.lookup(v['buyer_id'],,v['productName'])                          
+                     
     
     # registerProducts: Trader registers the seller goods.
     def registerProducts(self,sellerInfo): # Trader End.
         with self.tradeListLock:
             self.tradeList[str(sellerInfo['seller']['peerId'])+'_'+str(sellerInfo['seller']['productName'])] = sellerInfo 	
-            seller_log(self.tradeList) #not sure
+            logSeller(self.tradeList) #not sure
 
     # Check if all other buyers have already bought, If this is true then can buy else wait for others to buy first 
     def clockCheck(self,buyer_id):
@@ -357,6 +325,7 @@ class peer:
 
     #Trader lookups the product that a buyer wants to buy and replies respective seller and buyer.
     def lookup(self,buyer_id,hostAddr,productName,buyer_clock):
+        self.tradeCountIncrease()
         buyer_clock = json.loads(buyer_clock)
         buyer_clock = {int(k):int(v) for k,v in buyer_clock.items()}
         tot_prod = 0
@@ -387,8 +356,8 @@ class peer:
         if len(sellerList) > 0:
             # Log the request
             seller = sellerList[0]
-            transactionLog = {str(self.clock[self.peerId]) : {'productName' : productName, 'buyer_id' : buyer_id, 'sellerId':seller,'completed':False}}
-            log_transaction('transactions.csv',transactionLog)
+            transactionLog = {str(self.tradeCount) : {'productName' : productName, 'buyer_id' : buyer_id, 'sellerId':seller,'completed':False}}
+            logTransaction('transactions.csv',transactionLog)
             connected,proxy = self.getRpc(hostAddr)
             with self.tradeListLock:
                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1     	   
@@ -402,7 +371,7 @@ class peer:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(self.peerId),"Trader's Current Balance:",str(self.balance),"\n"]))
             # Relog the request as done ***Fix last arg as buyers clock**
-            mark_transaction_complete('transactions.csv',transactionLog,str(0))
+            completeTransaction('transactions.csv',transactionLog,str(self.tradeCount))
         else:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(self.peerId),"Item is not present!","\n"]))
@@ -480,11 +449,11 @@ class peer:
 
         
 db_load = {
-    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 140}',
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1140}',
     2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{},"Balance": 0}',
-    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 40}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1140}',
     4:'{"Role": "Seller","Inv":{"Fish":5,"Boar":1,"Salt":2},"shop":{},"Balance": 0}',
-    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 0}',
+    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1100}',
     6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
 }                   
 if __name__ == "__main__":
