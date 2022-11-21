@@ -104,8 +104,12 @@ class peer:
         
    # Gets the the proxy for specified address.
     def getRpc(self,neighbor):
-        if self.requestCount == 20 and self.peerId == 6:
-            return False,'Failed!'
+        #Testing trader failure and re-election
+        if testCase == 5:
+            if self.requestCount == 2 and neighbor == '127.0.0.1:'+str(10030+totalPeers):
+                with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                    f.write('Could not connected to trader!\n')
+                return False,'Failed!'
         a = xmlrpc.client.ServerProxy('http://' + str(neighbor) + '/')
         return True, a
 
@@ -280,6 +284,8 @@ class peer:
                     proxy.registerProducts(sellerInfo)
                 # If trader is down in the beginning, then re-elect.
                 else: 
+                    with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                            f.write("Restarting election\n")
                     for neighbor in self.neighbors:
                         thread = td.Thread(target = self.restartElectionMsg,args = (" ",neighbor))
                         # Start re-election
@@ -311,6 +317,8 @@ class peer:
                     # Trader is Down.
                     else: 
                         # Re-Election
+                        with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                            f.write("Restarting election\n")
                         for neighbor in self.neighbors:
                             thread = td.Thread(target = self.restartElectionMsg,args = (" ",neighbor))
                             thread.start() # Sending Neighbors reelection notification.
@@ -486,12 +494,18 @@ testcases = {1:{
     3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 404}',
 },
 4:{
-    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1404}',
-    2:'{"Role": "Seller","Inv":{"Fish":15},"shop":{},"Balance": 0}',
-    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 404}',
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1404}',
+    2:'{"Role": "Seller","Inv":{"Fish":150},"shop":{},"Balance": 0}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 404}',
     4:'{"Role": "Seller","Inv":{"Fish":15},"shop":{},"Balance": 0}',
     5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1440}',
     6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
+},
+5: {
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 140}',
+    2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{},"Balance": 0}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 140}',
+    4:'{"Role": "Seller","Inv":{"Fish":5,"Boar":1,"Salt":2},"shop":{},"Balance": 0}'
 },
 6:{
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 140}',

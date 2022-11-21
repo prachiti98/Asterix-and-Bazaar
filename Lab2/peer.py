@@ -104,8 +104,11 @@ class peer:
         
    # Gets the the proxy for specified address.
     def getRpc(self,neighbor):
-        if self.requestCount == 20 and self.peerId == 6:
-            return False,'Failed!'
+        #Force the leader to fail. Test using test.py case #5
+        #if self.requestCount == 2 and neighbor == '127.0.0.1:10034':
+        #    print(self.trader["hostAddr"])
+        #    print('Could not connected to trader')
+        #    return False,'Failed!'
         a = xmlrpc.client.ServerProxy('http://' + str(neighbor) + '/')
         return True, a
 
@@ -233,7 +236,7 @@ class peer:
             thread2 = td.Thread(target=self.beginTrading,args=())
             thread2.start()
             # self.leader is neighbor, if  peer is a seller, he has to register his products with the trader.
-            
+
     #Begins the election by forwarding the election message to the peers; if no higher peers are present, the leader takes over and sends the "I won" message to the peers.
     def startElection(self):
         with open('Peer_'+str(self.peerId)+".txt", "a") as f:
@@ -280,6 +283,8 @@ class peer:
                     proxy.registerProducts(sellerInfo)
                 # If trader is down in the beginning, then re-elect.
                 else: 
+                    with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                            f.write("Restarting election\n")
                     for neighbor in self.neighbors:
                         thread = td.Thread(target = self.restartElectionMsg,args = (" ",neighbor))
                         # Start re-election
@@ -310,6 +315,8 @@ class peer:
                         self.calculateLatency(timeStart, timeEnd)
                     # Trader is Down.
                     else: 
+                        with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                            f.write("Restarting election\n")
                         # Re-Election
                         for neighbor in self.neighbors:
                             thread = td.Thread(target = self.restartElectionMsg,args = (" ",neighbor))
