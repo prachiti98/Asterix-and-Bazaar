@@ -1,18 +1,21 @@
-Peer  1 : Started the election 
-Peer  1 : Election Won Msg Received 
-2022-11-21 19:13:42.775606 Peer  1 : Requesting  Fish 
-2022-11-21 19:13:42.779566 Peer  1  : Bought  Fish  from peer:  2 
-1 Current Balance: 120 
-Trader->Buyer Trader clock: {1: 1, 2: 0, 3: 1, 4: 5} Buyer clock: {1: 2, 2: 0, 3: 1, 4: 5} 
-2022-11-21 19:13:48.791759 Peer  1 : Requesting  Fish 
-2022-11-21 19:13:48.794794 Peer  1  : Bought  Fish  from peer:  2 
-1 Current Balance: 100 
-Trader->Buyer Trader clock: {1: 3, 2: 0, 3: 3, 4: 11} Buyer clock: {1: 4, 2: 0, 3: 3, 4: 11} 
-2022-11-21 19:13:50.819045 Peer  1 : Requesting  Fish 
-2022-11-21 19:13:50.824031 Peer  1  : Bought  Fish  from peer:  2 
-1 Current Balance: 80 
-Trader->Buyer Trader clock: {1: 5, 2: 0, 3: 5, 4: 17} Buyer clock: {1: 6, 2: 0, 3: 5, 4: 17} 
-2022-11-21 19:13:55.843594 Peer  1 : Requesting  Fish 
-2022-11-21 19:13:55.854621 Peer  1  : Bought  Fish  from peer:  2 
-1 Current Balance: 60 
-Trader->Buyer Trader clock: {1: 7, 2: 0, 3: 9, 4: 24} Buyer clock: {1: 8, 2: 0, 3: 9, 4: 24} 
+Buyer->Trader after recieve Trader clock: {1: 0, 2: 0, 3: 0} Buyer clock: {1: 0, 2: 0, 3: 0} 
+1 Trader's Current Balance: 1140 
+Buyer->Trader after recieve Trader clock: {1: 2, 2: 0, 3: 0} Buyer clock: {1: 1, 2: 0, 3: 1} 
+1 Trader's Current Balance: 1140 
+Buyer->Trader after recieve Trader clock: {1: 4, 2: 0, 3: 0} Buyer clock: {1: 3, 2: 0, 3: 2} 
+1 Trader's Current Balance: 1140 
+Buyer->Trader after recieve Trader clock: {1: 6, 2: 0, 3: 0} Buyer clock: {1: 5, 2: 0, 3: 3} 
+1 Trader's Current Balance: 1140 
+Buyer->Trader after recieve Trader clock: {1: 8, 2: 0, 3: 0} Buyer clock: {1: 7, 2: 0, 3: 4} 
+1 Trader's Current Balance: 1140 
+Buyer->Trader after recieve Trader clock: {1: 10, 2: 0, 3: 0} Buyer clock: {1: 9, 2: 0, 3: 5} 
+1 Trader's Current Balance: 1140 
+Buyer->Trader after recieve Trader clock: {1: 12, 2: 0, 3: 0} Buyer clock: {1: 11, 2: 0, 3: 6} 
+1 Trader's Current Balance: 1140 
+1 Item is not present! 
+1 Item is not present! 
+1 Item is not present! 
+1 Item is not present! 
+1 Item is not present! 
+1 Item is not present! 
+1 Item is not present! 
