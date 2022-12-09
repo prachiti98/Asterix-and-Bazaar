@@ -1,0 +1,14 @@
+2022-12-09 08:24:33.569856 Peer  5 : Requesting  Salt 
+2022-12-09 08:24:33.579208 Peer  5  : Bought  Salt  from peer:  6 
+2022-12-09 08:24:39.592790 Peer  5 : Requesting  Fish 
+2022-12-09 08:24:39.601981 Peer  5  : Bought  Fish  from peer:  4 
+2022-12-09 08:24:44.612671 Peer  5 : Requesting  Fish 
+2022-12-09 08:24:44.621945 Peer  5  : Bought  Fish  from peer:  4 
+2022-12-09 08:24:49.638354 Peer  5 : Requesting  Fish 
+2022-12-09 08:24:49.647388 Peer  5  : Bought  Fish  from peer:  4 
+2022-12-09 08:24:53.663887 Peer  5 : Requesting  Fish 
+2022-12-09 08:24:53.673436 Peer  5  : Bought  Fish  from peer:  4 
+2022-12-09 08:24:55.686432 Peer  5 : Requesting  Fish 
+2022-12-09 08:24:55.695279 Peer  5  : Bought  Fish  from peer:  4 
+2022-12-09 08:24:59.706305 Peer  5 : Requesting  Fish 
+2022-12-09 08:24:59.714978 Peer  5  : Bought  Fish  from peer:  4 
