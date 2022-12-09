@@ -1,0 +1,9 @@
+2022-12-09 08:22:56.664019 4 sold an item. Remaining items are: {'Fish': 2, 'Boar': 1} 
+2022-12-09 08:23:02.684040 4 sold an item. Remaining items are: {'Fish': 1, 'Boar': 1} 
+2022-12-09 08:23:03.687957 4 sold an item. Remaining items are: {'Fish': 0, 'Boar': 1} 
+4 restocking Fish by 8 more 
+2022-12-09 08:23:07.700700 4 sold an item. Remaining items are: {'Fish': 7, 'Boar': 1} 
+2022-12-09 08:23:09.713932 4 sold an item. Remaining items are: {'Fish': 6, 'Boar': 1} 
+2022-12-09 08:23:09.722281 4 sold an item. Remaining items are: {'Fish': 5, 'Boar': 1} 
+2022-12-09 08:23:13.741652 4 sold an item. Remaining items are: {'Fish': 4, 'Boar': 1} 
+2022-12-09 08:23:15.733918 4 sold an item. Remaining items are: {'Fish': 3, 'Boar': 1} 

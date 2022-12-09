@@ -1,21 +1,8 @@
-Peer  5 : Election Won Msg Received 
-2022-11-21 19:09:17.496276 Peer  5 : Requesting  Fish 
-2022-11-21 19:09:17.498712 Peer  5  : Bought  Fish  from peer:  2 
-5 Current Balance: 1080 
-Trader->Buyer Trader clock: {1: 1, 2: 0, 3: 0, 4: 0, 5: 1, 6: 5} Buyer clock: {1: 1, 2: 0, 3: 0, 4: 0, 5: 2, 6: 5} 
-2022-11-21 19:09:19.510174 Peer  5 : Requesting  Fish 
-2022-11-21 19:09:19.513170 Peer  5  : Bought  Fish  from peer:  2 
-5 Current Balance: 1060 
-Trader->Buyer Trader clock: {1: 1, 2: 0, 3: 1, 4: 0, 5: 3, 6: 11} Buyer clock: {1: 1, 2: 0, 3: 1, 4: 0, 5: 4, 6: 11} 
-2022-11-21 19:09:23.537941 Peer  5 : Requesting  Fish 
-2022-11-21 19:09:23.539937 Peer  5  : Bought  Fish  from peer:  2 
-5 Current Balance: 1040 
-Trader->Buyer Trader clock: {1: 5, 2: 0, 3: 5, 4: 0, 5: 5, 6: 26} Buyer clock: {1: 5, 2: 0, 3: 5, 4: 0, 5: 6, 6: 26} 
-2022-11-21 19:09:28.574854 Peer  5 : Requesting  Fish 
-2022-11-21 19:09:28.583831 Peer  5  : Bought  Fish  from peer:  2 
-5 Current Balance: 1020 
-Trader->Buyer Trader clock: {1: 9, 2: 0, 3: 7, 4: 0, 5: 7, 6: 38} Buyer clock: {1: 9, 2: 0, 3: 7, 4: 0, 5: 8, 6: 38} 
-2022-11-21 19:09:30.620344 Peer  5 : Requesting  Fish 
-2022-11-21 19:09:30.630256 Peer  5  : Bought  Fish  from peer:  2 
-5 Current Balance: 1000 
-Trader->Buyer Trader clock: {1: 9, 2: 0, 3: 9, 4: 0, 5: 9, 6: 44} Buyer clock: {1: 9, 2: 0, 3: 9, 4: 0, 5: 10, 6: 44} 
+2022-12-09 08:23:00.658783 Peer  5 : Requesting  Salt 
+2022-12-09 08:23:00.666249 Peer  5  : Bought  Salt  from peer:  6 
+2022-12-09 08:23:03.678766 Peer  5 : Requesting  Fish 
+2022-12-09 08:23:03.686490 Peer  5  : Bought  Fish  from peer:  4 
+2022-12-09 08:23:09.704708 Peer  5 : Requesting  Fish 
+2022-12-09 08:23:09.709965 Peer  5  : Bought  Fish  from peer:  4 
+2022-12-09 08:23:15.726843 Peer  5 : Requesting  Fish 
+2022-12-09 08:23:15.732384 Peer  5  : Bought  Fish  from peer:  4 

@@ -21,7 +21,6 @@ import multiprocessing
 COST_BOAR = 10
 COST_SALT = 5
 COST_FISH = 20
-COMMISSION = 2
 
 addLock = Lock()
 
@@ -99,6 +98,7 @@ class database:
                     tot_prod+=self.tradeList[i]['productCount']
         if tot_prod <= 0:
             self.oversellCount +=1
+            print("Oversell!")
             return #cant remove product, amount cant be negative
         sellerList = []
         for peerId,sellerInfo in self.tradeList.items():
@@ -136,7 +136,7 @@ class database:
                     result = self.removeProduct(tempRequest[0],tempRequest[1])
                     if(result == False):
                         self.oversellCount +=1
-                print(self.tradeList)
+                # print(self.tradeList)
             #Checks every second
             time.sleep(1)
 
@@ -157,11 +157,11 @@ class peer:
         self.tradeList = {}  #localcache
         self.clock  =  {i:0 for i in range(1,totalPeers+1)}
         self.tradeCount = 0
-        self.balance = self.db["Balance"]
+        # self.balance = self.db["Balance"]
         self.wonLock = Lock() 
         self.tradeListLock = Lock()
         self.clockLock = Lock()    
-        self.balanceLock = Lock()  
+        #self.balanceLock = Lock()  
         self.tradeCountLock = Lock()
 
    # Gets the the proxy for specified address.
@@ -181,10 +181,11 @@ class peer:
             self.printOnConsole('Average latency of peer '+str(self.peerId)+': '+str(self.latency / self.requestCount)+' (sec/req)')
 
     #Increment clock by 1
-    def clockForward(self):    
-        with self.clockLock:    
-            self.clock[self.peerId]+=1
-        return json.dumps(self.clock)
+    def clockForward(self):
+        pass    
+        # with self.clockLock:    
+        #     self.clock[self.peerId]+=1
+        # return json.dumps(self.clock)
 
     #Increment clock by 1
     def tradeCountIncrease(self):    
@@ -192,11 +193,12 @@ class peer:
             self.tradeCount+=1
 
     def clockAdjust(self,sendingClock,sender_id):
-        #Element wise max and max of buyer and its own clock 
-        with self.clockLock:
-            self.clock = {key:max(value,sendingClock[key]) for key, value in self.clock.items()}
-            #Increment by 1 cause reciving clock max(a,b)+1
-            self.clock[self.peerId]+=1
+        pass
+        # #Element wise max and max of buyer and its own clock 
+        # with self.clockLock:
+        #     self.clock = {key:max(value,sendingClock[key]) for key, value in self.clock.items()}
+        #     #Increment by 1 cause reciving clock max(a,b)+1
+        #     self.clock[self.peerId]+=1
         
     # Starting Server    
     def startServer(self):
@@ -255,82 +257,38 @@ class peer:
     # 2) "OK" : Drops out of the election, sets the flag didReceiveOK, which prevents it from further forwading the election message.
     # 3) "I won": Upon receiving this message, peer sets the leader details to the variable trader and starts the trading process. 
     def electionMessage(self,message,neighbor):
-        if message == "election":
-            #Forward election msg to higher peers that are present. Get reposnes of 'ok' and 'I won'
-            if self.didReceiveOK or self.didReceiveWon:
-                thread = td.Thread(target=self.sendMsg,args=("OK",neighbor)) 
-                thread.start()
-            else:
-                thread = td.Thread(target=self.sendMsg,args=("OK",neighbor)) 
-                thread.start()
-                peers = [x['peerId'] for x in self.neighbors]
-                peers = np.array(peers)
-                x = len(peers[peers > self.peerId])
-                if x > 0:
-                    with self.wonLock:
-                        self.isElectionRunning = True # Set the flag
-                    self.didReceiveOK = False
-                    for neighbor in self.neighbors:
-                        if neighbor['peerId'] > self.peerId:
-                            if self.trader != {} and neighbor['peerId'] == self.trader[0]:
-                                pass
-                            else:    
-                                thread = td.Thread(target=self.sendMsg,args=("election",neighbor)) # Start Server
-                                thread.start()
-                    time.sleep(2.0)
-                    self.wonLock.acquire()
-                    if self.didReceiveOK == False and self.didReceiveWon == False:
-                        # Release the lock 
-                        self.forwardWonMsg() 
-                    else:
-                        self.wonLock.release()      
-                elif x == 0:
-                    self.wonLock.acquire()
-                    if self.didReceiveWon == False:
-                        self.forwardWonMsg()
-                    else:
-                        self.wonLock.release()       
-        elif message == 'OK':
-            # Drop out and wait
-            self.didReceiveOK = True
-        elif message == 'I won':
-            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                f.write(" ".join(["Peer ",str(self.peerId),": Election Won Msg Received",'\n']))
-            with self.wonLock:
-                self.didReceiveWon = True
-            self.trader = neighbor
-            time.sleep(5.0)
-            thread2 = td.Thread(target=self.beginTrading,args=())
-            thread2.start()
-            # self.leader is neighbor, if  peer is a seller, he has to register his products with the trader.
+        pass
+
+            
 
     #Begins the election by forwarding the election message to the peers; if no higher peers are present, the leader takes over and sends the "I won" message to the peers.
     def startElection(self):
-        with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-            f.write(" ".join(["Peer ",str(self.peerId),": Started the election",'\n']))
-        with self.wonLock:
-            self.isElectionRunning = True # Set the flag
-        time.sleep(1)
-        # Check number of peers higher than you.
-        peers = [x['peerId'] for x in self.neighbors]
-        peers = np.array(peers)
-        x = len(peers[peers > self.peerId])
-        if x > 0:
-            self.didReceiveOK = False
-            self.didReceiveWon = False
-            for neighbor in self.neighbors:
-                if neighbor['peerId'] > self.peerId:
-                    thread = td.Thread(target=self.sendMsg,args=("election",neighbor)) # Start Server
-                    thread.start()  
-            time.sleep(2.0)
-            self.wonLock.acquire()
-            if self.didReceiveOK == False and self.didReceiveWon == False:
-               self.forwardWonMsg()
-            else:
-                self.wonLock.release()
-        else: # No higher peers
-            self.wonLock.acquire()
-            self.forwardWonMsg() # Release of lock is in forwardWonMsg
+        pass
+        # with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+        #     f.write(" ".join(["Peer ",str(self.peerId),": Started the election",'\n']))
+        # with self.wonLock:
+        #     self.isElectionRunning = True # Set the flag
+        # time.sleep(1)
+        # # Check number of peers higher than you.
+        # peers = [x['peerId'] for x in self.neighbors]
+        # peers = np.array(peers)
+        # x = len(peers[peers > self.peerId])
+        # if x > 0:
+        #     self.didReceiveOK = False
+        #     self.didReceiveWon = False
+        #     for neighbor in self.neighbors:
+        #         if neighbor['peerId'] > self.peerId:
+        #             thread = td.Thread(target=self.sendMsg,args=("election",neighbor)) # Start Server
+        #             thread.start()  
+        #     time.sleep(2.0)
+        #     self.wonLock.acquire()
+        #     if self.didReceiveOK == False and self.didReceiveWon == False:
+        #        self.forwardWonMsg()
+        #     else:
+        #         self.wonLock.release()
+        # else: # No higher peers
+        #     self.wonLock.acquire()
+        #     self.forwardWonMsg() # Release of lock is in forwardWonMsg
      
     # beginTrading : For a seller, through this method they register there product at the trader. For buyer, they start lookup process for the products needed, in this lab every lookup process is directed at the trader and he sells those goods on behalf of the sellers.            
     def beginTrading(self):
@@ -342,7 +300,8 @@ class peer:
         self.didReceiveOK = False
         # Seller registers products
         if self.db["Role"] == "Seller":
-            chosenTrader = self.trader[0]
+
+            chosenTrader = self.trader[random.randint(0,1)]
             hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
             connected,proxy = self.getRpc(hostAddress)
         
@@ -374,7 +333,7 @@ class peer:
                     return 
                 else:
                     item = self.db['shop'][0]
-                    chosenTrader = self.trader[0]
+                    chosenTrader = self.trader[random.randint(0,1)]
                     hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
                     
                     connected,proxy = self.getRpc(hostAddress)
@@ -416,9 +375,10 @@ class peer:
     # Check if all other buyers have already bought and informed by the trader that the item was successfully purchased
     # If all buyers have already bought and been informed by trader then allow the current buy request, else delay the buy request
     def clockCheck(self,buyer_id):
-        buyer_keys = map(int,list(set([str(i) for i in range(1,totalPeers+1)])-set(list(i.split('_')[0] for i in list(self.tradeList.keys()))+list(str(self.trader[0])))))  # All buyers
-        only_buyer  = dict((k, self.clock[k]) for k in buyer_keys if k in self.clock)
-        return any([only_buyer[buyer_id]-only_buyer[i]>2 for i in only_buyer])
+        pass
+        # buyer_keys = map(int,list(set([str(i) for i in range(1,totalPeers+1)])-set(list(i.split('_')[0] for i in list(self.tradeList.keys()))+list(str(self.trader[0])))))  # All buyers
+        # only_buyer  = dict((k, self.clock[k]) for k in buyer_keys if k in self.clock)
+        # return any([only_buyer[buyer_id]-only_buyer[i]>2 for i in only_buyer])
     
     
     def printOnConsole(self, msg):
@@ -473,8 +433,8 @@ class peer:
                 if connected:
                     proxy.transaction(productName,seller,buyer_id,self.tradeCount)
 
-                with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                    f.write(" ".join([str(self.peerId),"Trader's Current Balance:",str(self.balance),"\n"]))
+                # with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                #     f.write(" ".join([str(self.peerId),"Trader's Current Balance:",str(self.balance),"\n"]))
                 # Relog the request as done ***Fix last arg as buyers clock**
                 completeTransaction('transactions.csv',transactionLog,str(self.tradeCount))
 
@@ -492,65 +452,43 @@ class peer:
                 f.write(" ".join([str(datetime.datetime.now()),"Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
             if productName in self.db['shop']:	
                 self.db['shop'].remove(productName)	
-                # with self.balanceLock:
-                #     if productName == "Boar":	
-                #         self.balance = self.balance - COST_BOAR	
-                #     elif productName == "Fish":	
-                #         self.balance = self.balance - COST_FISH	
-                #     elif productName == "Salt":	
-                #         self.balance = self.balance - COST_SALT	
-                with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                    f.write(" ".join([str(self.peerId),"Current Balance:",str(self.balance),'\n']))
-                chosenTrader = self.trader[0]
+                	
+                # with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                #     f.write(" ".join([str(self.peerId),"Current Balance:",str(self.balance),'\n']))
+                chosenTrader = self.trader[random.randint(0,1)]
                 
                 hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
                 
                 connected,proxy = self.getRpc(hostAddress) 
-                #Increase traders clock
-                otherClock = json.loads(proxy.clockForward())
-                otherClock = {int(k):int(v) for k,v in otherClock.items()}
-                #Send message from Trader to Buyer and adjust Buyer clock
-                self.clockAdjust(otherClock,self.trader[0])
-                with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                    f.write(" ".join(['Trader->Buyer','Trader clock:',str(otherClock),'Buyer clock:',str(self.clock),'\n']))	
+                
+                
+                # with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                #     f.write(" ".join(['Trader->Buyer','Trader clock:',str(otherClock),'Buyer clock:',str(self.clock),'\n']))	
             if len(self.db['shop']) == 0:	
                 #print("No products with buyer",self.peerId)	
                 productList = ["Fish","Salt","Boar"]	
                 x = random.randint(0, 2)	
                 self.db['shop'].append(productList[x])	
-                # with self.balanceLock:	
-                #     if productList[x] == "Boar":	
-                #         self.balance +=COST_BOAR	
-                #     elif productList[x] == "Fish":	
-                #         self.balance +=COST_FISH	
-                #     elif productList[x] == "Salt":	
-                #         self.balance += COST_SALT 
-                with open('Peer_'+str(self.peerId)+".txt", "a") as f:	
-                    f.write(" ".join([str(self.peerId),"Current Balance:",str(self.balance),'\n']))
+                
+                # with open('Peer_'+str(self.peerId)+".txt", "a") as f:	
+                #     f.write(" ".join([str(self.peerId),"Current Balance:",str(self.balance),'\n']))
 
         elif self.db["Role"] == "Seller":	
             self.db['Inv'][productName] = self.db['Inv'][productName] - 1	
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(datetime.datetime.now()),str(self.peerId),"sold an item. Remaining items are:",str( self.db['Inv']),'\n']))	
-            # with self.balanceLock:
-            #     if productName == "Boar":	
-            #         self.balance += (COST_BOAR - COMMISSION)	
-            #     elif productName == "Fish":	
-            #         self.balance += (COST_FISH - COMMISSION)	
-            #     elif productName == "Salt":	
-            #         self.balance += (COST_SALT - COMMISSION)	
-            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                f.write(" ".join([str(self.peerId),"Current Balance:",str(self.balance),'\n']))	
-            chosenTrader = self.trader[0]
+            	
+            # with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+            #     f.write(" ".join([str(self.peerId),"Current Balance:",str(self.balance),'\n']))	
+            chosenTrader = self.trader[random.randint(0,1)]
             hostAddress = '127.0.0.1:'+str(10030+chosenTrader)	
             connected,proxy = self.getRpc(hostAddress) 
-            #Increase traders clock
-            otherClock = json.loads(proxy.clockForward())
-            otherClock = {int(k):int(v) for k,v in otherClock.items()}
-            #Send message from Trader to Seller and adjust Seller clock
-            self.clockAdjust(otherClock,self.trader[0])
-            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                f.write(" ".join(['Trader->Buyer','Trader clock:',str(otherClock),'Seller clock:',str(self.clock),'\n']))
+            
+            # otherClock = json.loads(proxy.clockForward())
+            # otherClock = {int(k):int(v) for k,v in otherClock.items()}
+            
+            # with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+            #     f.write(" ".join(['Trader->Buyer','Trader clock:',str(otherClock),'Seller clock:',str(self.clock),'\n']))
             if self.db['Inv'][productName] == 0:	
                 # Refill the item with seller               	
                 x = random.randint(1, 10)	
@@ -558,7 +496,7 @@ class peer:
                     f.write(" ".join([str(self.peerId),"restocking",str(productName),'by',str(x),'more','\n']))
                 self.db['Inv'][productName] = x	
                 sellerInfo = {'seller': {'peerId':self.peerId,'hostAddr':self.hostAddr,'productName':productName},'productName':productName,'productCount':x}	
-                chosenTrader = self.trader[0]
+                chosenTrader = self.trader[random.randint(0,1)]
                 hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
                 connected,proxy = self.getRpc(hostAddress) 	
                 if connected: 	
@@ -566,12 +504,12 @@ class peer:
 
         
 db_load = {
-    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1140}',
-    2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{},"Balance": 0}',
-    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1140}',
-    4:'{"Role": "Seller","Inv":{"Fish":5,"Boar":1,"Salt":2},"shop":{},"Balance": 0}',
-    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"],"Balance": 1100}',
-    6:'{"Role": "Seller","Inv":{"Fish":30,"Boar":30,"Salt":3},"shop":{},"Balance": 0}'
+    1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"]}',
+    2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{}}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"]}',
+    4:'{"Role": "Seller","Inv":{"Fish":3,"Boar":1},"shop":{}}',
+    5:'{"Role": "Buyer","Inv":{},"shop":["Salt","Fish","Fish","Fish","Fish","Fish","Fish"]}',
+    6:'{"Role": "Seller","Inv":{"Salt":3},"shop":{}}'
 }                   
 if __name__ == "__main__":
     port = 10030
@@ -594,11 +532,11 @@ if __name__ == "__main__":
             databaseConnection = database(databaseHostAddress)
             thread1 = td.Thread(target=databaseConnection.startServer,args=()) # Start Server
             thread1.start() 
-            time.sleep(2)
+            time.sleep(2) #wait till database is initialised 
             thread2 = td.Thread(target=databaseConnection.processRequests,args=())
-            thread2.start()
+            thread2.start() #start processing requests
 
-            traders = [1] #list of traders
+            traders = [1,2] #list of traders
             for peerId in range(1,totalPeers+1):
                 hostAddr = HostIp + ":" + str(port+peerId)
                 peerId = peerId
@@ -625,7 +563,4 @@ if __name__ == "__main__":
                     pass
                 thread2 = td.Thread(target=peer_local.beginTrading,args=())
                 thread2.start() 
-                #no need of election as trader already chosen
-                # if peerId <= 2:
-                #     thread1 = td.Thread(target=peer_local.startElection,args=()) # Start Server
-                #     thread1.start()
+                
