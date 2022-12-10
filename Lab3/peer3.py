@@ -271,7 +271,7 @@ class peer:
                 #Warehouse informs trader if item is present.
                 if itemPresent == 1:
                     with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                        f.write(" ".join([str(datetime.datetime.now()),"Warehouse to Trader ",str(self.peerId)," -> Product present!",'\n']))  
+                        f.write(" ".join([str(datetime.datetime.now()),"Recieved message from Warehouse that Product is present!",'\n']))  
                     connected,proxy = self.getRpc(hostAddr)
                     #Inform buyer and buyer removes product from shopping list
                     if connected: 
