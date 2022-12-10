@@ -1,22 +1,8 @@
-2022-12-10 17:52:54.409033 Peer  3 : Requesting  Fish 
-2022-12-10 17:52:54.416724 Receieved message from Trader  1 that item is available. Peer  3  : Bought  Fish  from peer:  4 
-2022-12-10 17:52:58.453242 Peer  3 : Requesting  Fish 
-2022-12-10 17:52:58.461268 Receieved message from Trader  2 that item is available. Peer  3  : Bought  Fish  from peer:  4 
-2022-12-10 17:53:03.483962 Peer  3 : Requesting  Fish 
-2022-12-10 17:53:03.499246 Receieved message from Trader  2 that item is available. Peer  3  : Bought  Fish  from peer:  4 
-2022-12-10 17:53:06.525479 Peer  3 : Requesting  Fish 
-2022-12-10 17:53:06.525479 Receieved message from Trader  4 that item is available. Peer  3  : Bought  Fish  from peer:  4 
-2022-12-10 17:53:09.556735 Peer  3 : Requesting  Fish 
-2022-12-10 17:53:09.571988 Receieved message from Trader  6 that item is available. Peer  3  : Bought  Fish  from peer:  4 
-2022-12-10 17:53:13.608519 Peer  3 : Requesting  Fish 
-2022-12-10 17:53:13.616659 Receieved message from Trader  7 that item is available. Peer  3  : Bought  Fish  from peer:  4 
-2022-12-10 17:53:16.649823 Peer  3 : Requesting  Fish 
-2022-12-10 17:53:16.649823 Receieved message from Trader  8 that item is available. Peer  3  : Bought  Fish  from peer:  4 
-2022-12-10 17:53:21.697283 Peer  3 : Requesting  Fish 
-2022-12-10 17:53:21.697283 Receieved message from Trader  8 that item is available. Peer  3  : Bought  Fish  from peer:  4 
-2022-12-10 17:53:26.727164 Peer  3 : Requesting  Fish 
-2022-12-10 17:53:26.727164 Receieved message from Trader  10 that item is available. Peer  3  : Bought  Fish  from peer:  4 
-2022-12-10 17:53:29.758755 Peer  3 : Requesting  Fish 
-2022-12-10 17:53:29.774004 Receieved message from Trader  10 that item is available. Peer  3  : Bought  Fish  from peer:  4 
-2022-12-10 17:53:33.793320 Peer  3 : Requesting  Fish 
-2022-12-10 17:53:33.801729 Receieved message from Trader  12 that item is available. Peer  3  : Bought  Fish  from peer:  4 
+2022-12-10 19:57:46.699379 Peer  3 : Requesting  Fish 
+2022-12-10 19:57:46.723054 Receieved message from Trader  1 that item is available. Peer  3  : Bought  Fish  from peer:  4 
+2022-12-10 19:57:49.747942 Peer  3 : Requesting  Fish 
+2022-12-10 19:57:49.755989 Receieved message from Trader  2 that item is available. Peer  3  : Bought  Fish  from peer:  4 
+2022-12-10 19:57:52.773032 Peer  3 : Requesting  Fish 
+2022-12-10 19:57:52.788651 Receieved message from Trader  3 that item is available. Peer  3  : Bought  Fish  from peer:  4 
+2022-12-10 19:57:55.818903 Peer  3 : Requesting  Fish 
+2022-12-10 19:57:55.826901 Receieved message from Trader  2 that item is available. Peer  3  : Bought  Fish  from peer:  4 

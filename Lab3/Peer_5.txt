@@ -1,28 +1,6 @@
-2022-12-10 17:52:58.437325 Peer  5 : Requesting  Salt 
-2022-12-10 17:52:58.445280 Receieved message from Trader  1 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:03.483962 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:03.483962 Receieved message from Trader  3 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:04.514925 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:04.514925 Receieved message from Trader  3 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:07.561447 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:07.561447 Receieved message from Trader  5 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:12.597223 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:12.613215 Receieved message from Trader  4 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:15.637261 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:15.637261 Receieved message from Trader  5 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:17.679767 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:17.679767 Receieved message from Trader  6 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:19.712039 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:19.712039 Receieved message from Trader  7 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:22.758638 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:22.773899 Receieved message from Trader  9 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:25.801170 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:25.816410 Receieved message from Trader  9 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:27.833160 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:27.848390 Receieved message from Trader  11 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:29.864055 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:29.864055 Receieved message from Trader  11 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:34.895732 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:34.910957 Receieved message from Trader  12 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 17:53:35.938331 Peer  5 : Requesting  Salt 
-2022-12-10 17:53:35.953592 Receieved message from Trader  13 that item is available. Peer  5  : Bought  Salt  from peer:  6 
+2022-12-10 19:57:53.731505 Peer  5 : Requesting  Salt 
+2022-12-10 19:57:53.739127 Receieved message from Trader  4 that item is available. Peer  5  : Bought  Salt  from peer:  6 
+2022-12-10 19:57:55.771294 Peer  5 : Requesting  Salt 
+2022-12-10 19:57:55.810964 Receieved message from Trader  1 that item is available. Peer  5  : Bought  Salt  from peer:  6 
+2022-12-10 19:57:58.850999 Peer  5 : Requesting  Salt 
+2022-12-10 19:57:58.859000 Receieved message from Trader  5 that item is available. Peer  5  : Bought  Salt  from peer:  6 

@@ -161,6 +161,7 @@ class peer:
         self.programType = programType
         self.tradeListLock = Lock()
         self.tradeCountLock = Lock()
+        self.failOccur = False
 
    # Gets the the proxy for specified address.
     def getRpc(self,neighbor):
@@ -191,6 +192,7 @@ class peer:
         server.register_function(self.lookup,'lookup')
         server.register_function(self.transaction,'transaction')
         server.register_function(self.registerProducts,'registerProducts')
+        server.register_function(self.updateTrader,'updateTrader')
         server.serve_forever()
         
             
@@ -199,7 +201,10 @@ class peer:
         time.sleep(2) 
         # Seller registers products
         if self.db["Role"] == "Seller":
-            chosenTrader = self.trader[random.randint(0,1)]
+            if not self.failOccur:
+                chosenTrader = self.trader[random.randint(0,1)]
+            else:
+                chosenTrader = self.trader[0]
             hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
             connected,proxy = self.getRpc(hostAddress)
             for productName, productCount in self.db['Inv'].items():
@@ -217,7 +222,12 @@ class peer:
             while len(self.db['shop'])!= 0: 
                 time.sleep(random.randint(1,5))
                 item = self.db['shop'][0]
-                chosenTrader = self.trader[random.randint(0,1)]
+                print(self,self.peerId,self.failOccur,self.trader)
+                if not self.failOccur:
+                    chosenTrader = self.trader[random.randint(0,1)]
+                else:
+                    print(self.trader[0])
+                    chosenTrader = self.trader[0]
                 hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
                 connected,proxy = self.getRpc(hostAddress)
                 if connected:
@@ -228,8 +238,34 @@ class peer:
                     proxy.lookup(self.peerId,self.hostAddr,item)
                     timeEnd = datetime.datetime.now()
                     self.calculateLatency(timeStart, timeEnd)
-                     
-    
+        #Trader checks of other trader is alive
+        elif self.db["Role"] == "Trader":
+            #Let eveyone start up
+            time.sleep(10) 
+            while(1):
+                self.requestCount+=1
+                #Hardcoded since only 2 traders are considered and either and we have made a design decision that the first trader will fail.
+                if self.peerId == 1:
+                    isAlive = self.heartbeat('127.0.0.1:'+str(10032))
+                    failureNode = 2
+                else:
+                    isAlive = self.heartbeat('127.0.0.1:'+str(10031))
+                    failureNode = 1
+                if not isAlive[0]:
+                    for i in range(3,7):
+                        connected,proxy = self.getRpc('127.0.0.1:'+str(10030+i))
+                        if connected:
+                            proxy.updateTrader(failureNode)
+                time.sleep(1)
+
+    #Not working for some reason
+    def updateTrader(self,failureTrader):
+        if not self.failOccur:
+            self.trader.remove(failureTrader)
+            self.failOccur = True
+            print(self.peerId,'Changing!',self.failOccur)
+        return
+
     # registerProducts: Trader registers the seller goods.
     def registerProducts(self,sellerInfo): # Trader End.
         connected,proxy = self.getRpc(self.databaseHostAddress)
@@ -316,7 +352,10 @@ class peer:
                 f.write(" ".join([str(datetime.datetime.now()),"Receieved message from Trader ",str(traderId),"that item is available. Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
             if productName in self.db['shop']:	
                 self.db['shop'].remove(productName)	
-                chosenTrader = self.trader[random.randint(0,1)]
+                if not self.failOccur:
+                    chosenTrader = self.trader[random.randint(0,1)]
+                else:
+                    chosenTrader = self.trader[0]
             if len(self.db['shop']) == 0:	
                 #print("No products with buyer",self.peerId)	
                 productList = ["Fish","Salt","Boar"]	
@@ -326,7 +365,10 @@ class peer:
             self.db['Inv'][productName] = self.db['Inv'][productName] - 1	
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(datetime.datetime.now()),str(self.peerId),"sold an item. Remaining items are:",str( self.db['Inv']),'\n']))	            	
-            chosenTrader = self.trader[random.randint(0,1)]
+            if not self.failOccur:
+                chosenTrader = self.trader[random.randint(0,1)]
+            else:
+                chosenTrader = self.trader[0]
             hostAddress = '127.0.0.1:'+str(10030+chosenTrader)	
             connected,proxy = self.getRpc(hostAddress) 
             if self.db['Inv'][productName] == 0:	
@@ -336,11 +378,25 @@ class peer:
                     f.write(" ".join([str(self.peerId),"restocking",str(productName),'by',str(x),'more','\n']))
                 self.db['Inv'][productName] = x	
                 sellerInfo = {'seller': {'peerId':self.peerId,'hostAddr':self.hostAddr,'productName':productName},'productName':productName,'productCount':x}	
-                chosenTrader = self.trader[random.randint(0,1)]
+                if not self.failOccur:
+                    chosenTrader = self.trader[random.randint(0,1)]
+                else:
+                    chosenTrader = self.trader[0]
                 hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
                 connected,proxy = self.getRpc(hostAddress) 	
                 if connected: 	
                     proxy.registerProducts(sellerInfo)	
+
+    def heartbeat(self, hostAddress):
+        #print('Heartbeat',self.requestCount,hostAddress)
+        failurePeer = 1
+        if self.requestCount >= 5 and hostAddress == '127.0.0.1:'+str(10030+failurePeer):
+            print('Node down!')
+            return False,'Failed!'
+        else:
+            a = xmlrpc.client.ServerProxy('http://' + str(hostAddress) + '/')
+            return True, a
+        
 
 #Initial data        
 db_load = {
@@ -394,12 +450,14 @@ if __name__ == "__main__":
                     peer_local.db['Role'] = 'Trader'
                     process1 = Process(target=peer_local.startServer,args=()) 
                     process1.start()    
+                    process2 = td.Thread(target=peer_local.beginTrading,args=())
+                    process2.start() 
                 #Start the process for the buyers and sellers
                 else:
                     process1 = Process(target=peer_local.startServer,args=()) 
                     process1.start()    
-                    thread2 = Process(target=peer_local.beginTrading,args=())
-                    thread2.start() 
+                    process2 = td.Thread(target=peer_local.beginTrading,args=())
+                    process2.start() 
                 #Clearing the logging files
                 try:
                     os.remove('Peer'+'_'+str(peerId)+'.txt')

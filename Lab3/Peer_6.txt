@@ -1,18 +1,5 @@
-2022-12-10 17:52:57.424058 Peer:  6 Registering:  Salt Quantity:  3 
-2022-12-10 17:52:58.453242 6 sold an item. Remaining items are: {'Salt': 2} 
-2022-12-10 17:53:03.499246 6 sold an item. Remaining items are: {'Salt': 1} 
-2022-12-10 17:53:04.530204 6 sold an item. Remaining items are: {'Salt': 0} 
-6 restocking Salt by 3 more 
-2022-12-10 17:53:07.576819 6 sold an item. Remaining items are: {'Salt': 2} 
-2022-12-10 17:53:12.613215 6 sold an item. Remaining items are: {'Salt': 1} 
-2022-12-10 17:53:15.652848 6 sold an item. Remaining items are: {'Salt': 0} 
-6 restocking Salt by 2 more 
-2022-12-10 17:53:17.679767 6 sold an item. Remaining items are: {'Salt': 1} 
-2022-12-10 17:53:19.712039 6 sold an item. Remaining items are: {'Salt': 0} 
-6 restocking Salt by 9 more 
-2022-12-10 17:53:22.773899 6 sold an item. Remaining items are: {'Salt': 8} 
-2022-12-10 17:53:25.816410 6 sold an item. Remaining items are: {'Salt': 7} 
-2022-12-10 17:53:27.848390 6 sold an item. Remaining items are: {'Salt': 6} 
-2022-12-10 17:53:29.879705 6 sold an item. Remaining items are: {'Salt': 5} 
-2022-12-10 17:53:34.910957 6 sold an item. Remaining items are: {'Salt': 4} 
-2022-12-10 17:53:35.953592 6 sold an item. Remaining items are: {'Salt': 3} 
+2022-12-10 19:57:49.731574 Peer:  6 Registering:  Salt Quantity:  3 
+2022-12-10 19:57:53.747087 6 sold an item. Remaining items are: {'Salt': 2} 
+2022-12-10 19:57:55.818903 6 sold an item. Remaining items are: {'Salt': 1} 
+2022-12-10 19:57:58.867019 6 sold an item. Remaining items are: {'Salt': 0} 
+6 restocking Salt by 10 more 
