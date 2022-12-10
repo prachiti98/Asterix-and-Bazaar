@@ -11,11 +11,10 @@ import csv
 import shutil
 import os.path
 import json
-from threading import Lock
 import datetime
 from collections import deque
 from collections import defaultdict
-import multiprocessing
+from multiprocessing import Process,Lock
 
 addLock = Lock()
 
@@ -54,7 +53,7 @@ class AsyncXMLRPCServer(socketserver.ThreadingMixIn,SimpleXMLRPCServer): pass
 
 #Defining DB Server
 class database:
-    def __init__(self,hostAddr):
+    def __init__(self,hostAddr,programType):
         self.hostAddr = hostAddr
         self.peerId = 0 #0 will start at 0
         self.latency = 0
@@ -64,6 +63,7 @@ class database:
         self.tradeCount = 0
         self.requestQueue = deque()
         self.oversellCount = 0
+        self.programType = programType
         self.databaseLock = Lock() #todo can change to multiprocessing lock -> check difference
         
         # Starting Server    
@@ -82,7 +82,7 @@ class database:
         return
 
     def removeProduct(self,seller,productName):
-        if programType == 'Synchronous':
+        if self.programType == 'Synchronous':
             sellerList = []
             for peerId,sellerInfo in self.tradeList.items():
                 if sellerInfo["productName"] == productName:
@@ -148,7 +148,7 @@ class database:
     
 # Defining peer
 class peer:
-    def __init__(self,hostAddr,peerId,db,totalPeers,traders,databaseHostAddress):
+    def __init__(self,hostAddr,peerId,db,totalPeers,traders,databaseHostAddress,programType):
         self.hostAddr = hostAddr
         self.peerId = peerId
         self.db = db 
@@ -158,6 +158,7 @@ class peer:
         self.databaseHostAddress = databaseHostAddress
         self.tradeList = {}  #localcache
         self.tradeCount = 0
+        self.programType = programType
         self.tradeListLock = Lock()
         self.tradeCountLock = Lock()
 
@@ -190,8 +191,6 @@ class peer:
         server.register_function(self.lookup,'lookup')
         server.register_function(self.transaction,'transaction')
         server.register_function(self.registerProducts,'registerProducts')
-        thread2 = td.Thread(target=peer_local.beginTrading,args=())
-        thread2.start() 
         server.serve_forever()
         
             
@@ -234,7 +233,7 @@ class peer:
     # registerProducts: Trader registers the seller goods.
     def registerProducts(self,sellerInfo): # Trader End.
         connected,proxy = self.getRpc(self.databaseHostAddress)
-        if programType == 'Synchronous':
+        if self.programType == 'Synchronous':
             with open('Peer_'+str(0)+".txt", "a") as f:
                 f.write(" ".join([str(datetime.datetime.now()),"Adding to warehouse", "Product: ",str(sellerInfo['productName']),"Quantity: ",str(sellerInfo['productCount']),'\n']))  
             proxy.addProductRequest(sellerInfo)
@@ -242,7 +241,7 @@ class peer:
             self.tradeList = proxy.getTradeList() #updated your own tradeList
             with self.tradeListLock:
                 self.tradeList[str(sellerInfo['seller']['peerId'])+'_'+str(sellerInfo['seller']['productName'])] = sellerInfo 	
-                logSeller(self.tradeList) #not sure
+            logSeller(self.tradeList) #not sure
             proxy.addProductRequest(sellerInfo) #update the data warehouse - only with new info
     
     def printOnConsole(self, msg):
@@ -256,7 +255,7 @@ class peer:
         #Connects to database
         connected,databaseProxy = self.getRpc(self.databaseHostAddress)
         if connected:
-            if programType == 'Synchronous':
+            if self.programType == 'Synchronous':
                 #Adds requests in database queue 
                 itemPresent, seller =  databaseProxy.removeProductRequest('',productName)
                 #Warehouse informs trader if item is present.
@@ -328,7 +327,7 @@ class peer:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(datetime.datetime.now()),str(self.peerId),"sold an item. Remaining items are:",str( self.db['Inv']),'\n']))	            	
             chosenTrader = self.trader[random.randint(0,1)]
-            hostAddress = '127.0.0.1:'+str(port+chosenTrader)	
+            hostAddress = '127.0.0.1:'+str(10030+chosenTrader)	
             connected,proxy = self.getRpc(hostAddress) 
             if self.db['Inv'][productName] == 0:	
                 # Refill the item with seller               	
@@ -379,29 +378,32 @@ if __name__ == "__main__":
         if buyerCnt<1 or sellerCnt<1:
             print('Enter atleast 1 buyer and seller!')
         else:
-            databaseHostAddress = HostIp+":"+str(port)
-            databaseConnection = database(databaseHostAddress)
+            databaseHostAddress = HostIp+":"+str(10030)
+            databaseConnection = database(databaseHostAddress,programType)
             # Start the DB Server
-            thread1 = td.Thread(target=databaseConnection.startServer,args=()) 
-            thread1.start() 
+            process1 = Process(target=databaseConnection.startServer,args=()) 
+            process1.start() 
             for peerId in range(1,totalPeers+1):
-                hostAddr = HostIp + ":" + str(port+peerId)
+                hostAddr = HostIp + ":" + str(10030+peerId)
                 peerId = peerId
                 db = json.loads(db_load[peerId])
                 num_peers = totalPeers
-                peer_local = peer(hostAddr,peerId,db,totalPeers,traders,databaseHostAddress)
+                peer_local = peer(hostAddr,peerId,db,totalPeers,traders,databaseHostAddress,programType)
                 #Start the process for the traders
                 if peerId in traders:
                     peer_local.db['Role'] = 'Trader'
-                    thread1 = td.Thread(target=peer_local.startServer,args=()) 
-                    thread1.start()    
+                    process1 = Process(target=peer_local.startServer,args=()) 
+                    process1.start()    
                 #Start the process for the buyers and sellers
                 else:
-                    thread1 = td.Thread(target=peer_local.startServer,args=()) 
-                    thread1.start()    
+                    process1 = Process(target=peer_local.startServer,args=()) 
+                    process1.start()    
+                    thread2 = td.Thread(target=peer_local.beginTrading,args=())
+                    thread2.start() 
                 #Clearing the logging files
                 try:
                     os.remove('Peer'+'_'+str(peerId)+'.txt')
                 except OSError:
                     pass
+                time.sleep(2)
                 
