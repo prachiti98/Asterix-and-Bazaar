@@ -224,11 +224,9 @@ class peer:
             while len(self.db['shop'])!= 0: 
                 time.sleep(random.randint(1,5))
                 item = self.db['shop'][0]
-                print(self,self.peerId,self.failOccur,self.trader)
                 if not self.failOccur:
                     chosenTrader = self.trader[random.randint(0,1)]
                 else:
-                    print(self.trader[0])
                     chosenTrader = self.trader[0]
                 hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
                 connected,proxy = self.getRpc(hostAddress)
@@ -299,7 +297,7 @@ class peer:
                 #Warehouse informs trader if item is present.
                 if itemPresent == 1:
                     with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                        f.write(" ".join([str(datetime.datetime.now()),"Warehouse to Trader ",str(self.peerId)," -> Product present!",'\n']))  
+                        f.write(" ".join([str(datetime.datetime.now()),"Recieved message from Warehouse that Product is present!",'\n']))  
                     connected,proxy = self.getRpc(hostAddr)
                     #Inform buyer and buyer removes product from shopping list
                     if connected: 
@@ -331,12 +329,12 @@ class peer:
                         self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1     	   
                     connected,proxy = self.getRpc(hostAddr)
                     if connected: # Pass the message to buyer that transaction is succesful
-                        proxy.transaction(productName,seller,buyer_id,self.tradeCount)
+                        proxy.transaction(productName,seller,buyer_id,self.peerId)
                     
                     connected,proxy = self.getRpc(seller["hostAddr"])
                     # Pass the message to seller that its product is sold
                     if connected:
-                        proxy.transaction(productName,seller,buyer_id,self.tradeCount)
+                        proxy.transaction(productName,seller,buyer_id,self.peerId)
 
                     completeTransaction('transactions.csv',transactionLog,str(self.tradeCount))
 
@@ -390,10 +388,8 @@ class peer:
                     proxy.registerProducts(sellerInfo)	
 
     def heartbeat(self, hostAddress):
-        #print('Heartbeat',self.requestCount,hostAddress)
         failurePeer = 1
-        if self.requestCount >= 5 and hostAddress == '127.0.0.1:'+str(10030+failurePeer):
-            print('Node down!')
+        if self.requestCount >= 20 and hostAddress == '127.0.0.1:'+str(10030+failurePeer):
             return False,'Failed!'
         else:
             a = xmlrpc.client.ServerProxy('http://' + str(hostAddress) + '/')
