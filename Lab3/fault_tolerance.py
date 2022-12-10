@@ -193,6 +193,8 @@ class peer:
         server.register_function(self.transaction,'transaction')
         server.register_function(self.registerProducts,'registerProducts')
         server.register_function(self.updateTrader,'updateTrader')
+        thread = td.Thread(target=self.beginTrading,args=())
+        thread.start() 
         server.serve_forever()
         
             
@@ -450,14 +452,10 @@ if __name__ == "__main__":
                     peer_local.db['Role'] = 'Trader'
                     process1 = Process(target=peer_local.startServer,args=()) 
                     process1.start()    
-                    process2 = td.Thread(target=peer_local.beginTrading,args=())
-                    process2.start() 
                 #Start the process for the buyers and sellers
                 else:
                     process1 = Process(target=peer_local.startServer,args=()) 
                     process1.start()    
-                    process2 = td.Thread(target=peer_local.beginTrading,args=())
-                    process2.start() 
                 #Clearing the logging files
                 try:
                     os.remove('Peer'+'_'+str(peerId)+'.txt')
