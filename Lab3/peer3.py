@@ -83,16 +83,24 @@ class database:
 
     def removeProduct(self,seller,productName):
         if self.programType == 'Synchronous':
+            tot_prod = 0
+            for i in self.tradeList:
+                if self.tradeList[i]['productName'] == productName:
+                        tot_prod+=self.tradeList[i]['productCount']
             sellerList = []
             for peerId,sellerInfo in self.tradeList.items():
                 if sellerInfo["productName"] == productName:
                     sellerList.append(sellerInfo["seller"])
-            if len(sellerList) > 0:
+            if len(sellerList) > 0 and tot_prod>0:
                 with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                         f.write(" ".join([str(datetime.datetime.now()),' Item present. Informing Trader.','\n']))
-                seller = sellerList[0]  
+                seller = sellerList[0] 
                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1 
                 return [1,seller]
+            else:
+                with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                        f.write(" ".join([str(datetime.datetime.now()),' Item not present. Informing Trader.','\n']))
+                return [-1,seller]
         else:
             tot_prod = 0
             for i in self.tradeList:
@@ -108,7 +116,7 @@ class database:
                     sellerList.append(sellerInfo["seller"])
             if len(sellerList) > 0:
                 with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                        f.write(" ".join([str(datetime.datetime.now()),' Item present. Informing Trader.','\n']))
+                        f.write(" ".join([str(datetime.datetime.now()),' Item present. Informing Trader.',str(self.tradeList),'\n']))
                 seller = sellerList[0]            
                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1 
                 return 1
@@ -191,6 +199,8 @@ class peer:
         server.register_function(self.lookup,'lookup')
         server.register_function(self.transaction,'transaction')
         server.register_function(self.registerProducts,'registerProducts')
+        thread = Process(target=self.beginTrading,args=())
+        thread.start() 
         server.serve_forever()
         
             
@@ -266,6 +276,12 @@ class peer:
                     #Inform buyer and buyer removes product from shopping list
                     if connected: 
                         proxy.transaction(productName,seller,buyer_id,self.peerId)
+
+                    # Pass the message to seller that its product is sold 
+                    connected,proxy = self.getRpc(seller["hostAddr"])
+                    # Pass the message to seller that its product is sold
+                    if connected:
+                        proxy.transaction(productName,seller,buyer_id,self.tradeCount)
                 else:
                 #Warehouse informs trader if item is not present.
                     with open('Peer_'+str(self.peerId)+".txt", "a") as f:
@@ -398,8 +414,6 @@ if __name__ == "__main__":
                 else:
                     process1 = Process(target=peer_local.startServer,args=()) 
                     process1.start()    
-                    thread2 = Process(target=peer_local.beginTrading,args=())
-                    thread2.start() 
                 #Clearing the logging files
                 try:
                     os.remove('Peer'+'_'+str(peerId)+'.txt')
