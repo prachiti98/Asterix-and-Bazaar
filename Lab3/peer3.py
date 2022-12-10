@@ -17,7 +17,6 @@ from collections import deque
 from collections import defaultdict
 import multiprocessing
 
-programType = 'Synchronous'
 addLock = Lock()
 
 # Log a transaction
@@ -89,6 +88,8 @@ class database:
                 if sellerInfo["productName"] == productName:
                     sellerList.append(sellerInfo["seller"])
             if len(sellerList) > 0:
+                with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                        f.write(" ".join([str(datetime.datetime.now()),' Item present. Informing Trader.','\n']))
                 seller = sellerList[0]  
                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1 
                 return [1,seller]
@@ -106,15 +107,20 @@ class database:
                 if sellerInfo["productName"] == productName:
                     sellerList.append(sellerInfo["seller"])
             if len(sellerList) > 0:
+                with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                        f.write(" ".join([str(datetime.datetime.now()),' Item present. Informing Trader.','\n']))
                 seller = sellerList[0]            
                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1 
                 return 1
                 #Can inform trader here if product sold or not. Reuturn 1 if sold else -1 
+        with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                f.write(" ".join([str(datetime.datetime.now()),' Item not present. Informing Trader.','\n']))
         return -1            
 
     def addProductRequest(self,sellerInfo):
         self.requestQueue.append([sellerInfo,'','add'])
-        return self.processRequests()
+        res = self.processRequests()
+        return res
 
     def removeProductRequest(self,seller,productName):
         self.requestQueue.append([seller,productName,'remove'])
@@ -264,10 +270,10 @@ class peer:
                 else:
                 #Warehouse informs trader if item is not present.
                     with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                        f.write(" ".join([str(datetime.datetime.now()),"Warehouse to Trader ",str(self.peerId)," -> Product not present!",'\n']))
+                        f.write(" ".join([str(datetime.datetime.now()),"Recieved message from Warehouse that product is not present!",'\n']))
                 #Trader informs buyer if item is not present.
-                    with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                        f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(self.peerId)," to Peer ",str(buyer_id)," -> Product not present!",'\n']))
+                    with open('Peer_'+str(buyer_id)+".txt", "a") as f:
+                        f.write(" ".join([str(datetime.datetime.now()),"Recieved message from Trader ",str(self.peerId)," that product is not present!",'\n']))
             else:
                 self.tradeList = databaseProxy.getTradeList() #updated own cache
                 for i in self.tradeList:
@@ -308,7 +314,7 @@ class peer:
     def transaction(self, productName, sellerId, buyer_id, traderId):
         if self.db["Role"] == "Buyer":	
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(traderId)," informs Peer ", str(self.peerId) ,"that item is available. Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
+                f.write(" ".join([str(datetime.datetime.now()),"Receieved message from Trader ",str(traderId),"that item is available. Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
             if productName in self.db['shop']:	
                 self.db['shop'].remove(productName)	
                 chosenTrader = self.trader[random.randint(0,1)]
@@ -350,10 +356,14 @@ db_load = {
 if __name__ == "__main__":
     port = 10030
     HostIp = '127.0.0.1'
-    totalPeers = int(sys.argv[1])
+    programType = sys.argv[1]
+    totalPeers = len(db_load)
     #The first 2 nodes are always the traders
     traders = [1,2] 
-    print("Marketplace is live! Check Peer_X.txt for logging!\n")
+    if programType == 'Synchronous':
+        print("Synchronous marketplace is live! Check Peer_X.txt for logging!\n")
+    else:
+        print("Cached marketplace is live! Check Peer_X.txt for logging!\n")
     #Clearing the transactions file
     clr = ['transactions.csv','Peer_0.txt']
     for f in clr:
