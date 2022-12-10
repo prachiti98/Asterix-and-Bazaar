@@ -17,14 +17,8 @@ from collections import deque
 from collections import defaultdict
 import multiprocessing
 
-#all amounts are in USD
-COST_BOAR = 10
-COST_SALT = 5
-COST_FISH = 20
-
 programType = 'Synchronous'
 addLock = Lock()
-
 
 # Log a transaction
 def logTransaction(filename,log):
@@ -83,40 +77,49 @@ class database:
         server.register_function(self.getTradeList,'getTradeList')
         server.register_function(self.setTradeList,'setTradeList')
         server.serve_forever()
-        self.processRequests()
 
     def addProduct(self,sellerInfo):
-        #Why lock here? We are already using a queue
         self.tradeList[str(sellerInfo['seller']['peerId'])+'_'+str(sellerInfo['seller']['productName'])] = sellerInfo 
         return
 
     def removeProduct(self,seller,productName):
-        tot_prod = 0
-        for i in self.tradeList:
-            if self.tradeList[i]['productName'] == productName:
-                    tot_prod+=self.tradeList[i]['productCount']
-        if tot_prod <= 0:
-            self.oversellCount +=1
-            print("Oversell!")
-            return #cant remove product, amount cant be negative
-        sellerList = []
-        for peerId,sellerInfo in self.tradeList.items():
-            if sellerInfo["productName"] == productName:
-                sellerList.append(sellerInfo["seller"])
-        if len(sellerList) > 0:
-            seller = sellerList[0]            
-            self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1 
-            return 1
-            #Can inform trader here if product sold or not. Reuturn 1 if sold else -1 
-        return -1
+        if programType == 'Synchronous':
+            sellerList = []
+            for peerId,sellerInfo in self.tradeList.items():
+                if sellerInfo["productName"] == productName:
+                    sellerList.append(sellerInfo["seller"])
+            if len(sellerList) > 0:
+                seller = sellerList[0]  
+                self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1 
+                return [1,seller]
+        else:
+            tot_prod = 0
+            for i in self.tradeList:
+                if self.tradeList[i]['productName'] == productName:
+                        tot_prod+=self.tradeList[i]['productCount']
+            if tot_prod <= 0:
+                self.oversellCount +=1
+                print("Oversell!")
+                return #cant remove product, amount cant be negative
+            sellerList = []
+            for peerId,sellerInfo in self.tradeList.items():
+                if sellerInfo["productName"] == productName:
+                    sellerList.append(sellerInfo["seller"])
+            if len(sellerList) > 0:
+                seller = sellerList[0]            
+                self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1 
+                return 1
+                #Can inform trader here if product sold or not. Reuturn 1 if sold else -1 
+        return -1            
 
     def addProductRequest(self,sellerInfo):
         self.requestQueue.append([sellerInfo,'','add'])
-        return
+        return self.processRequests()
 
     def removeProductRequest(self,seller,productName):
         self.requestQueue.append([seller,productName,'remove'])
-        return    
+        res = self.processRequests()
+        return res 
 
     def getTradeList(self):
         return self.tradeList
@@ -127,19 +130,16 @@ class database:
 
     # processRequests : DB processes requests            
     def processRequests(self):
-        while(1):
-            while(self.requestQueue):
-                tempRequest = self.requestQueue.popleft()
-                if tempRequest[2] == 'add':
-                    self.addProduct(tempRequest[0])
-                else:
-                    result = self.removeProduct(tempRequest[0],tempRequest[1])
-                    if(result == False):
-                        self.oversellCount +=1
-                # print(self.tradeList)
-            #Checks every second
-            time.sleep(1)
-
+        while(self.requestQueue):
+            tempRequest = self.requestQueue.popleft()
+            if tempRequest[2] == 'add':
+                self.addProduct(tempRequest[0])
+            else:
+                result = self.removeProduct(tempRequest[0],tempRequest[1])
+                if(result == False):
+                    self.oversellCount +=1
+                return result
+    
 # Defining peer
 class peer:
     def __init__(self,hostAddr,peerId,db,totalPeers,traders,databaseHostAddress):
@@ -184,21 +184,23 @@ class peer:
         server.register_function(self.lookup,'lookup')
         server.register_function(self.transaction,'transaction')
         server.register_function(self.registerProducts,'registerProducts')
+        self.beginTrading()
         server.serve_forever()
+        
             
-    # beginTrading : For a seller, through this method they register there product at the trader. For buyer, they start lookup process for the products needed, in this lab every lookup process is directed at the trader and he sells those goods on behalf of the sellers.            
+    #beginTrading : For a seller, through this method they register there product at the trader. For buyer, they start lookup process for the products needed, in this lab every lookup process is directed at the trader and he contacts the database server and register
     def beginTrading(self):
         time.sleep(2) 
-        # Reset the flags.
         # Seller registers products
         if self.db["Role"] == "Seller":
             chosenTrader = self.trader[random.randint(0,1)]
             hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
             connected,proxy = self.getRpc(hostAddress)
-        
             for productName, productCount in self.db['Inv'].items():
                 if productCount > 0:
                     sellerInfo = {'seller': {'peerId':self.peerId,'hostAddr':self.hostAddr,'productName':productName},'productName':productName,'productCount':productCount} 	
+                    with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                        f.write(" ".join([str(datetime.datetime.now()),"Peer: ",str(self.peerId), "Registering: ",str(productName),"Quantity: ",str(productCount),'\n']))
                 if connected:
                     proxy.registerProducts(sellerInfo)
                 time.sleep(1)
@@ -225,19 +227,16 @@ class peer:
     # registerProducts: Trader registers the seller goods.
     def registerProducts(self,sellerInfo): # Trader End.
         connected,proxy = self.getRpc(self.databaseHostAddress)
-        #Is this right? We must add to the cache even if the database server is down. 
-        #If cache then go down this path else sip and directly 
-        if connected:
-            if programType == 'Synchoronous':
-                proxy.addProductRequest(sellerInfo)
-            else:
-                self.tradeList = proxy.getTradeList() #updated your own tradeList
-                with self.tradeListLock:
-                    self.tradeList[str(sellerInfo['seller']['peerId'])+'_'+str(sellerInfo['seller']['productName'])] = sellerInfo 	
-                    logSeller(self.tradeList) #not sure
-                proxy.addProductRequest(sellerInfo) #update the data warehouse - only with new info
-        else: 
-            pass #downtime for database warehouse?
+        if programType == 'Synchronous':
+            with open('Peer_'+str(0)+".txt", "a") as f:
+                f.write(" ".join([str(datetime.datetime.now()),"Adding to warehouse", "Product: ",str(sellerInfo['productName']),"Quantity: ",str(sellerInfo['productCount']),'\n']))  
+            proxy.addProductRequest(sellerInfo)
+        else:
+            self.tradeList = proxy.getTradeList() #updated your own tradeList
+            with self.tradeListLock:
+                self.tradeList[str(sellerInfo['seller']['peerId'])+'_'+str(sellerInfo['seller']['productName'])] = sellerInfo 	
+                logSeller(self.tradeList) #not sure
+            proxy.addProductRequest(sellerInfo) #update the data warehouse - only with new info
     
     def printOnConsole(self, msg):
         with addLock:
@@ -252,16 +251,23 @@ class peer:
         if connected:
             if programType == 'Synchronous':
                 #Adds requests in database queue 
-                itemPresent = databaseProxy.removeProductRequest(seller,productName)
-                #if item is present then inform buyer and buyer decrements
+                itemPresent, seller =  databaseProxy.removeProductRequest('',productName)
+                #Warehouse informs trader if item is present.
                 if itemPresent == 1:
+                    with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                        f.write(" ".join([str(datetime.datetime.now()),"Warehouse to Trader ",str(self.peerId)," -> Product present!",'\n']))  
                     connected,proxy = self.getRpc(hostAddr)
-                    if connected: # Pass the message to buyer that transaction is succesful
-                        proxy.transaction(productName,seller,buyer_id,self.tradeCount)
+                    #Inform buyer and buyer removes product from shopping list
+                    print(connected)
+                    if connected: 
+                        proxy.transaction(productName,seller,buyer_id,self.peerId)
                 else:
-                #else inform buyer that item not present and don't do anything
-                    print('Product not present!')
-
+                #Warehouse informs trader if item is not present.
+                    with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                        f.write(" ".join([str(datetime.datetime.now()),"Warehouse to Trader ",str(self.peerId)," -> Product not present!",'\n']))
+                #Trader informs buyer if item is not present.
+                    with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                        f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(self.peerId)," to Peer ",str(buyer_id)," -> Product not present!",'\n']))
             else:
                 self.tradeList = databaseProxy.getTradeList() #updated own cache
                 for i in self.tradeList:
@@ -299,15 +305,13 @@ class peer:
 
 
 	# transaction : Seller just deducts the product count, Buyer prints the message.    	
-    def transaction(self, productName, sellerId, buyer_id,tradeCount):
+    def transaction(self, productName, sellerId, buyer_id, traderId):
         if self.db["Role"] == "Buyer":	
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                f.write(" ".join([str(datetime.datetime.now()),"Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
+                f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(traderId)," informs Peer ", str(self.peerId) ,"that item is available. Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
             if productName in self.db['shop']:	
                 self.db['shop'].remove(productName)	
                 chosenTrader = self.trader[random.randint(0,1)]
-                hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
-                connected,proxy = self.getRpc(hostAddress) 
             if len(self.db['shop']) == 0:	
                 #print("No products with buyer",self.peerId)	
                 productList = ["Fish","Salt","Boar"]	
@@ -318,7 +322,7 @@ class peer:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(datetime.datetime.now()),str(self.peerId),"sold an item. Remaining items are:",str( self.db['Inv']),'\n']))	            	
             chosenTrader = self.trader[random.randint(0,1)]
-            hostAddress = '127.0.0.1:'+str(10030+chosenTrader)	
+            hostAddress = '127.0.0.1:'+str(port+chosenTrader)	
             connected,proxy = self.getRpc(hostAddress) 
             if self.db['Inv'][productName] == 0:	
                 # Refill the item with seller               	
@@ -333,7 +337,7 @@ class peer:
                 if connected: 	
                     proxy.registerProducts(sellerInfo)	
 
-        
+#Initial data        
 db_load = {
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"]}',
     2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{}}',
@@ -347,11 +351,16 @@ if __name__ == "__main__":
     port = 10030
     HostIp = '127.0.0.1'
     totalPeers = int(sys.argv[1])
+    #The first 2 nodes are always the traders
+    traders = [1,2] 
     print("Marketplace is live! Check Peer_X.txt for logging!\n")
-    try:
-        os.remove('transactions.csv')
-    except OSError:
-        pass
+    #Clearing the transactions file
+    clr = ['transactions.csv','Peer_0.txt']
+    for f in clr:
+        try:
+            os.remove(f)
+        except OSError:
+            pass
     if totalPeers<4:
         print('Less than 4 peers passed!')
     else:
@@ -362,31 +371,27 @@ if __name__ == "__main__":
         else:
             databaseHostAddress = HostIp+":"+str(port)
             databaseConnection = database(databaseHostAddress)
-            thread1 = td.Thread(target=databaseConnection.startServer,args=()) # Start Server
+            # Start the DB Server
+            thread1 = td.Thread(target=databaseConnection.startServer,args=()) 
             thread1.start() 
-            time.sleep(2) #wait till database is initialised #Callinng twice?
-            thread2 = td.Thread(target=databaseConnection.processRequests,args=())
-            thread2.start() #start processing requests
-
-            traders = [1,2] #list of traders
             for peerId in range(1,totalPeers+1):
                 hostAddr = HostIp + ":" + str(port+peerId)
                 peerId = peerId
                 db = json.loads(db_load[peerId])
                 num_peers = totalPeers
-                            
-                #Start the thread 
                 peer_local = peer(hostAddr,peerId,db,totalPeers,traders,databaseHostAddress)
+                #Start the process for the traders
                 if peerId in traders:
                     peer_local.db['Role'] = 'Trader'
-                thread1 = td.Thread(target=peer_local.startServer,args=()) # Start Server
-                thread1.start()    
-                
+                    thread1 = td.Thread(target=peer_local.startServer,args=()) 
+                    thread1.start()    
+                #Start the process for the buyers and sellers
+                else:
+                    thread1 = td.Thread(target=peer_local.startServer,args=()) 
+                    thread1.start()    
+                #Clearing the logging files
                 try:
                     os.remove('Peer'+'_'+str(peerId)+'.txt')
                 except OSError:
                     pass
-                #Is this right?? 
-                thread2 = td.Thread(target=peer_local.beginTrading,args=())
-                thread2.start() 
                 
