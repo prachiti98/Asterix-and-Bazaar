@@ -184,7 +184,8 @@ class peer:
         server.register_function(self.lookup,'lookup')
         server.register_function(self.transaction,'transaction')
         server.register_function(self.registerProducts,'registerProducts')
-        self.beginTrading()
+        thread2 = td.Thread(target=peer_local.beginTrading,args=())
+        thread2.start() 
         server.serve_forever()
         
             
@@ -258,7 +259,6 @@ class peer:
                         f.write(" ".join([str(datetime.datetime.now()),"Warehouse to Trader ",str(self.peerId)," -> Product present!",'\n']))  
                     connected,proxy = self.getRpc(hostAddr)
                     #Inform buyer and buyer removes product from shopping list
-                    print(connected)
                     if connected: 
                         proxy.transaction(productName,seller,buyer_id,self.peerId)
                 else:
