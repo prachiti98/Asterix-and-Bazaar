@@ -310,7 +310,7 @@ class peer:
 
     #Trader lookups the product that a buyer wants to buy and replies respective seller and buyer.
     def lookup(self,buyer_id,hostAddr,productName):
-        self.tradeCountIncrease() #todo is it required?
+        self.tradeCountIncrease() 
         tot_prod = 0
         #Connects to database
         connected,databaseProxy = self.getRpc(self.databaseHostAddress)
