@@ -237,11 +237,8 @@ class peer:
                                     df.to_csv('transactions.csv',mode = 'a',header=False)
                                 else:
                                     df.to_csv('transactions.csv',mode = 'a',header=True)
-                            else:
-                                with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                                    f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(self.peerId), " retrying the transaction for ",str(buyerId)," with transactionID ",str(transactionId),'\n'])) 
-                                #Restart from scratch
-                                self.lookup(buyerId,'127.0.0.1:'+str(10030+buyerId),productName)
+                                connected,databaseProxy = self.getRpc(self.databaseHostAddress)
+                                databaseProxy.removeProductRequest('',productName)
                     #Update the traders list for other peers
                     for i in range(3,7):
                         connected,proxy = self.getRpc('127.0.0.1:'+str(10030+i))
@@ -302,40 +299,43 @@ class peer:
                         f.write(" ".join([str(datetime.datetime.now()),"Recieved message from Trader",str(self.peerId),"that product is not present!",'\n']))
             else:
                 with self.tradeCountLock: 
-                    if (self.failOccur and self.peerId == 1) or (self.requestCount>=20 and self.peerId == 1) and self.noReach == 'T':
+                    self.tradeCount+=1
+                    self.tradeList = databaseProxy.getTradeList() #updated own cache
+                    for i in self.tradeList:
+                        if self.tradeList[i]['productName'] == productName:
+                                tot_prod+=self.tradeList[i]['productCount'] 
+                    sellerList = []
+                    for peerId,sellerInfo in self.tradeList.items():
+                        if sellerInfo["productName"] == productName:
+                            sellerList.append(sellerInfo["seller"])
+                    #Check if sellers re present
+                    if len(sellerList) > 0:
                         with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                            f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(self.peerId), "failed and did not deduct goods. Transaction",str(self.tradeCount),"also failed and could not inform the buyer",str(buyerId),"that it was successful",'\n'])) 
-                    else:
-                        self.tradeCount+=1
-                        self.tradeList = databaseProxy.getTradeList() #updated own cache
-                        for i in self.tradeList:
-                            if self.tradeList[i]['productName'] == productName:
-                                    tot_prod+=self.tradeList[i]['productCount'] 
-                        sellerList = []
-                        for peerId,sellerInfo in self.tradeList.items():
-                            if sellerInfo["productName"] == productName:
-                                sellerList.append(sellerInfo["seller"])
-                        if len(sellerList) > 0:
+                            f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(self.peerId), "has the product Product:",str(sellerInfo['productName']),'\n']))  
+                        # Log the request
+                        seller = sellerList[0]
+                        transactionLog = {'tradeCount':str(self.tradeCount),'traderId':self.peerId,'productName' : productName, 'buyerId' : buyerId,'completed':False}
+                        df = pd.DataFrame(transactionLog,index=[0])
+                        if os.path.exists('transactions.csv'):
+                            df.to_csv('transactions.csv',mode = 'a',header=False)
+                        else:
+                            df.to_csv('transactions.csv',mode = 'a',header=True)
+                        time.sleep(5)
+                        #Trader recieves request but does not process it yet. If requestCount>=20 then it is assumed to have failed. 'T' has to be passed as arg.
+                        if (self.failOccur and self.peerId == 1) or (self.requestCount>=20 and self.peerId == 1) and self.noReach == 'T':
                             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                                f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(self.peerId), "has the product Product:",str(sellerInfo['productName']),'\n']))  
-                            # Log the request
-                            seller = sellerList[0]
-                            transactionLog = {'tradeCount':str(self.tradeCount),'traderId':self.peerId,'productName' : productName, 'buyerId' : buyerId,'completed':False}
-                            df = pd.DataFrame(transactionLog,index=[0])
-                            if os.path.exists('transactions.csv'):
-                                df.to_csv('transactions.csv',mode = 'a',header=False)
-                            else:
-                                df.to_csv('transactions.csv',mode = 'a',header=True)
+                                f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(self.peerId), "failed and did not deduct goods. Transaction",str(self.tradeCount),"also failed and could not inform the buyer",str(buyerId),"that it was successful",'\n'])) 
+                        else:
                             with self.tradeListLock:
                                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1    
-                            #Trader has marked logged transaction as complete
-                            time.sleep(5)
+                            #Trader recieves request but has processed it. If requestCount>=20 then it is assumed to have failed. 'F' has to be passed as arg.
                             if (self.failOccur and self.peerId == 1) or (self.requestCount>=20 and self.peerId == 1) and self.noReach == 'F':
                                 with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                                     f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(self.peerId), "failed but deducted goods from the cache. The transaction",str(self.tradeCount)," failed and could not inform the buyer",str(buyerId),"that it was successful",'\n'])) 
                             else:
+                                # Pass the message to buyer that transaction is succesful
                                 connected,proxy = self.getRpc(hostAddr)
-                                if connected: # Pass the message to buyer that transaction is succesful
+                                if connected: 
                                     proxy.transaction(productName,seller,buyerId,self.peerId)
                                 connected,proxy = self.getRpc(seller["hostAddr"])
                                 # Pass the message to seller that its product is sold
@@ -347,16 +347,12 @@ class peer:
                                     df.to_csv('transactions.csv',mode = 'a',header=False)
                                 else:
                                     df.to_csv('transactions.csv',mode = 'a',header=True)
-                                #df_transactions = pd.read_csv('transactions.csv')
-                                #print(df_transactions)
-                                #df_transactions.loc[((df_transactions['traderId'] == self.peerId) & (df_transactions['tradeCount'] == self.tradeCount)),'completed'] = True
-                                #df.to_csv('transactions.csv')
                             #update the datawarehouse
                             databaseProxy.removeProductRequest(seller,productName)
-                            time.sleep(2)
-                        else:
-                            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                                f.write(" ".join([str(self.peerId),"Item is not present!","\n"]))
+                        time.sleep(2)
+                    else:
+                        with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                            f.write(" ".join([str(self.peerId),"Item is not present!","\n"]))
 
 
 	# transaction : Seller just deducts the product count, Buyer prints the message.    	
@@ -415,9 +411,9 @@ db_load = {
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"]}',
     2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{}}',
     3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"]}',
-    4:'{"Role": "Seller","Inv":{"Fish":3,"Boar":1},"shop":{}}',
+    4:'{"Role": "Seller","Inv":{"Fish":30,"Boar":100},"shop":{}}',
     5:'{"Role": "Buyer","Inv":{},"shop":["Salt","Fish","Fish","Fish","Fish","Fish","Fish"]}',
-    6:'{"Role": "Seller","Inv":{"Salt":3},"shop":{}}'
+    6:'{"Role": "Seller","Inv":{"Salt":30},"shop":{}}'
 }       
 
 if __name__ == "__main__":
