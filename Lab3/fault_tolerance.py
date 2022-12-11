@@ -405,13 +405,13 @@ db_load = {
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"]}',
     2:'{"Role": "Seller","Inv":{"Fish":0},"shop":{}}',
     3:'{"Role": "Buyer","Inv":{},"shop":["Boar","Fish","Salt"]}',
-    4:'{"Role": "Seller","Inv":{"Boar":0,"Salt":0},"shop":{}}',
+    4:'{"Role": "Seller","Inv":{"Boar":0,"Salt":0,"Fish":0},"shop":{}}',
     5:'{"Role": "Buyer","Inv":{},"shop":["Boar","Boar","Fish","Fish","Fish","Fish","Fish"]}',
-    6:'{"Role": "Seller","Inv":{"Fish":0},"shop":{}}',
+    6:'{"Role": "Seller","Inv":{"Fish":0,"Boar":0},"shop":{}}',
     7:'{"Role": "Buyer","Inv":{},"shop":["Salt","Boar","Fish","Fish","Fish","Fish","Fish"]}',
-    8:'{"Role": "Buyer","Inv":{},"shop":["Salt","Boar","Fish","Fish","Fish","Fish","Fish"]}',
+    8:'{"Role": "Buyer","Inv":{},"shop":["Salt","Boar","Fish","Fish","Boar","Fish","Fish"]}',
     9:'{"Role": "Buyer","Inv":{},"shop":["Fish","Boar","Fish","Fish","Fish","Fish","Fish"]}',
-    10:'{"Role": "Buyer","Inv":{},"shop":["Fish","Boar","Fish","Fish","Fish","Fish","Fish"]}'
+    10:'{"Role": "Buyer","Inv":{},"shop":["Fish","Boar","Fish","Fish","Fish","Boar","Fish"]}'
 }     
 
 if __name__ == "__main__":
