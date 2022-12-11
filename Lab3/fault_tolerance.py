@@ -371,7 +371,6 @@ class peer:
                 else:
                     chosenTrader = self.trader[0]
             if len(self.db['shop']) == 0:	
-                #print("No products with buyer",self.peerId)	
                 productList = ["Fish","Salt","Boar"]	
                 x = random.randint(0, 2)	
                 self.db['shop'].append(productList[x])	
@@ -401,6 +400,7 @@ class peer:
                 if connected: 	
                     proxy.registerProducts(sellerInfo)	
 
+    #Heartbeat to check if the trader is alive
     def heartbeat(self, hostAddress):
         failurePeer = 1
         if self.requestCount >= 20 and hostAddress == '127.0.0.1:'+str(10030+failurePeer):
