@@ -95,7 +95,7 @@ class database:
                 #uncomment only if you want to see oversell percentage
                 # print("Oversell! The incidence of over-selling as a percentage of total buy requests: (in %) ",(self.oversellCount/self.totalBuyRequest)*100)
                 with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                        f.write(" ".join([str(datetime.datetime.now()),' Oversell3! Item not present. Informing Trader.' + str(traderPeerId),'\n']))
+                        f.write(" ".join([str(datetime.datetime.now()),' Oversell! Item not present. Informing Trader.' + str(traderPeerId),'\n']))
                 with open('Peer_'+str(traderPeerId)+".txt", "a") as f:
                         f.write(" ".join([str(datetime.datetime.now()),' Message received from data warehouse, I did an oversell!','\n']))
                 return -1            
@@ -372,14 +372,16 @@ class peer:
                             f.write(" ".join([str(datetime.datetime.now()),"Received message from Data warehouse via Trader ",str(self.peerId)," that product is not present!",'\n']))
                 else:
                     with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                        f.write(" ".join([str(self.peerId),"Item is not present!","\n"]))
+                        f.write(" ".join([str(datetime.datetime.now()),str(self.peerId),"Item is not present!","\n"]))
+                    with open('Peer_'+str(self.buyerId)+".txt", "a") as f:
+                        f.write(" ".join([str(datetime.datetime.now()),str(self.peerId),"Received message from Trader ",str(self.peerId)," that Item is not present!","\n"]))
 
 
 	# transaction : Seller just deducts the product count, Buyer prints the message.    	
     def transaction(self, productName, sellerId, buyer_id, traderId):
         if self.db["Role"] == "Buyer":	
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                f.write(" ".join([str(datetime.datetime.now()),"Received message from Trader ",str(traderId),"that item is available. Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
+                f.write(" ".join([str(datetime.datetime.now()),"Received message from Trader ",str(traderId),"that item is bought. Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
             if productName in self.db['shop']:	 
                 # print(self.peerId,self.db['shop'])
                 self.db['shop'].remove(productName)	
