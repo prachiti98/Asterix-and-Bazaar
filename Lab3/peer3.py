@@ -132,12 +132,11 @@ class database:
                 self.addProduct(tempRequest[0])
             else:
                 result = self.removeProduct(tempRequest[0],tempRequest[1],tempRequest[3])
-                return result
             with open('Peer_'+str(self.peerId)+"_DB.txt", "w") as f:
                 f.write(" ".join([str(item)+':'+str(i)+'\n' for item,i in self.tradeList.items()]))
+                return result
             #added for simulation
-            time.sleep(10)
-    
+
 # Defining peer
 class peer:
     def __init__(self,hostAddr,peerId,db,totalPeers,traders,databaseHostAddress,programType):
