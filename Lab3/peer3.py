@@ -210,7 +210,7 @@ class peer:
                     connected,proxy = self.getRpc(hostAddress) 	
                     if connected: 	
                         proxy.registerProducts(sellerInfo)	
-                    time.sleep(5)
+                    time.sleep(x)
         # If you are a buyer, wait 2 seconds for the seller to register the products before you begin purchasing.
         elif self.db["Role"] == "Buyer":
             # Sellers register the products during this time.
@@ -331,7 +331,7 @@ class peer:
                     connected,proxy = self.getRpc(seller["hostAddr"])
                     # Pass the message to seller that its product is sold
                     if connected:
-                        proxy.transaction(productName,seller,buyer_id,self.tradeCount)
+                        proxy.transaction(productName,seller,buyer_id,self.peerId)
                 else:
                 #Warehouse informs trader if item is not present.
                     with open('Peer_'+str(self.peerId)+".txt", "a") as f:
@@ -359,13 +359,14 @@ class peer:
                     # Pass the message to buyer that transaction is succesful
                     connected,proxy = self.getRpc(hostAddr)
                     if connected: 
-                        proxy.transaction(productName,seller,buyer_id,self.tradeCount)
+                        proxy.transaction(productName,seller,buyer_id,self.peerId)
                     # Pass the message to seller that its product is sold
                     connected,proxy = self.getRpc(seller["hostAddr"])
                     if connected:
-                        proxy.transaction(productName,seller,buyer_id,self.tradeCount)
+                        proxy.transaction(productName,seller,buyer_id,self.peerId)
                     #update the datawarehouse
                     result = databaseProxy.removeProductRequest(self.peerId,seller,productName)
+                    #case of oversell
                     if(result == -1):
                         with open('Peer_'+str(buyer_id)+".txt", "a") as f:
                             f.write(" ".join([str(datetime.datetime.now()),"Recieved message from Data warehouse via Trader ",str(self.peerId)," that product is not present!",'\n']))
