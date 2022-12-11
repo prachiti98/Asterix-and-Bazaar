@@ -321,7 +321,7 @@ class peer:
                 #Warehouse informs trader if item is present.
                 if itemPresent == 1:
                     with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                        f.write(" ".join([str(datetime.datetime.now()),"Recieved message from Warehouse that Product is present!",'\n']))  
+                        f.write(" ".join([str(datetime.datetime.now()),"Received message from Warehouse that Product is present!",'\n']))  
                     connected,proxy = self.getRpc(hostAddr)
                     #Inform buyer and buyer removes product from shopping list
                     if connected: 
@@ -335,10 +335,10 @@ class peer:
                 else:
                 #Warehouse informs trader if item is not present.
                     with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                        f.write(" ".join([str(datetime.datetime.now()),"Recieved message from Warehouse that product is not present!",'\n']))
+                        f.write(" ".join([str(datetime.datetime.now()),"Received message from Warehouse that product is not present!",'\n']))
                 #Trader informs buyer if item is not present.
                     with open('Peer_'+str(buyer_id)+".txt", "a") as f:
-                        f.write(" ".join([str(datetime.datetime.now()),"Recieved message from Trader ",str(self.peerId)," that product is not present!",'\n']))
+                        f.write(" ".join([str(datetime.datetime.now()),"Received message from Trader ",str(self.peerId)," that product is not present!",'\n']))
             else:
                 self.tradeList = databaseProxy.getTradeList() #updated own cache
                 sellerList = []
@@ -369,7 +369,7 @@ class peer:
                     #case of oversell
                     if(result == -1):
                         with open('Peer_'+str(buyer_id)+".txt", "a") as f:
-                            f.write(" ".join([str(datetime.datetime.now()),"Recieved message from Data warehouse via Trader ",str(self.peerId)," that product is not present!",'\n']))
+                            f.write(" ".join([str(datetime.datetime.now()),"Received message from Data warehouse via Trader ",str(self.peerId)," that product is not present!",'\n']))
                 else:
                     with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                         f.write(" ".join([str(self.peerId),"Item is not present!","\n"]))
@@ -379,7 +379,7 @@ class peer:
     def transaction(self, productName, sellerId, buyer_id, traderId):
         if self.db["Role"] == "Buyer":	
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                f.write(" ".join([str(datetime.datetime.now()),"Receieved message from Trader ",str(traderId),"that item is available. Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
+                f.write(" ".join([str(datetime.datetime.now()),"Received message from Trader ",str(traderId),"that item is available. Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
             if productName in self.db['shop']:	 
                 # print(self.peerId,self.db['shop'])
                 self.db['shop'].remove(productName)	
