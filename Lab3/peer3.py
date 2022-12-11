@@ -130,11 +130,14 @@ class database:
             tempRequest = self.requestQueue.popleft()
             if tempRequest[2] == 'add':
                 self.addProduct(tempRequest[0])
+                with open('Peer_'+str(self.peerId)+"_DB.txt", "w") as f:
+                    f.write(" ".join([str(item)+':'+str(i)+'\n' for item,i in self.tradeList.items()]))
             else:
                 result = self.removeProduct(tempRequest[0],tempRequest[1],tempRequest[3])
-            with open('Peer_'+str(self.peerId)+"_DB.txt", "w") as f:
-                f.write(" ".join([str(item)+':'+str(i)+'\n' for item,i in self.tradeList.items()]))
+                with open('Peer_'+str(self.peerId)+"_DB.txt", "w") as f:
+                    f.write(" ".join([str(item)+':'+str(i)+'\n' for item,i in self.tradeList.items()]))
                 return result
+                
             #added for simulation
 
 # Defining peer
