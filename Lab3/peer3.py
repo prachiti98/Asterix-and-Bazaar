@@ -276,6 +276,8 @@ class peer:
             with self.tradeListLock:
                 self.tradeList[str(sellerInfo['seller']['peerId'])+'_'+str(sellerInfo['seller']['productName'])] = sellerInfo 	
             logSeller(self.tradeList) #not sure
+            with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                f.write(" ".join([str(datetime.datetime.now()),"Added to trader "+str(self.peerId)+" cache", "Product: ",str(sellerInfo['productName']),"Quantity: ",str(sellerInfo['productCount']),'\n']))  
             proxy.addProductRequest(self.peerId,sellerInfo) #update the data warehouse - only with new info
     
     def printOnConsole(self, msg):
@@ -331,6 +333,9 @@ class peer:
                     
                     with self.tradeListLock:
                         self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1     	   
+                    #trader sells the product
+                    with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                        f.write(" ".join([str(datetime.datetime.now()),"Product "+str(productName)+" of buyer "+str(buyer_id)+" sold to seller "+str(seller['peerId']),'\n']))
                     connected,proxy = self.getRpc(hostAddr)
                     if connected: # Pass the message to buyer that transaction is succesful
                         proxy.transaction(productName,seller,buyer_id,self.tradeCount)
@@ -366,7 +371,7 @@ class peer:
         elif self.db["Role"] == "Seller":	
             self.db['Inv'][productName] = self.db['Inv'][productName] - 1	
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                f.write(" ".join([str(datetime.datetime.now()),str(self.peerId),"sold an item. Remaining items are:",str( self.db['Inv']),'\n']))	            	
+                f.write(" ".join([str(datetime.datetime.now()),str(self.peerId),"sold an item.",'\n']))	            	
             chosenTrader = self.trader[random.randint(0,1)]
             hostAddress = '127.0.0.1:'+str(10030+chosenTrader)	
             connected,proxy = self.getRpc(hostAddress) 
@@ -390,8 +395,8 @@ db_load = {
     2:'{"Role": "Seller","Inv":{"Fish":0},"shop":{}}',
     3:'{"Role": "Buyer","Inv":{},"shop":["Boar","Fish","Salt"]}',
     4:'{"Role": "Seller","Inv":{"Boar":0,"Salt":0},"shop":{}}',
-    # 5:'{"Role": "Buyer","Inv":{},"shop":["Boar","Boar","Fish","Fish","Fish","Fish","Fish"]}',
-    5:'{"Role": "Seller","Inv":{"Boar":0},"shop":{}}'
+    5:'{"Role": "Buyer","Inv":{},"shop":["Boar","Boar","Fish","Fish","Fish","Fish","Fish"]}',
+    6:'{"Role": "Seller","Inv":{"Boar":0},"shop":{}}'
     
 }       
 

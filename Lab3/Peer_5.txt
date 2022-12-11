@@ -1,8 +1,8 @@
-5 restocking Boar by 5 more 
-5 restocking Boar by 5 more 
-5 restocking Boar by 5 more 
-5 restocking Boar by 5 more 
-5 restocking Boar by 5 more 
-5 restocking Boar by 5 more 
-5 restocking Boar by 5 more 
-5 restocking Boar by 5 more 
+2022-12-11 10:31:45.192650 Peer  5 : Requesting  Boar 
+2022-12-11 10:31:45.205944 Receieved message from Trader  1 that item is available. Peer  5  : Bought  Boar  from peer:  4 
+2022-12-11 10:31:51.223524 Peer  5 : Requesting  Boar 
+2022-12-11 10:31:51.234923 Receieved message from Trader  2 that item is available. Peer  5  : Bought  Boar  from peer:  4 
+2022-12-11 10:31:57.249351 Peer  5 : Requesting  Boar 
+2022-12-11 10:31:57.260879 Receieved message from Trader  4 that item is available. Peer  5  : Bought  Boar  from peer:  4 
+2022-12-11 10:32:03.270929 Peer  5 : Requesting  Boar 
+2022-12-11 10:32:03.281654 Receieved message from Trader  6 that item is available. Peer  5  : Bought  Boar  from peer:  4 

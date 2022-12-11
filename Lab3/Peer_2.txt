@@ -1,0 +1,4 @@
+2022-12-11 10:31:39.232699 Added to trader 2 cache Product:  Boar Quantity:  5 
+2022-12-11 10:31:45.202792 Product Boar of buyer 5 sold to seller 4 
+2022-12-11 10:31:48.224859 Product Boar of buyer 3 sold to seller 4 
+2022-12-11 10:32:09.274716 Added to trader 2 cache Product:  Boar Quantity:  5 

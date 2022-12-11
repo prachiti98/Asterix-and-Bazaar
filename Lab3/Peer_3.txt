@@ -1,40 +1,10 @@
-2022-12-11 09:29:24.481254 Peer  3 : Requesting  Boar 
-2022-12-11 09:29:24.501678 Receieved message from Trader  1 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:29:31.518004 Peer  3 : Requesting  Boar 
-2022-12-11 09:29:31.524085 Receieved message from Trader  1 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:29:36.538541 Peer  3 : Requesting  Boar 
-2022-12-11 09:29:36.547415 Receieved message from Trader  2 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:29:40.558268 Peer  3 : Requesting  Boar 
-2022-12-11 09:29:40.566541 Receieved message from Trader  3 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:29:47.577110 Peer  3 : Requesting  Boar 
-2022-12-11 09:29:47.585988 Receieved message from Trader  4 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:29:54.600543 Peer  3 : Requesting  Boar 
-2022-12-11 09:29:54.604233 Receieved message from Trader  5 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:29:59.617856 Peer  3 : Requesting  Boar 
-2022-12-11 09:29:59.627328 Receieved message from Trader  6 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:30:02.639518 Peer  3 : Requesting  Boar 
-2022-12-11 09:30:02.648887 Receieved message from Trader  7 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:30:08.668511 Peer  3 : Requesting  Boar 
-2022-12-11 09:30:08.677638 Receieved message from Trader  8 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:30:15.694411 Peer  3 : Requesting  Boar 
-2022-12-11 09:30:15.704202 Receieved message from Trader  2 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:30:21.719018 Peer  3 : Requesting  Boar 
-2022-12-11 09:30:21.727183 Receieved message from Trader  9 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:30:27.744391 Peer  3 : Requesting  Boar 
-2022-12-11 09:30:27.754171 Receieved message from Trader  3 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:30:31.770970 Peer  3 : Requesting  Boar 
-2022-12-11 09:30:31.778547 Receieved message from Trader  4 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:30:36.790535 Peer  3 : Requesting  Boar 
-2022-12-11 09:30:36.800721 Receieved message from Trader  10 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:30:40.812976 Peer  3 : Requesting  Boar 
-2022-12-11 09:30:40.822363 Receieved message from Trader  5 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:30:45.838580 Peer  3 : Requesting  Boar 
-2022-12-11 09:30:45.846623 Receieved message from Trader  11 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:30:48.862210 Peer  3 : Requesting  Boar 
-2022-12-11 09:30:48.870933 Receieved message from Trader  6 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:30:54.886891 Peer  3 : Requesting  Boar 
-2022-12-11 09:30:54.895187 Receieved message from Trader  12 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:31:01.910908 Peer  3 : Requesting  Boar 
-2022-12-11 09:31:01.919950 Receieved message from Trader  7 that item is available. Peer  3  : Bought  Boar  from peer:  4 
-2022-12-11 09:31:05.932372 Peer  3 : Requesting  Boar 
-2022-12-11 09:31:05.939088 Receieved message from Trader  8 that item is available. Peer  3  : Bought  Boar  from peer:  4 
+2022-12-11 10:31:42.175553 Peer  3 : Requesting  Boar 
+2022-12-11 10:31:42.195485 Receieved message from Trader  1 that item is available. Peer  3  : Bought  Boar  from peer:  4 
+2022-12-11 10:31:48.217256 Peer  3 : Requesting  Boar 
+2022-12-11 10:31:48.227797 Receieved message from Trader  2 that item is available. Peer  3  : Bought  Boar  from peer:  4 
+2022-12-11 10:31:52.243388 Peer  3 : Requesting  Boar 
+2022-12-11 10:31:52.254546 Receieved message from Trader  3 that item is available. Peer  3  : Bought  Boar  from peer:  4 
+2022-12-11 10:31:59.272434 Peer  3 : Requesting  Boar 
+2022-12-11 10:31:59.282119 Receieved message from Trader  5 that item is available. Peer  3  : Bought  Boar  from peer:  4 
+2022-12-11 10:32:06.297106 Peer  3 : Requesting  Boar 
+2022-12-11 10:32:06.306794 Receieved message from Trader  7 that item is available. Peer  3  : Bought  Boar  from peer:  4 
