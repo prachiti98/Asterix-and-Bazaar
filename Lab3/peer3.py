@@ -103,7 +103,6 @@ class database:
     def calculateThroughput(self, timeStart, timeStop):
         self.requestCount += 1 #every successful good shipped
         if self.requestCount % 100 == 0:
-            print(timeStart,timeStop)
             totalTime = (timeStop - timeStart).total_seconds()
             print('Average throughput of system is '+str(self.peerId)+': '+str(self.requestCount/totalTime)+' (req/sec)')
 
@@ -188,9 +187,11 @@ class peer:
         time.sleep(2) 
         # Seller registers products
         if self.db["Role"] == "Seller":
-            chosenTrader = self.trader[random.randint(0,1)]
-            hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
-            connected,proxy = self.getRpc(hostAddress)          
+            # noOfTraders = len(self.trader)-1
+            
+            # chosenTrader = self.trader[random.randint(0,noOfTraders)]
+            # hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
+            # connected,proxy = self.getRpc(hostAddress)          
             while(True):
                 x = 5
                 #every product generated Ng time every Tg seconds
@@ -199,7 +200,8 @@ class peer:
                         f.write(" ".join([str(self.peerId),"restocking",str(productName),'by',str(x),'more','\n']))
                     self.db['Inv'][productName] = x	
                     sellerInfo = {'seller': {'peerId':self.peerId,'hostAddr':self.hostAddr,'productName':productName},'productName':productName,'productCount':x}	
-                    chosenTrader = self.trader[random.randint(0,1)]
+                    noOfTraders = len(self.trader)-1
+                    chosenTrader = self.trader[random.randint(0,noOfTraders)]
                     hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
                     connected,proxy = self.getRpc(hostAddress) 	
                     if connected: 	
@@ -212,7 +214,8 @@ class peer:
             while len(self.db['shop'])!= 0:
                 time.sleep(random.randint(1,5))
                 item = self.db['shop'][0]
-                chosenTrader = self.trader[random.randint(0,1)]
+                noOfTraders = len(self.trader)-1
+                chosenTrader = self.trader[random.randint(0,noOfTraders)]
                 hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
                 connected,proxy = self.getRpc(hostAddress)
                 if connected:
@@ -398,7 +401,7 @@ if __name__ == "__main__":
     programType = sys.argv[1]
     totalPeers = len(db_load)
     #The first 2 nodes are always the traders
-    traders = [1,2,3] 
+    traders = [1,2] #please add peerId of peers which you want to have role Trader
     if programType == 'Synchronous':
         print("Synchronous marketplace is live! Check Peer_X.txt for logging!\n")
     else:
