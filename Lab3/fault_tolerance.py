@@ -32,7 +32,7 @@ class database:
         self.requestQueue = deque()
         self.oversellCount = 0
         self.programType = programType
-        self.databaseLock = Lock() #todo can change to multiprocessing lock -> check difference
+        self.timeStart = datetime.datetime.now()
         
         # Starting Server    
     def startServer(self):
@@ -60,6 +60,7 @@ class database:
                         f.write(" ".join([str(datetime.datetime.now()),' Item present. Informing Trader.','\n']))
                 seller = sellerList[0]  
                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1 
+                self.calculateThroughput(self.timeStart,datetime.datetime.now())
                 return [1,seller]
         else:
             tot_prod = 0
@@ -79,17 +80,28 @@ class database:
                         f.write(" ".join([str(datetime.datetime.now()),' Item present. Informing Trader.','\n']))
                 seller = sellerList[0]            
                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1 
+                self.calculateThroughput(self.timeStart,datetime.datetime.now())
                 return 1
                 #Can inform trader here if product sold or not. Reuturn 1 if sold else -1 
-        with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                f.write(" ".join([str(datetime.datetime.now()),' Item not present. Informing Trader.','\n']))
-        return -1            
+            else:
+                self.oversellCount +=1
+                #uncomment only if you want to see oversell percentage
+                # print("Oversell! The incidence of over-selling as a percentage of total buy requests: (in %) ",(self.oversellCount/self.totalBuyRequest)*100)
+                with open('Peer_'+str(self.peerId)+".txt", "a") as f:
+                        f.write(" ".join([str(datetime.datetime.now()),' Oversell! Item not present. Informing Trader.' + str(traderPeerId),'\n']))
+                return -1            
 
     def addProductRequest(self,sellerInfo):
         self.requestQueue.append([sellerInfo,'','add'])
         res = self.processRequests()
         return res
 
+    def calculateThroughput(self, timeStart, timeStop):
+        self.requestCount += 1 #every successful good shipped
+        #printing it everytime so that we know when a trader failed and its throughput till vs later
+        totalTime = (timeStop - timeStart).total_seconds()
+        print('Average throughput of system is '+str(self.peerId)+': '+str(self.requestCount/totalTime)+' (req/sec)')
+    
     def removeProductRequest(self,seller,productName):
         self.requestQueue.append([seller,productName,'remove'])
         res = self.processRequests()
@@ -175,18 +187,21 @@ class peer:
                 chosenTrader = self.trader[0]
             hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
             connected,proxy = self.getRpc(hostAddress)
-            for productName, productCount in self.db['Inv'].items():
-                if productCount > 0:
-                    sellerInfo = {'seller': {'peerId':self.peerId,'hostAddr':self.hostAddr,'productName':productName},'productName':productName,'productCount':productCount} 	
-                    with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                        f.write(" ".join([str(datetime.datetime.now()),"Peer: ",str(self.peerId), "Registering: ",str(productName),"Quantity: ",str(productCount),'\n']))
-                if connected:
-                    proxy.registerProducts(sellerInfo)
-                time.sleep(1)
+            while(True):
+                x = 5
+                #every product generated Ng time every Tg seconds
+                for productName in self.db['Inv'].keys():
+                    with open('Peer_'+str(self.peerId)+".txt", "a") as f:	
+                        f.write(" ".join([str(self.peerId),"restocking",str(productName),'by',str(x),'more','\n']))
+                    self.db['Inv'][productName] = x	
+                    sellerInfo = {'seller': {'peerId':self.peerId,'hostAddr':self.hostAddr,'productName':productName},'productName':productName,'productCount':x}	 	
+                    if connected: 	
+                        proxy.registerProducts(sellerInfo)	
+                    time.sleep(5)
         # If you are a buyer, wait 2 seconds for the seller to register the products before you begin purchasing.
         elif self.db["Role"] == "Buyer":
             # Sellers register the products during this time.
-            time.sleep(2) 
+            time.sleep(5) 
             while len(self.db['shop'])!= 0: 
                 time.sleep(1)
                 item = self.db['shop'][0]
@@ -249,6 +264,7 @@ class peer:
     #Not working for some reason
     def updateTrader(self,failureTrader):
         if not self.failOccur:
+            print("Trader failed")
             self.trader.remove(failureTrader)
             self.failOccur = True
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
@@ -321,15 +337,15 @@ class peer:
                         else:
                             df.to_csv('transactions.csv',mode = 'a',header=True)
                         time.sleep(5)
-                        #Trader recieves request but does not process it yet. If requestCount>=20 then it is assumed to have failed. 'T' has to be passed as arg.
-                        if (self.failOccur and self.peerId == 1) or (self.requestCount>=20 and self.peerId == 1) and self.noReach == 'T':
+                        #Trader recieves request but does not process it yet. If requestCount>=50 then it is assumed to have failed. 'T' has to be passed as arg.
+                        if (self.failOccur and self.peerId == 1) or (self.requestCount>=50 and self.peerId == 1) and self.noReach == 'T':
                             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                                 f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(self.peerId), "failed and did not deduct goods. Transaction",str(self.tradeCount),"also failed and could not inform the buyer",str(buyerId),"that it was successful",'\n'])) 
                         else:
                             with self.tradeListLock:
                                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1    
-                            #Trader recieves request but has processed it. If requestCount>=20 then it is assumed to have failed. 'F' has to be passed as arg.
-                            if (self.failOccur and self.peerId == 1) or (self.requestCount>=20 and self.peerId == 1) and self.noReach == 'F':
+                            #Trader recieves request but has processed it. If requestCount>=50 then it is assumed to have failed. 'F' has to be passed as arg.
+                            if (self.failOccur and self.peerId == 1) or (self.requestCount>=50 and self.peerId == 1) and self.noReach == 'F':
                                 with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                                     f.write(" ".join([str(datetime.datetime.now()),"Trader ",str(self.peerId), "failed but deducted goods from the cache. The transaction",str(self.tradeCount)," failed and could not inform the buyer",str(buyerId),"that it was successful",'\n'])) 
                             else:
@@ -374,32 +390,12 @@ class peer:
             self.db['Inv'][productName] = self.db['Inv'][productName] - 1	
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(datetime.datetime.now()),str(self.peerId),"sold an item. Remaining items are:",str( self.db['Inv']),'\n']))	            	
-            if not self.failOccur:
-                chosenTrader = self.trader[random.randint(0,1)]
-            else:
-                chosenTrader = self.trader[0]
-            hostAddress = '127.0.0.1:'+str(10030+chosenTrader)	
-            connected,proxy = self.getRpc(hostAddress) 
-            if self.db['Inv'][productName] == 0:	
-                # Refill the item with seller               	
-                x = random.randint(1, 10)	
-                with open('Peer_'+str(self.peerId)+".txt", "a") as f:	
-                    f.write(" ".join([str(self.peerId),"restocking",str(productName),'by',str(x),'more','\n']))
-                self.db['Inv'][productName] = x	
-                sellerInfo = {'seller': {'peerId':self.peerId,'hostAddr':self.hostAddr,'productName':productName},'productName':productName,'productCount':x}	
-                if not self.failOccur:
-                    chosenTrader = self.trader[random.randint(0,1)]
-                else:
-                    chosenTrader = self.trader[0]
-                hostAddress = '127.0.0.1:'+str(10030+chosenTrader)
-                connected,proxy = self.getRpc(hostAddress) 	
-                if connected: 	
-                    proxy.registerProducts(sellerInfo)	
+	
 
     #Heartbeat to check if the trader is alive
     def heartbeat(self, hostAddress):
         failurePeer = 1
-        if self.requestCount >= 20 and hostAddress == '127.0.0.1:'+str(10030+failurePeer):
+        if self.requestCount >= 50 and hostAddress == '127.0.0.1:'+str(10030+failurePeer):
             return False,'Failed!'
         else:
             a = xmlrpc.client.ServerProxy('http://' + str(hostAddress) + '/')
@@ -409,12 +405,16 @@ class peer:
 #Initial data        
 db_load = {
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"]}',
-    2:'{"Role": "Seller","Inv":{"Fish":5},"shop":{}}',
-    3:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"]}',
-    4:'{"Role": "Seller","Inv":{"Fish":30,"Boar":100},"shop":{}}',
-    5:'{"Role": "Buyer","Inv":{},"shop":["Salt","Fish","Fish","Fish","Fish","Fish","Fish"]}',
-    6:'{"Role": "Seller","Inv":{"Salt":30},"shop":{}}'
-}       
+    2:'{"Role": "Seller","Inv":{"Fish":0},"shop":{}}',
+    3:'{"Role": "Buyer","Inv":{},"shop":["Boar","Fish","Salt"]}',
+    4:'{"Role": "Seller","Inv":{"Boar":0,"Salt":0},"shop":{}}',
+    5:'{"Role": "Buyer","Inv":{},"shop":["Boar","Boar","Fish","Fish","Fish","Fish","Fish"]}',
+    6:'{"Role": "Seller","Inv":{"Fish":0},"shop":{}}',
+    7:'{"Role": "Buyer","Inv":{},"shop":["Salt","Boar","Fish","Fish","Fish","Fish","Fish"]}',
+    8:'{"Role": "Buyer","Inv":{},"shop":["Salt","Boar","Fish","Fish","Fish","Fish","Fish"]}',
+    9:'{"Role": "Buyer","Inv":{},"shop":["Fish","Boar","Fish","Fish","Fish","Fish","Fish"]}',
+    10:'{"Role": "Buyer","Inv":{},"shop":["Fish","Boar","Fish","Fish","Fish","Fish","Fish"]}'
+}     
 
 if __name__ == "__main__":
     port = 10030
