@@ -130,12 +130,16 @@ class database:
             tempRequest = self.requestQueue.popleft()
             if tempRequest[2] == 'add':
                 self.addProduct(tempRequest[0])
+                with open('Peer_'+str(self.peerId)+"_DB.txt", "w") as f:
+                    f.write(" ".join([str(item)+':'+str(i)+'\n' for item,i in self.tradeList.items()]))
             else:
                 result = self.removeProduct(tempRequest[0],tempRequest[1],tempRequest[3])
+                with open('Peer_'+str(self.peerId)+"_DB.txt", "w") as f:
+                    f.write(" ".join([str(item)+':'+str(i)+'\n' for item,i in self.tradeList.items()]))
                 return result
+                
             #added for simulation
-            time.sleep(10)
-    
+
 # Defining peer
 class peer:
     def __init__(self,hostAddr,peerId,db,totalPeers,traders,databaseHostAddress,programType):
@@ -293,6 +297,8 @@ class peer:
         else:
             self.tradeList = proxy.getTradeList() #updated your own tradeList
             with self.tradeListLock:
+                with open('Peer_'+str(self.peerId)+"_Cache.txt", "w") as f:
+                    f.write(" ".join([str(sellerInfo)]))  
                 self.tradeList[str(sellerInfo['seller']['peerId'])+'_'+str(sellerInfo['seller']['productName'])] = sellerInfo 	
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(datetime.datetime.now()),"Added to trader "+str(self.peerId)+" cache", "Product: ",str(sellerInfo['productName']),"Quantity: ",str(sellerInfo['productCount']),'\n']))  
@@ -344,6 +350,8 @@ class peer:
                     seller = sellerList[0]
                     transactionLog = {str(self.tradeCount) : {'productName' : productName, 'buyer_id' : buyer_id, 'sellerId':seller,'completed':False}}
                     with self.tradeListLock:
+                        with open('Peer_'+str(self.peerId)+"_Cache.txt", "w") as f:
+                            f.write(" ".join([str(sellerInfo)]))  
                         self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1     	   
                     #trader sells the product
                     with open('Peer_'+str(self.peerId)+".txt", "a") as f:
