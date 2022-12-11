@@ -1,6 +1,8 @@
-2022-12-10 19:57:53.731505 Peer  5 : Requesting  Salt 
-2022-12-10 19:57:53.739127 Receieved message from Trader  4 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 19:57:55.771294 Peer  5 : Requesting  Salt 
-2022-12-10 19:57:55.810964 Receieved message from Trader  1 that item is available. Peer  5  : Bought  Salt  from peer:  6 
-2022-12-10 19:57:58.850999 Peer  5 : Requesting  Salt 
-2022-12-10 19:57:58.859000 Receieved message from Trader  5 that item is available. Peer  5  : Bought  Salt  from peer:  6 
+5 restocking Boar by 5 more 
+5 restocking Boar by 5 more 
+5 restocking Boar by 5 more 
+5 restocking Boar by 5 more 
+5 restocking Boar by 5 more 
+5 restocking Boar by 5 more 
+5 restocking Boar by 5 more 
+5 restocking Boar by 5 more 

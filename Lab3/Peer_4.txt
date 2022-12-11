@@ -1,7 +1,28 @@
-2022-12-10 19:57:45.707054 Peer:  4 Registering:  Fish Quantity:  3 
-2022-12-10 19:57:46.731000 4 sold an item. Remaining items are: {'Fish': 2, 'Boar': 1} 
-2022-12-10 19:57:46.765488 Peer:  4 Registering:  Boar Quantity:  1 
-2022-12-10 19:57:49.755989 4 sold an item. Remaining items are: {'Fish': 1, 'Boar': 1} 
-2022-12-10 19:57:52.788651 4 sold an item. Remaining items are: {'Fish': 0, 'Boar': 1} 
-4 restocking Fish by 3 more 
-2022-12-10 19:57:55.834891 4 sold an item. Remaining items are: {'Fish': 2, 'Boar': 1} 
+4 restocking Boar by 5 more 
+2022-12-11 09:29:24.504835 4 sold an item. Remaining items are: {'Boar': -1, 'Salt': 0} 
+4 restocking Salt by 5 more 
+2022-12-11 09:29:31.525557 4 sold an item. Remaining items are: {'Boar': -2, 'Salt': 0} 
+2022-12-11 09:29:36.549114 4 sold an item. Remaining items are: {'Boar': -3, 'Salt': 0} 
+2022-12-11 09:29:40.568338 4 sold an item. Remaining items are: {'Boar': -4, 'Salt': 0} 
+4 restocking Boar by 5 more 
+2022-12-11 09:29:47.587738 4 sold an item. Remaining items are: {'Boar': -5, 'Salt': 0} 
+2022-12-11 09:29:54.605367 4 sold an item. Remaining items are: {'Boar': -6, 'Salt': 0} 
+2022-12-11 09:29:59.629302 4 sold an item. Remaining items are: {'Boar': -7, 'Salt': 0} 
+4 restocking Salt by 5 more 
+2022-12-11 09:30:02.650685 4 sold an item. Remaining items are: {'Boar': -8, 'Salt': 0} 
+2022-12-11 09:30:08.679948 4 sold an item. Remaining items are: {'Boar': -9, 'Salt': 0} 
+2022-12-11 09:30:15.706388 4 sold an item. Remaining items are: {'Boar': -10, 'Salt': 0} 
+4 restocking Boar by 5 more 
+2022-12-11 09:30:21.728734 4 sold an item. Remaining items are: {'Boar': -11, 'Salt': 0} 
+2022-12-11 09:30:27.756166 4 sold an item. Remaining items are: {'Boar': -12, 'Salt': 0} 
+4 restocking Salt by 5 more 
+2022-12-11 09:30:31.780305 4 sold an item. Remaining items are: {'Boar': -13, 'Salt': 0} 
+2022-12-11 09:30:36.802541 4 sold an item. Remaining items are: {'Boar': -14, 'Salt': 0} 
+2022-12-11 09:30:40.824189 4 sold an item. Remaining items are: {'Boar': -15, 'Salt': 0} 
+2022-12-11 09:30:45.848440 4 sold an item. Remaining items are: {'Boar': -16, 'Salt': 0} 
+4 restocking Boar by 5 more 
+2022-12-11 09:30:48.872828 4 sold an item. Remaining items are: {'Boar': -17, 'Salt': 0} 
+2022-12-11 09:30:54.896999 4 sold an item. Remaining items are: {'Boar': -18, 'Salt': 0} 
+4 restocking Salt by 5 more 
+2022-12-11 09:31:01.921721 4 sold an item. Remaining items are: {'Boar': -19, 'Salt': 0} 
+2022-12-11 09:31:05.940814 4 sold an item. Remaining items are: {'Boar': -20, 'Salt': 0} 
