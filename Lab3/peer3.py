@@ -95,7 +95,7 @@ class database:
                 #uncomment only if you want to see oversell percentage
                 # print("Oversell! The incidence of over-selling as a percentage of total buy requests: (in %) ",(self.oversellCount/self.totalBuyRequest)*100)
                 with open('Peer_'+str(self.peerId)+".txt", "a") as f:
-                        f.write(" ".join([str(datetime.datetime.now()),' Item not present. Informing Trader.' + str(traderPeerId),'\n']))
+                        f.write(" ".join([str(datetime.datetime.now()),' Oversell! Item not present. Informing Trader.' + str(traderPeerId),'\n']))
                 with open('Peer_'+str(traderPeerId)+".txt", "a") as f:
                         f.write(" ".join([str(datetime.datetime.now()),' Message received from data warehouse, I did an oversell!','\n']))
                 return -1            
