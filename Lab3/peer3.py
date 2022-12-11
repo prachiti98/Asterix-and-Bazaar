@@ -35,6 +35,7 @@ class database:
         self.oversellCount = 0
         self.programType = programType
         self.totalBuyRequest = 0
+        self.timeStart = datetime.datetime.now()
         
         # Starting Server    
     def startServer(self):
@@ -66,6 +67,7 @@ class database:
                         f.write(" ".join([str(datetime.datetime.now()),' Item present. Informing Trader.','\n']))
                 seller = sellerList[0] 
                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1 
+                self.calculateThroughput(self.timeStart,datetime.datetime.now())
                 return [1,seller]
             else:
                 with open('Peer_'+str(self.peerId)+".txt", "a") as f:
@@ -85,16 +87,25 @@ class database:
                         f.write(" ".join([str(datetime.datetime.now()),' Item present. Informing Trader.',str(self.tradeList),'\n']))
                 seller = sellerList[0]            
                 self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"]  = self.tradeList[str(seller['peerId'])+'_'+str(seller['productName'])]["productCount"] -1 
+                self.calculateThroughput(self.timeStart,datetime.datetime.now())
                 return 1
             #check once
             else:
                 self.oversellCount +=1
-                print("Oversell! The incidence of over-selling as a percentage of total buy requests: (in %) ",(self.oversellCount/self.totalBuyRequest)*100)
+                #uncomment only if you want to see oversell percentage
+                # print("Oversell! The incidence of over-selling as a percentage of total buy requests: (in %) ",(self.oversellCount/self.totalBuyRequest)*100)
                 with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                         f.write(" ".join([str(datetime.datetime.now()),' Item not present. Informing Trader.' + str(traderPeerId),'\n']))
                 with open('Peer_'+str(traderPeerId)+".txt", "a") as f:
                         f.write(" ".join([str(datetime.datetime.now()),' Message received from data warehouse, I did an oversell!','\n']))
                 return -1            
+
+    def calculateThroughput(self, timeStart, timeStop):
+        self.requestCount += 1 #every successful good shipped
+        if self.requestCount % 100 == 0:
+            print(timeStart,timeStop)
+            totalTime = (timeStop - timeStart).total_seconds()
+            print('Average throughput of system is '+str(self.peerId)+': '+str(self.requestCount/totalTime)+' (req/sec)')
 
     def addProductRequest(self,traderPeerId,sellerInfo):
         self.requestQueue.append([sellerInfo,'','add',traderPeerId])
@@ -355,9 +366,9 @@ class peer:
             with open('Peer_'+str(self.peerId)+".txt", "a") as f:
                 f.write(" ".join([str(datetime.datetime.now()),"Receieved message from Trader ",str(traderId),"that item is available. Peer ", str(self.peerId), " : Bought ",productName, " from peer: ",str(sellerId["peerId"]),'\n']))
             if productName in self.db['shop']:	 
-                print(self.peerId,self.db['shop'])
+                # print(self.peerId,self.db['shop'])
                 self.db['shop'].remove(productName)	
-                print(self.peerId,self.db['shop'])
+                # print(self.peerId,self.db['shop'])
             if len(self.db['shop']) == 0:	
                 productList = ["Fish","Salt","Boar"]	
                 x = random.randint(0, 2)	
@@ -372,9 +383,13 @@ db_load = {
     1:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish","Fish","Fish"]}',
     2:'{"Role": "Seller","Inv":{"Fish":0},"shop":{}}',
     3:'{"Role": "Buyer","Inv":{},"shop":["Boar","Fish","Salt"]}',
-    4:'{"Role": "Seller","Inv":{"Boar":5,"Salt":5},"shop":{}}',
-    5:'{"Role": "Buyer","Inv":{},"shop":["Fish","Fish","Fish","Fish","Fish"]}',
-    6:'{"Role": "Seller","Inv":{"Fish":5},"shop":{}}' 
+    4:'{"Role": "Seller","Inv":{"Boar":0,"Salt":0},"shop":{}}',
+    5:'{"Role": "Buyer","Inv":{},"shop":["Boar","Boar","Fish","Fish","Fish","Fish","Fish"]}',
+    6:'{"Role": "Seller","Inv":{"Boar":0,"Fish":0},"shop":{}}',
+    7:'{"Role": "Buyer","Inv":{},"shop":["Salt","Boar","Fish","Fish","Fish","Fish","Fish"]}',
+    8:'{"Role": "Buyer","Inv":{},"shop":["Salt","Boar","Fish","Fish","Fish","Fish","Fish"]}',
+    9:'{"Role": "Buyer","Inv":{},"shop":["Fish","Boar","Fish","Fish","Fish","Fish","Fish"]}',
+    10:'{"Role": "Buyer","Inv":{},"shop":["Fish","Boar","Fish","Fish","Fish","Fish","Fish"]}'
 }       
 
 if __name__ == "__main__":
@@ -383,7 +398,7 @@ if __name__ == "__main__":
     programType = sys.argv[1]
     totalPeers = len(db_load)
     #The first 2 nodes are always the traders
-    traders = [1,2] 
+    traders = [1,2,3] 
     if programType == 'Synchronous':
         print("Synchronous marketplace is live! Check Peer_X.txt for logging!\n")
     else:
