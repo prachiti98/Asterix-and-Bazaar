@@ -1,7 +1,12 @@
-2022-12-10 19:57:45.707054 Peer:  4 Registering:  Fish Quantity:  3 
-2022-12-10 19:57:46.731000 4 sold an item. Remaining items are: {'Fish': 2, 'Boar': 1} 
-2022-12-10 19:57:46.765488 Peer:  4 Registering:  Boar Quantity:  1 
-2022-12-10 19:57:49.755989 4 sold an item. Remaining items are: {'Fish': 1, 'Boar': 1} 
-2022-12-10 19:57:52.788651 4 sold an item. Remaining items are: {'Fish': 0, 'Boar': 1} 
-4 restocking Fish by 3 more 
-2022-12-10 19:57:55.834891 4 sold an item. Remaining items are: {'Fish': 2, 'Boar': 1} 
+4 restocking Boar by 5 more 
+2022-12-11 10:31:42.201873 4 sold an item. 
+2022-12-11 10:31:45.209199 4 sold an item. 
+2022-12-11 10:31:48.230695 4 sold an item. 
+4 restocking Salt by 5 more 
+2022-12-11 10:31:51.238046 4 sold an item. 
+2022-12-11 10:31:52.257538 4 sold an item. 
+2022-12-11 10:31:57.264282 4 sold an item. 
+2022-12-11 10:31:59.284950 4 sold an item. 
+2022-12-11 10:32:03.284221 4 sold an item. 
+4 restocking Boar by 5 more 
+2022-12-11 10:32:06.309684 4 sold an item. 

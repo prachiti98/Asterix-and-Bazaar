@@ -1,5 +1,3 @@
-2022-12-10 19:57:49.731574 Peer:  6 Registering:  Salt Quantity:  3 
-2022-12-10 19:57:53.747087 6 sold an item. Remaining items are: {'Salt': 2} 
-2022-12-10 19:57:55.818903 6 sold an item. Remaining items are: {'Salt': 1} 
-2022-12-10 19:57:58.867019 6 sold an item. Remaining items are: {'Salt': 0} 
-6 restocking Salt by 10 more 
+6 restocking Boar by 5 more 
+6 restocking Boar by 5 more 
+6 restocking Boar by 5 more 
