@@ -1,2 +1,4 @@
 4_Boar:{'seller': {'peerId': 4, 'hostAddr': '127.0.0.1:10034', 'productName': 'Boar'}, 'productName': 'Boar', 'productCount': 5}
  6_Boar:{'seller': {'peerId': 6, 'hostAddr': '127.0.0.1:10036', 'productName': 'Boar'}, 'productName': 'Boar', 'productCount': 5}
+ 4_Salt:{'seller': {'peerId': 4, 'hostAddr': '127.0.0.1:10034', 'productName': 'Salt'}, 'productName': 'Salt', 'productCount': 3}
+ 6_Fish:{'seller': {'peerId': 6, 'hostAddr': '127.0.0.1:10036', 'productName': 'Fish'}, 'productName': 'Fish', 'productCount': 5}

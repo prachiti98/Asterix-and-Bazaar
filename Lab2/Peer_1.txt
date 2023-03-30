@@ -1,4 +1,14 @@
-Buyer->Trader after recieve Trader clock: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0} Buyer clock: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0} 
-Buyer->Trader after recieve Trader clock: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0} Buyer clock: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0} 
-Buyer->Trader after recieve Trader clock: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0} Buyer clock: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0} 
-Buyer->Trader after recieve Trader clock: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0} Buyer clock: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0} 
+Peer  1 : Started the election 
+Peer  1 : Election Won Msg Received 
+2023-03-30 11:33:05.093008 Peer  1 : Requesting  Fish 
+2023-03-30 11:33:05.097228 Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 1120 
+Trader->Buyer Trader clock: {1: 1, 2: 0, 3: 1, 4: 5} Buyer clock: {1: 2, 2: 0, 3: 1, 4: 5} 
+2023-03-30 11:33:10.110639 Peer  1 : Requesting  Fish 
+2023-03-30 11:33:10.113845 Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 1100 
+Trader->Buyer Trader clock: {1: 3, 2: 0, 3: 3, 4: 11} Buyer clock: {1: 4, 2: 0, 3: 3, 4: 11} 
+2023-03-30 11:33:14.125802 Peer  1 : Requesting  Fish 
+2023-03-30 11:33:14.131370 Peer  1  : Bought  Fish  from peer:  2 
+1 Current Balance: 1080 
+Trader->Buyer Trader clock: {1: 5, 2: 0, 3: 7, 4: 18} Buyer clock: {1: 6, 2: 0, 3: 7, 4: 18} 

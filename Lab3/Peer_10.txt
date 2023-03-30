@@ -1,32 +1,58 @@
-2022-12-11 09:21:29.102954 Peer  10 : Requesting  Fish 
-2022-12-11 09:21:29.116135 Receieved message from Trader  5 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:21:34.126881 Peer  10 : Requesting  Fish 
-2022-12-11 09:21:34.132220 Receieved message from Trader  14 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:21:41.146413 Peer  10 : Requesting  Fish 
-2022-12-11 09:21:41.152901 Receieved message from Trader  18 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:21:46.167939 Peer  10 : Requesting  Fish 
-2022-12-11 09:21:46.179499 Receieved message from Trader  20 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:21:51.197403 Peer  10 : Requesting  Fish 
-2022-12-11 09:21:51.207517 Receieved message from Trader  23 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:21:54.225859 Peer  10 : Requesting  Fish 
-2022-12-11 09:21:54.230029 Receieved message from Trader  15 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:21:58.245751 Peer  10 : Requesting  Fish 
-2022-12-11 09:21:58.251992 Receieved message from Trader  18 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:22:04.267562 Peer  10 : Requesting  Fish 
-2022-12-11 09:22:04.271717 Receieved message from Trader  21 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:22:11.286540 Peer  10 : Requesting  Fish 
-2022-12-11 09:22:11.319453 Receieved message from Trader  36 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:22:14.343817 Peer  10 : Requesting  Fish 
-2022-12-11 09:22:14.348559 Receieved message from Trader  39 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:22:18.362345 Peer  10 : Requesting  Fish 
-2022-12-11 09:22:18.366123 Receieved message from Trader  27 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:22:21.378777 Peer  10 : Requesting  Fish 
-2022-12-11 09:22:21.383834 Receieved message from Trader  31 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:22:25.400392 Peer  10 : Requesting  Fish 
-2022-12-11 09:22:25.404700 Receieved message from Trader  43 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:22:30.421137 Peer  10 : Requesting  Fish 
-2022-12-11 09:22:30.426003 Receieved message from Trader  39 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:22:35.442876 Peer  10 : Requesting  Fish 
-2022-12-11 09:22:35.446928 Receieved message from Trader  48 that item is available. Peer  10  : Bought  Fish  from peer:  6 
-2022-12-11 09:22:39.464477 Peer  10 : Requesting  Fish 
-2022-12-11 09:22:39.472222 Receieved message from Trader  44 that item is available. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:35:13.059275 Peer  10 : Requesting  Fish ['Fish', 'Boar', 'Fish', 'Fish', 'Fish', 'Fish', 'Fish'] 
+2023-03-30 11:35:13.074951 Received message from Trader  1 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:35:20.086917 Peer  10 : Requesting  Boar ['Boar', 'Fish', 'Fish', 'Fish', 'Fish', 'Fish'] 
+2023-03-30 11:35:20.100011 Received message from Trader  1 that item is bought. Peer  10  : Bought  Boar  from peer:  4 
+2023-03-30 11:35:24.110782 Peer  10 : Requesting  Fish ['Fish', 'Fish', 'Fish', 'Fish', 'Fish'] 
+2023-03-30 11:35:24.116357 Received message from Trader  1 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:35:31.124344 Peer  10 : Requesting  Fish ['Fish', 'Fish', 'Fish', 'Fish'] 
+2023-03-30 11:35:31.129565 Received message from Trader  1 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:35:37.142904 Peer  10 : Requesting  Fish ['Fish', 'Fish', 'Fish'] 
+2023-03-30 11:35:37.148831 Received message from Trader  2 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:35:41.157913 Peer  10 : Requesting  Fish ['Fish', 'Fish'] 
+2023-03-30 11:35:41.167056 Received message from Trader  1 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:35:48.177001 Peer  10 : Requesting  Fish ['Fish'] 
+2023-03-30 11:35:48.183833 Received message from Trader  1 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:35:54.196356 Peer  10 : Requesting  Boar ['Boar'] 
+2023-03-30 11:35:54.204987 Received message from Trader  1 that item is bought. Peer  10  : Bought  Boar  from peer:  4 
+2023-03-30 11:36:01.215698 Peer  10 : Requesting  Fish ['Fish'] 
+2023-03-30 11:36:01.224616 Received message from Trader  2 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:36:06.235997 Peer  10 : Requesting  Salt ['Salt'] 
+2023-03-30 11:36:06.245762 Received message from Trader  1 that item is bought. Peer  10  : Bought  Salt  from peer:  4 
+2023-03-30 11:36:12.256725 Peer  10 : Requesting  Salt ['Salt'] 
+2023-03-30 11:36:12.267021 Received message from Trader  2 that item is bought. Peer  10  : Bought  Salt  from peer:  4 
+2023-03-30 11:36:15.278770 Peer  10 : Requesting  Boar ['Boar'] 
+2023-03-30 11:36:15.288626 Received message from Trader  2 that item is bought. Peer  10  : Bought  Boar  from peer:  4 
+2023-03-30 11:36:21.302034 Peer  10 : Requesting  Boar ['Boar'] 
+2023-03-30 11:36:21.311588 Received message from Trader  2 that item is bought. Peer  10  : Bought  Boar  from peer:  4 
+2023-03-30 11:36:25.324334 Peer  10 : Requesting  Fish ['Fish'] 
+2023-03-30 11:36:25.329943 Received message from Trader  2 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:36:31.342983 Peer  10 : Requesting  Fish ['Fish'] 
+2023-03-30 11:36:31.352237 Received message from Trader  2 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:36:37.365013 Peer  10 : Requesting  Salt ['Salt'] 
+2023-03-30 11:36:37.375013 Received message from Trader  2 that item is bought. Peer  10  : Bought  Salt  from peer:  4 
+2023-03-30 11:36:40.387519 Peer  10 : Requesting  Fish ['Fish'] 
+2023-03-30 11:36:40.397877 Received message from Trader  1 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:36:45.409940 Peer  10 : Requesting  Salt ['Salt'] 
+2023-03-30 11:36:45.420680 Received message from Trader  1 that item is bought. Peer  10  : Bought  Salt  from peer:  4 
+2023-03-30 11:36:45.428259 Received message from Data warehouse via Trader  1  that product is not present! 
+2023-03-30 11:36:50.438699 Peer  10 : Requesting  Fish ['Fish'] 
+2023-03-30 11:36:50.447096 Received message from Trader  1 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:36:57.459806 Peer  10 : Requesting  Salt ['Salt'] 
+2023-03-30 11:36:57.471367 Received message from Trader  1 that item is bought. Peer  10  : Bought  Salt  from peer:  4 
+2023-03-30 11:37:04.484549 Peer  10 : Requesting  Boar ['Boar'] 
+2023-03-30 11:37:04.490570 Received message from Trader  2 that item is bought. Peer  10  : Bought  Boar  from peer:  4 
+2023-03-30 11:37:07.503030 Peer  10 : Requesting  Fish ['Fish'] 
+2023-03-30 11:37:07.509473 Received message from Trader  1 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:37:12.520235 Peer  10 : Requesting  Salt ['Salt'] 
+2023-03-30 11:37:12.527431 Received message from Trader  1 that item is bought. Peer  10  : Bought  Salt  from peer:  4 
+2023-03-30 11:37:19.539524 Peer  10 : Requesting  Fish ['Fish'] 
+2023-03-30 11:37:19.546096 Received message from Trader  1 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:37:25.560830 Peer  10 : Requesting  Fish ['Fish'] 
+2023-03-30 11:37:25.567844 Received message from Trader  2 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:37:31.577441 Peer  10 : Requesting  Fish ['Fish'] 
+2023-03-30 11:37:31.587413 Received message from Trader  1 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:37:34.599918 Peer  10 : Requesting  Salt ['Salt'] 
+2023-03-30 11:37:34.605703 Received message from Trader  2 that item is bought. Peer  10  : Bought  Salt  from peer:  4 
+2023-03-30 11:37:39.617803 Peer  10 : Requesting  Fish ['Fish'] 
+2023-03-30 11:37:39.623866 Received message from Trader  1 that item is bought. Peer  10  : Bought  Fish  from peer:  6 
+2023-03-30 11:37:45.630219 Peer  10 : Requesting  Fish ['Fish'] 

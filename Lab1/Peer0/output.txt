@@ -1,0 +1,4 @@
+2023-03-30 11:33:58.065812 Peer 0 plans to buy Salt
+2023-03-30 11:34:02.070091 Stopped buying Salt because no sellers
+2023-03-30 11:34:04.084759 Max Hopcount Reached, Can't lookup futher. Lookup stopped Path: 0-3
+2023-03-30 11:34:05.075183 Peer 0 plans to buy Boar

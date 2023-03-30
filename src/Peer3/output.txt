@@ -1,6 +1,0 @@
-2022-11-10 19:44:38.445683 Selling Fish: 7 Unit(s) 
-2022-11-10 19:44:41.462411 Lookup for product Boar propogated from peerID 3 to peerID 4
-2022-11-10 19:44:49.462060 Lookup for product Salt propogated from peerID 3 to peerID 4
-2022-11-10 19:44:49.471946 Peer 4 has Salt
-2022-11-10 19:44:49.475692 Propogate the reply to peerID 2 Path: 2
-2022-11-10 19:44:58.478283 Lookup for product Boar propogated from peerID 3 to peerID 4

@@ -1,0 +1,4 @@
+2023-03-30 11:33:57.081646 Max Hopcount Reached, Can't lookup futher. Lookup stopped Path: 3-2
+2023-03-30 11:33:59.069259 Peer 3 plans to buy Salt
+2023-03-30 11:34:03.076205 Stopped buying Salt because no sellers
+2023-03-30 11:34:05.083386 Max Hopcount Reached, Can't lookup futher. Lookup stopped Path: 3-2

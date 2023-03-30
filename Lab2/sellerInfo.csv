@@ -1,3 +1,1 @@
-"{""4_Fish"": {""seller"": {""peerId"": 4, ""hostAddr"": ""127.0.0.1:10034"", ""productName"": ""Fish""}, ""productName"": ""Fish"", ""productCount"": 8}}"
-"{""6_Salt"": {""seller"": {""peerId"": 6, ""hostAddr"": ""127.0.0.1:10036"", ""productName"": ""Salt""}, ""productName"": ""Salt"", ""productCount"": 2}}"
-"{""4_Boar"": {""seller"": {""peerId"": 4, ""hostAddr"": ""127.0.0.1:10034"", ""productName"": ""Boar""}, ""productName"": ""Boar"", ""productCount"": 1}}"
+"{""2_Fish"": {""seller"": {""peerId"": 2, ""hostAddr"": ""127.0.0.1:10032"", ""productName"": ""Fish""}, ""productName"": ""Fish"", ""productCount"": 7}}"

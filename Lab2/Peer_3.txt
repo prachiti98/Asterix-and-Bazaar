@@ -1,10 +1,17 @@
-2022-12-09 08:22:56.654909 Peer  3 : Requesting  Fish 
-2022-12-09 08:22:56.661915 Peer  3  : Bought  Fish  from peer:  4 
-2022-12-09 08:23:02.673668 Peer  3 : Requesting  Fish 
-2022-12-09 08:23:02.681811 Peer  3  : Bought  Fish  from peer:  4 
-2022-12-09 08:23:07.696425 Peer  3 : Requesting  Fish 
-2022-12-09 08:23:07.699525 Peer  3  : Bought  Fish  from peer:  4 
-2022-12-09 08:23:09.708239 Peer  3 : Requesting  Fish 
-2022-12-09 08:23:09.716781 Peer  3  : Bought  Fish  from peer:  4 
-2022-12-09 08:23:13.731709 Peer  3 : Requesting  Fish 
-2022-12-09 08:23:13.739868 Peer  3  : Bought  Fish  from peer:  4 
+Peer  3 : Election Won Msg Received 
+2023-03-30 11:33:03.094017 Peer  3 : Requesting  Fish 
+2023-03-30 11:33:03.097045 Peer  3  : Bought  Fish  from peer:  2 
+3 Current Balance: 1120 
+Trader->Buyer Trader clock: {1: 0, 2: 0, 3: 1, 4: 2} Buyer clock: {1: 0, 2: 0, 3: 2, 4: 2} 
+2023-03-30 11:33:08.108098 Peer  3 : Requesting  Fish 
+2023-03-30 11:33:08.112588 Peer  3  : Bought  Fish  from peer:  2 
+3 Current Balance: 1100 
+Trader->Buyer Trader clock: {1: 1, 2: 0, 3: 3, 4: 8} Buyer clock: {1: 1, 2: 0, 3: 4, 4: 8} 
+2023-03-30 11:33:11.130327 Peer  3 : Requesting  Fish 
+2023-03-30 11:33:11.133146 Peer  3  : Bought  Fish  from peer:  2 
+3 Current Balance: 1080 
+Trader->Buyer Trader clock: {1: 3, 2: 0, 3: 5, 4: 14} Buyer clock: {1: 3, 2: 0, 3: 6, 4: 14} 
+2023-03-30 11:33:13.150324 Peer  3 : Requesting  Fish 
+2023-03-30 11:33:15.159635 Peer  3  : Bought  Fish  from peer:  2 
+3 Current Balance: 1060 
+Trader->Buyer Trader clock: {1: 5, 2: 0, 3: 7, 4: 20} Buyer clock: {1: 5, 2: 0, 3: 8, 4: 20} 

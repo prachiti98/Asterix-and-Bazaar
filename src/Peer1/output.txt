@@ -1,8 +1,0 @@
-2022-11-10 19:44:38.444873 Selling Salt: 3 Unit(s) 
-2022-11-10 19:44:41.461140 Lookup for product Boar propogated from peerID 1 to peerID 0
-2022-11-10 19:44:48.471380 Remaining Salt: 2 Unit(s) 
-2022-11-10 19:44:51.483449 Lookup for product Fish propogated from peerID 1 to peerID 2
-2022-11-10 19:44:53.464881 Remaining Salt: 1 Unit(s) 
-2022-11-10 19:44:58.478347 Lookup for product Boar propogated from peerID 1 to peerID 0
-2022-11-10 19:44:59.491390 Lookup for product Boar propogated from peerID 1 to peerID 2
-2022-11-10 19:45:06.487998 Lookup for product Fish propogated from peerID 1 to peerID 0
